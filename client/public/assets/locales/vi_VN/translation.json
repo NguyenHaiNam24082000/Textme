@@ -1,0 +1,21 @@
+{
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "register": "Đăng ký",
+    "home_page": "Trang chủ",
+    "about": "Giới thiệu",
+    "contact": "Liên hệ",
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "email": "Email",
+    "first_name": "Họ",
+    "last_name": "Tên",
+    "confirm_password": "Xác nhận mật khẩu",
+    "forgot_password": "Quên mật khẩu?",
+    "reset_password": "Đặt lại mật khẩu",
+    "not_found": "Không tìm thấy",
+    "login_with": "Đăng nhập bằng",
+    "login_with_facebook": "Đăng nhập bằng Facebook",
+    "login_with_google": "Đăng nhập bằng Google",
+    "new_user": "Bạn là người mới"
+}

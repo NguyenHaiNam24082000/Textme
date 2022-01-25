@@ -1,0 +1,21 @@
+{
+    "login": "Acceso",
+    "logout": "Cerrar sesión",
+    "register": "Registrarse",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "email": "Email",
+    "first_name": "Primer nombre",
+    "last_name": "Apellido",
+    "confirm_password": "Confirmar contraseña",
+    "forgot_password": "Se te olvidó tu contraseña?",
+    "reset_password": "Restablecer la contraseña",
+    "home_page": "Página de inicio",
+    "about": "Acerca de",
+    "contact": "Contacto",
+    "not_found": "No encontrado",
+    "login_with": "Iniciar sesión con",
+    "login_with_facebook": "Iniciar sesión con Facebook",
+    "login_with_google": "Iniciar sesión con Google",
+    "new_user": "Nuevo usuario"
+}

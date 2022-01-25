@@ -1,0 +1,20 @@
+{
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "username": "Username",
+    "password": "Password",
+    "email": "Email",
+    "first_name": "Firstname",
+    "last_name": "Lastname",
+    "confirm_password": "Confirm password",
+    "forgot_password": "Forgot password?",
+    "reset_password": "Reset password",
+    "home_page": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "not_found": "Not found",
+    "login_with": "Login with",
+    "login_with_facebook": "Login with Facebook",
+    "login_with_google": "Login with Google"
+}
