@@ -13,7 +13,23 @@ i18n
   .use(LanguageDetector)
   .use(HttpApi)
   .init({
-    supportedLngs: ["ar", "en_GB","en_US","es","id_ID","ja_JP","ko_KR","ms_MY","pt_BR","ru_RU","th_TH","tr_TR","vi_VN","zh_CN","zh_TW"],
+    supportedLngs: [
+      "ar",
+      "en_GB",
+      "en_US",
+      "es",
+      "id_ID",
+      "ja_JP",
+      "ko_KR",
+      "ms_MY",
+      "pt_BR",
+      "ru_RU",
+      "th_TH",
+      "tr_TR",
+      "vi_VN",
+      "zh_CN",
+      "zh_TW",
+    ],
     fallbackLng: "en",
     detection: {
       order: [
@@ -26,7 +42,7 @@ i18n
         "navigator",
         "sessionStorage",
       ],
-      caches: ["localStorage","cookie"],
+      caches: ["localStorage", "cookie"],
     },
     backend: {
       loadPath: "/assets/locales/{{lng}}/translation.json",
@@ -36,12 +52,30 @@ i18n
     },
   });
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById("root")
-);
+// ReactDOM.render(
+//   <React.StrictMode>
+//     <App />
+//   </React.StrictMode>,
+//   document.getElementById("root")
+// );
+
+const rootElement = document.getElementById("root");
+
+if (rootElement.hasChildNodes()) {
+  ReactDOM.hydrate(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    rootElement
+  );
+} else {
+  ReactDOM.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    rootElement
+  );
+}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
