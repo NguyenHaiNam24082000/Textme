@@ -1,0 +1,20 @@
+{
+    "login": "Авторизоваться",
+    "logout": "Выйти",
+    "register": "регистр",
+    "username": "Имя пользователя",
+    "password": "Пароль",
+    "email": "Электронное письмо",
+    "first_name": "Имя",
+    "last_name": "Фамилия",
+    "confirm_password": "Подтвердите пароль",
+    "forgot_password": "Забыли пароль?",
+    "reset_password": "Сброс пароля",
+    "home_page": "Домой",
+    "about": "О",
+    "contact": "Контакт",
+    "not_found": "Не найдено",
+    "login_with": "Войти с",
+    "login_with_facebook": "Войти с Facebook",
+    "login_with_google": "Войти с Google"
+}

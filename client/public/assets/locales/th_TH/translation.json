@@ -1,0 +1,20 @@
+{
+    "login": "เข้าสู่ระบบ",
+    "logout": "ออกจากระบบ",
+    "register": "ลงทะเบียน",
+    "username": "ชื่อผู้ใช้",
+    "password": "รหัสผ่าน",
+    "email": "อีเมล",
+    "first_name": "ชื่อจริง",
+    "last_name": "นามสกุล",
+    "confirm_password": "ยืนยันรหัสผ่าน",
+    "forgot_password": "ลืมรหัสผ่าน?",
+    "reset_password": "รีเซ็ตรหัสผ่าน",
+    "home_page": "บ้าน",
+    "about": "เกี่ยวกับ",
+    "contact": "ติดต่อ",
+    "not_found": "ไม่พบหน้าที่คุณต้องการ",
+    "login_with": "เข้าสู่ระบบด้วย",
+    "login_with_facebook": "เข้าสู่ระบบด้วย Facebook",
+    "login_with_google": "เข้าสู่ระบบด้วย Google"
+}

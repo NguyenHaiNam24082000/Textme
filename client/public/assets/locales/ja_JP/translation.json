@@ -1,0 +1,20 @@
+{
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "register": "登録",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "email": "Eメール",
+    "first_name": "ファーストネーム",
+    "last_name": "苗字",
+    "confirm_password": "パスワードを認証する",
+    "forgot_password": "パスワードをお忘れですか?",
+    "reset_password": "パスワードを再設定する",
+    "home_page": "家",
+    "about": "約",
+    "contact": "コンタクト",
+    "not_found": "見つかりません",
+    "login_with": "ログイン",
+    "login_with_facebook": "Facebookでログイン",
+    "login_with_google": "Googleでログイン"
+}

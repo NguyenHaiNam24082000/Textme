@@ -1,0 +1,20 @@
+{
+    "login": "Conecte-se",
+    "logout": "Sair",
+    "register": "Registro",
+    "username": "Nome do usuário",
+    "password": "Senha",
+    "email": "E-mail",
+    "first_name": "Primeiro nome",
+    "last_name": "Último nome",
+    "confirm_password": "Confirme a Senha",
+    "forgot_password": "Esqueceu a senha?",
+    "reset_password": "Redefinir senha",
+    "home_page": "Casa",
+    "about": "Cerca de",
+    "contact": "Contato",
+    "not_found": "Não encontrado",
+    "login_with": "Entrar com",
+    "login_with_facebook": "Entrar com Facebook",
+    "login_with_google": "Entrar com Google"
+}
