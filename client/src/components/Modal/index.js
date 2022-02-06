@@ -6,11 +6,19 @@ export default function Modal({
   children,
   opened,
   onClose,
-  size="xl",
+  size = "xl",
   zIndex = "auto",
+  className,
+  style,
+  styles,
+  classNames,
 }) {
   return (
     <ModalContainer
+      className={className}
+      style={style}
+      classNames={classNames}
+      styles={styles}
       opened={opened}
       onClose={onClose}
       size={size}

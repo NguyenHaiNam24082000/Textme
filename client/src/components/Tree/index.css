@@ -1,0 +1,33 @@
+.semi-tree-option {
+  height: 32px;
+  font-size: 14px !important;
+  line-height: 14px !important;
+  user-select: none;
+}
+.semi-tree-option-selected {
+  background-color: #e2e8f0 !important;
+}
+.semi-tree-option.semi-tree-option-level-1:not(:first-child) {
+  margin-top: 1rem;
+}
+.semi-tree-option.semi-tree-option-level-1 {
+  padding: 0 0.75rem !important;
+  font-weight: 500;
+}
+.semi-tree-option.semi-tree-option-level-2 {
+  padding: 0 12px 0 32px !important;
+}
+.semi-tree-option.semi-tree-option-level-2 > * {
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+.semi-tree-option .mantine-Text-root {
+  flex: auto;
+}
+.semi-tree-option.semi-tree-option-level-1 .mantine-Text-root {
+  margin-left: 4px !important;
+}
+.semi-tree-option.semi-tree-option-level-2 .mantine-Text-root {
+  margin-left: 8px !important;
+  flex-grow: 1;
+}

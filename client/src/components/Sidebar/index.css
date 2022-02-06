@@ -1,0 +1,36 @@
+.sidebar
+{
+    @apply flex;
+}
+.sidebar-menu {
+    position: relative;
+}
+.sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 7.25px 24px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    transition: color 0.3s ease-in-out;
+}
+.sidebar-menu-item.active {
+    color: #fff;
+}
+.sidebar-menu-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: calc(100% - 13px);
+    border-radius: 8px;
+    background-color: #fab005;
+    z-index: -1;
+    transform: translateX(-50%);
+    transition: 0.3s ease-in-out;
+}
+
+.sidebar-content
+{
+    @apply flex flex-col ml-8 pt-1;
+}

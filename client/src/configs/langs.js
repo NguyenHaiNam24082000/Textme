@@ -1,20 +1,20 @@
-import ar from "../assets/flags/ar.png";
-import br from "../assets/flags/br.png";
-import cn from "../assets/flags/cn.png";
-import es from "../assets/flags/es.png";
-import gb from "../assets/flags/gb.png";
-import id from "../assets/flags/id.png";
-import jp from "../assets/flags/jp.png";
-import kr from "../assets/flags/kr.png";
-import my from "../assets/flags/my.png";
-import ru from "../assets/flags/ru.png";
-import th from "../assets/flags/th.png";
-import tr from "../assets/flags/tr.png";
-import tw from "../assets/flags/tw.png";
-import us from "../assets/flags/us.png";
-import vn from "../assets/flags/vn.png";
+import ar from "../assets/images/flags/ar.png";
+import br from "../assets/images/flags/br.png";
+import cn from "../assets/images/flags/cn.png";
+import es from "../assets/images/flags/es.png";
+import gb from "../assets/images/flags/gb.png";
+import id from "../assets/images/flags/id.png";
+import jp from "../assets/images/flags/jp.png";
+import kr from "../assets/images/flags/kr.png";
+import my from "../assets/images/flags/my.png";
+import ru from "../assets/images/flags/ru.png";
+import th from "../assets/images/flags/th.png";
+import tr from "../assets/images/flags/tr.png";
+import tw from "../assets/images/flags/tw.png";
+import us from "../assets/images/flags/us.png";
+import vn from "../assets/images/flags/vn.png";
 
-const lang = [
+const langs = [
   {
     name: "简体中文",
     code: "zh_CN",
@@ -122,6 +122,6 @@ const lang = [
   },
 ];
 
-export default lang.sort((a, b) => {
+export default langs.sort((a, b) => {
   return a.label.localeCompare(b.label);
 });

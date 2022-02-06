@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, forwardRef } from "react";
 import QRCodeStyling from "qr-code-styling";
 import logo from "../../logo.svg";
 import { Group, Avatar, Text, Select, Image } from "@mantine/core";
-import lang from "../../configs/lang";
+import langs from "../../configs/langs";
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
 import removeTones from "../../configs/removeTones";
@@ -56,7 +56,7 @@ export default function AuthForm({children}) {
   }, [url]);
 
   useEffect(() => {
-    i18next.changeLanguage(lang.filter((l) => l.label === value)[0].code);
+    i18next.changeLanguage(langs.filter((l) => l.label === value)[0].code);
   }, [value, setValue]);
 
   return (
@@ -72,7 +72,7 @@ export default function AuthForm({children}) {
           placeholder="Pick one"
           itemComponent={SelectItem}
           classNames={{ label: "text-white" }}
-          data={lang}
+          data={langs}
           searchable
           maxDropdownHeight={400}
           nothingFound={t("not_found")}
@@ -84,7 +84,7 @@ export default function AuthForm({children}) {
                 width={24}
                 height={24}
                 radius="sm"
-                src={lang.filter((l) => l.label === value)[0].flag}
+                src={langs.filter((l) => l.label === value)[0].flag}
               />
             )
           }

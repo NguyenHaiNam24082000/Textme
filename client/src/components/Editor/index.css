@@ -1,0 +1,22 @@
+.editor {
+  box-sizing: border-box;
+  /* border: 1px solid #ddd; */
+  cursor: text;
+  padding: 8px 12px;
+  border-radius: 8px;
+  /* margin-bottom: 2em; */
+  /* box-shadow: inset 0px 1px 8px -3px #ababab; */
+  background: #fafafa;
+}
+
+.editor :global(.public-DraftEditor-content) {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+#placeholder-editor {
+  position: absolute;
+  color: gray;
+  user-select: none;
+}

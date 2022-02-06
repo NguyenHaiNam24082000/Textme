@@ -10,7 +10,6 @@ import AccountDetail from "./pages/AccountDetail";
 import { Helmet } from "react-helmet";
 
 function App() {
-  const [modal, setModal] = useState(true);
   return (
     <div className="App">
       <Helmet>
