@@ -1,0 +1,22 @@
+.floating-reaction-item {
+  position: absolute;
+  pointer-events: none;
+  width: auto;
+  height: auto;
+  bottom: -100px;
+  animation: floating-reaction-item-animation 10s ease-out;
+}
+
+@keyframes floating-reaction-item-animation {
+  0% {
+    bottom: -100px;
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 90vh;
+    opacity: 0;
+  }
+}

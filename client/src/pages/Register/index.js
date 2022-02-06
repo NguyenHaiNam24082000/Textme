@@ -24,8 +24,8 @@ import { motion } from "framer-motion";
 import { useClipboard } from "@mantine/hooks";
 import { CheckIcon, Cross1Icon } from "@modulz/radix-icons";
 import Fab from "@mui/material/Fab";
-import Facebook from "../../assets/logos/facebook.svg";
-import Google from "../../assets/logos/google.svg";
+import Facebook from "../../assets/images/logos/facebook.svg";
+import Google from "../../assets/images/logos/google.svg";
 import { NavLink } from "react-router-dom";
 
 const pageVariants = {
