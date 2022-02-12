@@ -188,7 +188,7 @@ export default function EditorDraft() {
     <div className="mx-4 relative flex-shrink-0">
       <div
         style={{
-          border: "1px solid #d5d5d5",
+          border: "2px solid #e5e7eb",
           borderRadius: 8,
           padding: 8,
           backgroundColor: "#fff",
@@ -239,7 +239,7 @@ export default function EditorDraft() {
           </Group>
         )}
         <div
-          className={editorStyles.editor}
+          className="editor"
           onClick={() => {
             ref.current?.focus();
           }}

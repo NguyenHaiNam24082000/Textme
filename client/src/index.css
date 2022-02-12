@@ -57,6 +57,9 @@
   --padding-small: 0.5rem; /* 8px */
   --padding-medium: 1rem; /* 16px */
   --padding-large: 1.5rem; /* 24px */
+
+
+  --speed: 250ms; 
 }
 
 .shake {
@@ -107,8 +110,8 @@
   background-color: transparent;
 }
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 120px;
 }
 :hover::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
@@ -118,7 +121,7 @@
   background-color: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  border-radius: 3px;
+  border-radius: 4px;
   background-color: rgba(0, 0, 0, 0.2);
 }
 

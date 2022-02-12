@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./pages/Login";
 import { AnimatePresence } from "framer-motion";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
@@ -8,6 +8,7 @@ import ProtectedRoutes from "./routes/ProtectedRoutes";
 import Workspace from "./pages/Workspace";
 import AccountDetail from "./pages/AccountDetail";
 import { Helmet } from "react-helmet";
+import { SocketContext, socket } from "./sockets";
 
 function App() {
   return (
@@ -36,7 +37,10 @@ function App() {
         {/* <!-- Twitter Meta Tags --> */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta property="twitter:domain" content="textme-chat.vercel.app" />
-        <meta property="twitter:url" content="https://textme-chat.vercel.app/" />
+        <meta
+          property="twitter:url"
+          content="https://textme-chat.vercel.app/"
+        />
         <meta name="twitter:title" content="Textme" />
         <meta
           name="twitter:description"
@@ -49,14 +53,16 @@ function App() {
       </Helmet>
       <BrowserRouter>
         <AnimatePresence>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/accountdetail" element={<AccountDetail />} />
-            <Route element={<ProtectedRoutes />}>
-              <Route path="/app" element={<Workspace />} />
-            </Route>
-          </Routes>
+          <SocketContext.Provider value={socket}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/accountdetail" element={<AccountDetail />} />
+              <Route element={<ProtectedRoutes />}>
+                <Route path="/app" element={<Workspace />} />
+              </Route>
+            </Routes>
+          </SocketContext.Provider>
         </AnimatePresence>
       </BrowserRouter>
     </div>

@@ -59,6 +59,10 @@ import SpaceAvatar from "../../components/SpaceAvatar";
 import ChatArea from "../../components/ChatArea";
 import Channel from "../../components/Channel";
 import ModalCreateWorkspace from "../../components/Modals/ModalCreateWorkspace";
+import { SocketContext } from "../../sockets";
+import useSound from 'use-sound';
+import sound from "../../assets/sounds/audio.ogg";
+import config from "../../assets/jsons/cherrymx-brown-abs/config.json";
 
 const variants = {
   enter: (direction) => {
@@ -168,13 +172,23 @@ export default function Workspace() {
   const [items, setItems] = useState(Array.from({ length: 20 }));
   const [pageMessage, setPageMessage] = useState(1);
   const [data, setData] = useState([]);
-  const [openedModalCreateWorkspace, setOpenedModalCreateWorkspace] = useState(false);
+  const [openedModalCreateWorkspace, setOpenedModalCreateWorkspace] =
+    useState(false);
+  const socket = React.useContext(SocketContext);
+  const [play] = useSound(sound,{
+    sprite: config.defines,
+  });
 
   // We manually create x/y motion values for the draggable plane as it allows us to pass these to
   // icon children, which can then listen to when they change and respond.
   // -220 is an arbitrary position that centers an initial icon - this could be calculated
   const x = useMotionValue(-225);
   const y = useMotionValue(-225);
+
+  useEffect(() => {
+    socket.emit("chatMessage", "Hello");
+  }, []);
+
   const fetch = (pageNumber = 1) => {
     if (pageNumber <= 10) {
       axios
@@ -208,14 +222,19 @@ export default function Workspace() {
 
   return (
     <div
-      className="flex w-full h-full overflow-hidden flex-shrink-0"
-      style={{
-        background:
-          "url(https://zmp3-static.zadn.vn/skins/zmp3-v6.1/images/theme-background/new-year-bg-light-2.png) no-repeat center center fixed",
-        backgroundSize: "cover",
-      }}
+      className="flex w-full h-full overflow-hidden flex-shrink-0 bg-white"
+      // style={{
+      //   background:
+      //     "url(https://zmp3-static.zadn.vn/skins/zmp3-v6.1/images/theme-background/new-year-bg-light-2.png) no-repeat center center fixed",
+      //   backgroundSize: "cover",
+      // }}
+      onKeyDown={(e) => {play({id: e.keyCode.toString()});}}
     >
-      <div className="flex flex-col w-16 h-full flex-shrink-0 bg-white" onClick={() => setOpenedModalCreateWorkspace(true)}>
+      <div
+        className="flex flex-col w-16 h-full flex-shrink-0"
+        onClick={() => setOpenedModalCreateWorkspace(true)}
+        style={{backgroundColor: "#f3f4f6",borderRight: "2px solid #e5e7eb"}}
+      >
         <SpaceAvatar
           image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
           alt="avatar"
@@ -232,7 +251,10 @@ export default function Workspace() {
         }}
       </FullScreenDropzone>
       {openModalConfirm && openModalConfirm()}
-      <ModalCreateWorkspace opened={openedModalCreateWorkspace} onClose={()=>setOpenedModalCreateWorkspace(false)} />
+      <ModalCreateWorkspace
+        opened={openedModalCreateWorkspace}
+        onClose={() => setOpenedModalCreateWorkspace(false)}
+      />
     </div>
   );
 }

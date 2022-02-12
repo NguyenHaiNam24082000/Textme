@@ -13,14 +13,17 @@ export default function Channel() {
   const [openedModalWorkspaceSettings, setOpenedModalWorkspaceSettings] =
     useState(false);
   return (
-    <div className="flex flex-col w-64 h-full flex-shrink-0">
+    <div
+      className="flex flex-col w-64 h-full flex-shrink-0"
+      style={{ backgroundColor: "#f3f4f6", borderRight: "2px solid #e5e7eb" }}
+    >
       <Menu
         radius="md"
         size="lg"
         placement="center"
         closeOnItemClick={false}
         control={
-          <div className="flex w-full h-12 flex-shrink-0 px-4 bg-red-500">
+          <div className="flex w-full h-12 flex-shrink-0 px-2">
             <div className="flex w-full h-full items-center justify-between border-b-2">
               <div>test</div>
               <div>icon</div>
@@ -45,11 +48,11 @@ export default function Channel() {
       </Menu>
       <div className="flex flex-col flex-1 w-full h-full flex-shrink-0">
         <Tree />
-        <div
-          className="flex flex-col justify-between w-full h-auto items-center px-2"
-          style={{ backgroundColor: "#ececea" }}
-        >
-          <div className="flex flex-col w-full h-24 border-b-2 pb-2">
+        <div className="flex flex-col justify-between w-full h-auto items-center px-2">
+          <div
+            className="flex flex-col w-full h-24 pb-2"
+            style={{ borderTop: "2px solid #e5e7eb" }}
+          >
             <div className="flex w-full flex-auto justify-between items-center">
               <div className="flex flex-col">
                 <div className="text-sm">Voice Connected</div>
@@ -64,7 +67,7 @@ export default function Channel() {
               <Button className="bg-yellow-400">Screen</Button>
             </Group>
           </div>
-          <div className="flex w-full truncate h-14 justify-between items-center">
+          <div className="flex w-full truncate h-14 justify-between items-center" style={{borderTop: "2px solid #e5e7eb"}}>
             <div className="flex truncate items-center">
               <Menu
                 // trigger="hover"

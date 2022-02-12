@@ -11,12 +11,17 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^14.2.0",
     "express": "^4.17.2",
+    "http": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.1.7",
+    "lodash": "^4.17.21",
+    "mongoose": "^6.2.1",
+    "node-summary": "git+https://github.com/TroniPM/node-summary.git",
     "nodemon": "^2.0.15",
+    "os": "^0.1.2",
     "socket.io": "^4.4.1"
   }
 }

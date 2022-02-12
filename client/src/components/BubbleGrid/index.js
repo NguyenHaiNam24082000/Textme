@@ -3,42 +3,42 @@ import BubbleUI from "react-bubble-ui";
 import "react-bubble-ui/dist/index.css";
 
 const options = {
-    size: 250,
-    minSize: 0,
-    gutter: 15,
-    provideProps: true,
-    numCols: 6,
-    fringeWidth: 200,
-    yRadius: 400,
-    xRadius: 400,
-    cornerRadius: 0,
-    showGuides: false,
-    compact: true,
-    gravitation: 5,
-  };
+  size: 250,
+  minSize: 0,
+  gutter: 15,
+  provideProps: true,
+  numCols: 6,
+  fringeWidth: 200,
+  yRadius: 400,
+  xRadius: 400,
+  cornerRadius: 0,
+  showGuides: false,
+  compact: true,
+  gravitation: 5,
+};
 
 const data = [
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-    "ten",
-    "eleven",
-    "twelve",
-    "thirteen",
-    "fourteen",
-    "fifteen",
-    "sixteen",
-    "seventeen",
-    "eighteen",
-    "ninety",
-    "twenty",
-  ];
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "ninety",
+  "twenty",
+];
 export default function BubbleGrid() {
   const children = data?.map((data, i) => {
     return <Child className="child" key={i} setClick={handleClick} />;
@@ -80,7 +80,11 @@ export default function BubbleGrid() {
     });
   }, []);
 
-  return <div></div>;
+  return (
+    <BubbleUI options={options} className="w-full h-full">
+      {children}
+    </BubbleUI>
+  );
 }
 
 function Child({ data, setClick, goInner }) {
