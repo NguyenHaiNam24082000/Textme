@@ -12,9 +12,13 @@ export default function Modal({
   style,
   styles,
   classNames,
+  hideCloseButton=false,
+  padding="xl",
+  ref=null,
 }) {
   return (
     <ModalContainer
+      ref={ref}
       className={className}
       style={style}
       classNames={classNames}
@@ -24,10 +28,11 @@ export default function Modal({
       size={size}
       noFocusTrap={true}
       overflow="inside"
-      padding="xl"
+      padding={padding}
       radius="md"
       centered
       zIndex={zIndex}
+      hideCloseButton={hideCloseButton}
       title={
         <Text style={{ fontSize: "var(--font-size-xxxlarge)" }} weight={600}>
           {title}

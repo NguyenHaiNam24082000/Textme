@@ -1,9 +1,11 @@
 .sidebar
 {
-    @apply flex;
+    @apply flex h-full;
+    border-radius: inherit;
 }
 .sidebar-menu {
     position: relative;
+    flex-shrink: 0;
 }
 .sidebar-menu-item {
     display: flex;
@@ -32,5 +34,5 @@
 
 .sidebar-content
 {
-    @apply flex flex-col ml-8 pt-1;
+    @apply flex flex-col ml-8 pt-1 w-full;
 }

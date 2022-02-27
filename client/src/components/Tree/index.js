@@ -130,7 +130,7 @@ export default function TreeComponent() {
   };
 
   return (
-    <div className="flex flex-col flex-shrink-0 flex-auto w-64 border-r border-gray-300 bg-gray-100">
+    <div className="flex flex-col flex-shrink-0 flex-auto w-64">
       <Tree
         treeData={treeData}
         defaultValue="Shanghai"

@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import { ActionIcon } from "@mantine/core";
-import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
-import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
-import { Player } from "@lottiefiles/react-lottie-player";
+// import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
+// import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
+// import { Player } from "@lottiefiles/react-lottie-player";
 import {
   BsMicMuteFill,
   BsMicFill,

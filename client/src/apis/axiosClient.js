@@ -9,10 +9,11 @@ import queryString from "query-string";
 // DELETE — deletes the specified resource.
 // PATCH — applies partial modifications to a resource.
 const axiosClient = axios.create({
-  baseURL: process.env.APP_API_URL,
+  baseURL: "http://localhost:5000",
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Credentials": true,
     "Accept": "application/json",
     "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH",
   },
@@ -23,6 +24,10 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   async (config) => {
+    if(localStorage.user) {
+      const userStorage = JSON.parse(localStorage.getItem('user'));
+      config.headers.Authorization = `Bearer ${userStorage?.tokens?.access?.token}`;
+    }
     // Do something before request is sent
     return config;
   },
@@ -35,9 +40,9 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => {
     // Do something with response data
-    if (response && response.data) {
-      return response.data;
-    }
+    // if (response && response.data) {
+    //   return response.data;
+    // }
     return response;
   },
   (error) => {
@@ -45,5 +50,10 @@ axiosClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+//All request will wait 2 seconds before timeout
+axiosClient.defaults.timeout = 2000;
+
+axiosClient.defaults.withCredentials = true;
 
 export default axiosClient;
