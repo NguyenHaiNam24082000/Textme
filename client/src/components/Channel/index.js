@@ -161,14 +161,14 @@ export default function Channel() {
           </div>
         </div>
       </div>
-      <ModalUserSettings
+      {/* <ModalUserSettings
         opened={openedModalUserSettings}
         onClose={() => setOpenedModalUserSettings(false)}
       />
       <ModalWorkspaceSettings
         opened={openedModalWorkspaceSettings}
         onClose={() => setOpenedModalWorkspaceSettings(false)}
-      />
+      /> */}
     </div>
   );
 }

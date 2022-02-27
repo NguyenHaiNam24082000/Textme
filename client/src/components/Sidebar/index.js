@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./index.css";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeLayout from "../ThemeLayout";
+import { themes } from "../../configs/themes";
+import { RadioGroup, Radio } from "@mantine/core";
+import { InputWrapper } from "@mantine/core";
 
 const sidebarNavItems = [
   {
@@ -32,6 +36,7 @@ export default function Sidebar() {
   const [activeDisplayName, setActiveDisplayName] = useState(
     sidebarNavItems[0].display
   );
+  const [checkRadioValue, setCheckRadioValue] = useState("360channel");
   const sidebarRef = useRef();
   const indicatorRef = useRef();
   useEffect(() => {
@@ -54,7 +59,7 @@ export default function Sidebar() {
 
   return (
     <div className="sidebar">
-      <div ref={sidebarRef} className="sidebar-menu">
+      <div ref={sidebarRef} className="sidebar-menu w-64 bg-black py-6 pl-6 pr-4">
         <div
           ref={indicatorRef}
           className="sidebar-menu-indicator"
@@ -76,7 +81,7 @@ export default function Sidebar() {
           </div>
         ))}
       </div>
-      <div className="sidebar-content">
+      <div className="sidebar-content overflow-y-auto">
         <AnimatePresence exitBeforeEnter>
           {sidebarNavItems.map(
             (item, index) =>
@@ -87,20 +92,42 @@ export default function Sidebar() {
                   initial={{ opacity: 0, y: 20 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.15 }}
+                  className="inline-flex flex-wrap justify-evenly h-full"
                 >
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
-                  <div className="font-bold">{item.display}</div>
+                  {/* {themes
+                    .sort((a, b) =>
+                      a.name
+                        .toLowerCase()
+                        .localeCompare(b.name.toLocaleLowerCase())
+                    )
+                    .map((theme) => (
+                      <div
+                        key={theme.value}
+                        className="flex flex-col rounded-lg border-2 h-auto flex-shrink-0 overflow-hidden mb-5 cursor-pointer"
+                        style={{
+                          padding: 2,
+                          width: "30%",
+                          borderColor:
+                            theme.value === checkRadioValue
+                              ? "#4eabd2"
+                              : "#f1f1f1",
+                          backgroundColor:
+                            theme.value === checkRadioValue
+                              ? "rgba(29,155,209,.12)"
+                              : "#fff",
+                        }}
+                        onClick={() => setCheckRadioValue(theme.value)}
+                      >
+                        <ThemeLayout
+                          sidebar={theme.sidebarBackground}
+                          channel={theme.sidebarBackground}
+                          activeItem={theme.activeItem}
+                        />
+                        <div className="text-center h-12 border-t-2 flex w-full items-center justify-center">
+                          {theme.name}
+                        </div>
+                      </div>
+                    ))} */}
                 </motion.div>
               )
           )}

@@ -5,19 +5,28 @@ const { generateKeywords } = require("./app/commons/generateKeywords");
 const { removeAccents } = require("./app/commons/removeAccents");
 const { soundex } = require("./app/commons/soundex");
 const SummaryTool = require("node-summary");
-// connectDB();
-
+const translate = require("@vitalets/google-translate-api");
+const helmet = require("helmet");
 const express = require("express");
+const xss = require('xss-clean');
+const mongoSanitize = require('express-mongo-sanitize');
+const bodyParser = require("body-parser");
+const morgan = require("morgan");
 const cors = require("cors");
-const authRoute = require("./app/routes/authRoute");
+const authRoute = require("./app/routes/v1/authRoute");
 const app = express();
 const compression = require("compression");
 const http = require("http");
 const socketio = require("socket.io");
+const passport = require('passport');
+const { jwtStrategy } = require('./app/configs/passport');
+const { errorConverter, errorHandler } = require('./app/middlewares/error');
+
 // const os = require("os");
 
 // process.env.UV_THREADPOOL_SIZE = os.cpus().length >= 2 ? 2 : 1;
 
+connectDB();
 const server = http.createServer(app);
 const io = socketio(server, {
   cors: {
@@ -36,11 +45,42 @@ io.on("connection", (socket) => {
   });
 });
 
-//Cors
-app.use(cors());
+//enabling CORS for all requests
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true, //access-control-allow-credentials:true
+    optionSuccessStatus: 200,
+  })
+);
+// app.options(
+//   '*',
+//   cors({
+//     origin: true,
+//     optionsSuccessStatus: 200,
+//     credentials: true,
+//   })
+// );
 
 //Body Parser
 app.use(express.json());
+
+// using bodyParser to parse JSON bodies into JS objects
+app.use(bodyParser.json());
+
+//adding Helmet to enhance your API's security
+app.use(helmet());
+
+// adding morgan to log HTTP requests
+app.use(morgan("combined"));
+
+// jwt authentication
+app.use(passport.initialize());
+passport.use('jwt', jwtStrategy);
+
+// sanitize request data
+app.use(xss());
+app.use(mongoSanitize());
 
 //Compression
 app.use(
@@ -55,6 +95,12 @@ app.use(
     },
   })
 );
+
+// convert error to ApiError, if needed
+app.use(errorConverter);
+
+// handle error
+app.use(errorHandler);
 
 const port = process.env.APP_PORT;
 
@@ -130,6 +176,23 @@ app.use("/api/v1/auth", authRoute);
 // app.use("/", ()=>{
 //   console.log("Server is running");
 // });
+
+app.post("/api/v1/translate", (req, res, next) => {
+  translate(req.body.text, { to: "en" })
+    .then((response) => {
+      console.log(response.text);
+      //=> I speak English
+      // console.log(response.from.language.iso);
+      //=> nl
+      res.status(200).json({
+        status: "success",
+        data: response,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
 

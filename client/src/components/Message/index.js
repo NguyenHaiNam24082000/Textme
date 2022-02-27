@@ -8,6 +8,8 @@ import "@lottiefiles/lottie-player";
 import "@lottiefiles/lottie-player";
 import useSound from "use-sound";
 import fireSound from "../../assets/sounds/fire.mp3";
+import wowSound from "../../assets/sounds/wow.mp3";
+import test from "../../assets/images/test.gif";
 
 const item = {
   hidden: {
@@ -27,6 +29,7 @@ export default function Message(props) {
   const [ref, inView] = useInView();
   const x = useMotionValue(0);
   const [play] = useSound(fireSound);
+  const [play2] = useSound(wowSound);
   let i;
   useEffect(() => {
     if (inView) {
@@ -43,7 +46,6 @@ export default function Message(props) {
 
   const hasAfterMessage = () => {
     const index = props.messages.findIndex((m) => m.id === props.message.id);
-    console.log(index);
     i = index;
     if (index + 1 >= props.messages.length) return false;
     const next = props.messages[index + 1];
@@ -95,10 +97,11 @@ export default function Message(props) {
           overflowWrap: "break-word",
           zIndex: 3,
           borderRadius: "inherit",
+          backgroundImage: `url(${test})`,
         }}
         className="w-full px-3 py-2 h-full bg-inherit"
         highlight={props.searchMessage.split(" ")}
-        onClick={() => fire && play()}
+        onClick={() => (fire ? play() : play2())}
         children={
           "Lorem chào aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         }
@@ -119,78 +122,80 @@ export default function Message(props) {
       //   }
       // }}
       style={{
-        borderTop: !isActuallyExtraMessage && "16px solid #fff",
+        marginTop: !isActuallyExtraMessage && "16px",
       }}
       key={props.key}
     >
       <div className="chat-content">
         <LeftSide />
         <MessageHeader />
-        <motion.div
-          variants={item}
-          initial="hidden"
-          animate={controls}
-          ref={ref}
-          style={{
-            x,
-            cursor: "pointer",
-            zIndex: 2,
-            backgroundColor: fire ? "#f5d020" : "",
-            backgroundImage: fire
-              ? "linear-gradient(315deg, #f5d020 0%, #f53803 74%)"
-              : "",
-          }}
-          className={`${
-            isActuallyExtraMessage && !fire ? "message-last" : ""
-          } ${
-            hasActuallyAfterMessage && !fire ? "message-first" : ""
-          } chat-content-text relative`}
-          whileTap={{
-            cursor: "grabbing",
-          }}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-        >
-          {props.message.id === 100 || props.message.userId === 6 ? (
-            <Sparkles children={<MessageText />} />
-          ) : (
-            <MessageText />
-          )}
-          {props.message.id === 89 && (
-            <>
-              {/* <Flame /> */}
-              {/* <Fire /> */}
-              <lottie-player
-                src="https://assets8.lottiefiles.com/packages/lf20_gkmkgw96.json"
-                background="transparent"
-                autoplay
-                loop
-                style={{
-                  zIndex: 2,
-                  width: "auto",
-                  height: "100%",
-                  left: 0,
-                  bottom: 0,
-                  transform: "translate(-20%,-85%) scale(3)",
-                  position: "absolute",
-                }}
-              ></lottie-player>
-              <lottie-player
-                src="https://assets8.lottiefiles.com/packages/lf20_gkmkgw96.json"
-                background="transparent"
-                autoplay
-                loop
-                style={{
-                  zIndex: 2,
-                  width: "auto",
-                  height: "100%",
-                  right: 0,
-                  bottom: 0,
-                  transform: "translate(20%,-85%) scale(-3,3)",
-                  position: "absolute",
-                }}
-              ></lottie-player>
-              {/* <lottie-player
+        <div className="relative">
+          <p className="absolute left-0 text-black">Rely</p>
+          <motion.div
+            variants={item}
+            initial="hidden"
+            animate={controls}
+            ref={ref}
+            style={{
+              x,
+              cursor: "pointer",
+              zIndex: 2,
+              backgroundColor: fire ? "#f5d020" : "",
+              backgroundImage: fire
+                ? "linear-gradient(315deg, #f5d020 0%, #f53803 74%)"
+                : "",
+            }}
+            className={`${
+              isActuallyExtraMessage && !fire ? "message-last" : ""
+            } ${
+              hasActuallyAfterMessage && !fire ? "message-first" : ""
+            } chat-content-text relative`}
+            whileTap={{
+              cursor: "grabbing",
+            }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+          >
+            {props.message.id === 100 || props.message.userId === 6 ? (
+              <Sparkles children={<MessageText />} />
+            ) : (
+              <MessageText />
+            )}
+            {props.message.id === 89 && (
+              <>
+                {/* <Flame /> */}
+                {/* <Fire /> */}
+                <lottie-player
+                  src="https://assets8.lottiefiles.com/packages/lf20_gkmkgw96.json"
+                  background="transparent"
+                  autoplay
+                  loop
+                  style={{
+                    zIndex: 2,
+                    width: "auto",
+                    height: "100%",
+                    left: 0,
+                    bottom: 0,
+                    transform: "translate(-20%,-85%) scale(3)",
+                    position: "absolute",
+                  }}
+                ></lottie-player>
+                <lottie-player
+                  src="https://assets8.lottiefiles.com/packages/lf20_gkmkgw96.json"
+                  background="transparent"
+                  autoplay
+                  loop
+                  style={{
+                    zIndex: 2,
+                    width: "auto",
+                    height: "100%",
+                    right: 0,
+                    bottom: 0,
+                    transform: "translate(20%,-85%) scale(-3,3)",
+                    position: "absolute",
+                  }}
+                ></lottie-player>
+                {/* <lottie-player
                 src="https://assets8.lottiefiles.com/packages/lf20_no9qrf5p.json"
                 background="transparent"
                 autoplay
@@ -207,9 +212,18 @@ export default function Message(props) {
                   position: "absolute",
                 }}
               ></lottie-player> */}
-            </>
-          )}
-        </motion.div>
+              </>
+            )}
+            {props.message.id === 90 && (
+              <>
+                {/* <img
+                  className="absolute -top-6 -left-6 z-10 h-full w-auto -rotate-12"
+                  src="https://video-public.canva.com/VADlsz-nbMw/videos/990131e940.gif"
+                /> */}
+              </>
+            )}
+          </motion.div>
+        </div>
       </div>
     </div>
   );

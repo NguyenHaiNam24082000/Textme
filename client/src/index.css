@@ -58,8 +58,7 @@
   --padding-medium: 1rem; /* 16px */
   --padding-large: 1.5rem; /* 24px */
 
-
-  --speed: 250ms; 
+  --speed: 250ms;
 }
 
 .shake {
@@ -150,4 +149,35 @@
 .prev {
   left: 10px;
   transform: scale(-1);
+}
+
+.animated-avatar:hover .cutout-container{
+  top: 0px;
+  right: 0px;
+}
+
+.cutout-container
+{
+  transition: all 0.2s ease-out 0s;
+  right: -50px;
+  top: -50px;
+}
+
+.cutout {
+  box-shadow: rgb(255 102 102) 16px 16px 0px, rgb(255 102 102) 16px 32px 0px,
+    rgb(255 102 102) 32px 32px 0px, rgb(255 102 102) 16px 48px 0px,
+    rgb(255 102 102) 32px 48px 0px, rgb(255 102 102) 48px 48px 0px;
+  transform: translate3d(-48px, 48px, 0px);
+  transition: transform 0.2s ease-out 0s;
+}
+
+.reactEasyCrop_CropArea:before, .reactEasyCrop_CropArea:after
+{
+  opacity: 0;
+  transition: opacity 0.2s ease-out 0s;
+}
+
+.reactEasyCrop_CropArea:hover:before,.reactEasyCrop_CropArea:hover:after
+{
+  opacity: 1;
 }

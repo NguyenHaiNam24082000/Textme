@@ -62,7 +62,7 @@ export default function AuthForm({children}) {
   return (
     <div
       className="flex bg-clip-padding backdrop-filter backdrop-blur-xl bg-opacity-60 border border-gray-200 relative"
-      style={{ borderRadius: "var(--radius-medium)", width: 768, height: 565 }}
+      style={{ borderRadius: "var(--radius-medium)", width: 768, height: 625 }}
     >
       <div className="w-2/6 h-full text-white flex justify-between flex-col items-center p-6">
         <h1 className="text-2xl  font-bold">Textme</h1>

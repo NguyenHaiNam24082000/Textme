@@ -31,6 +31,7 @@ import { Input } from "@mantine/core";
 import ImageGrid from "../ImageGrid";
 import InfinityGauntlet from "react-thanos-snap";
 import "./index.css";
+import Parallax from "../BackgroundEffect/Parallax";
 
 const users = [
   {
@@ -217,11 +218,12 @@ export default function ChatArea() {
           </div>
         )}
       </div>
-      <div className="flex w-full h-full relative overflow-hidden bg-white">
+      <div className="flex w-full h-full relative overflow-hidden ">
         <div className="flex w-full h-full relative flex-col flex-auto">
           <div
             className="chat-area flex flex-auto w-full relative"
           >
+            {/* <Parallax /> */}
             <ActionIcon
               className="absolute bottom-2 right-8 z-10"
               size="xl"

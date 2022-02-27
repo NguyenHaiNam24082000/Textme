@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { FullScreenDropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import Modal from "../../components/Modal";
 import {
@@ -60,9 +60,14 @@ import ChatArea from "../../components/ChatArea";
 import Channel from "../../components/Channel";
 import ModalCreateWorkspace from "../../components/Modals/ModalCreateWorkspace";
 import { SocketContext } from "../../sockets";
-import useSound from 'use-sound';
+import useSound from "use-sound";
 import sound from "../../assets/sounds/audio.ogg";
 import config from "../../assets/jsons/cherrymx-brown-abs/config.json";
+import { useRecoilValue } from "recoil";
+import { themeState } from "../../recoil/themeState";
+import LogRocket from "logrocket";
+import { DragDropContext } from "react-beautiful-dnd";
+import VideoCall from "../../components/VideoCall";
 
 const variants = {
   enter: (direction) => {
@@ -175,9 +180,11 @@ export default function Workspace() {
   const [openedModalCreateWorkspace, setOpenedModalCreateWorkspace] =
     useState(false);
   const socket = React.useContext(SocketContext);
-  const [play] = useSound(sound,{
+  const [play] = useSound(sound, {
     sprite: config.defines,
   });
+  const theme = useRecoilValue(themeState);
+  // LogRocket.init('emr1fu/textme');
 
   // We manually create x/y motion values for the draggable plane as it allows us to pass these to
   // icon children, which can then listen to when they change and respond.
@@ -217,23 +224,35 @@ export default function Workspace() {
     console.log("aaa");
   }
 
+  const onDragEnd = useCallback(() => {
+    // the only one that is required
+  }, []);
+
   const scrollToBottom = () =>
     viewportRef.current.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
   return (
     <div
-      className="flex w-full h-full overflow-hidden flex-shrink-0 bg-white"
+      className="flex w-full h-full overflow-hidden flex-shrink-0 "
+      style={{
+        background: theme.palette.background,
+      }}
       // style={{
       //   background:
       //     "url(https://zmp3-static.zadn.vn/skins/zmp3-v6.1/images/theme-background/new-year-bg-light-2.png) no-repeat center center fixed",
       //   backgroundSize: "cover",
       // }}
-      onKeyDown={(e) => {play({id: e.keyCode.toString()});}}
+      onKeyDown={(e) => {
+        play({ id: e.keyCode.toString() });
+      }}
     >
       <div
         className="flex flex-col w-16 h-full flex-shrink-0"
         onClick={() => setOpenedModalCreateWorkspace(true)}
-        style={{backgroundColor: "#f3f4f6",borderRight: "2px solid #e5e7eb"}}
+        style={{
+          backgroundColor: "#f3f4f6",
+          borderRight: "2px solid #e5e7eb",
+        }}
       >
         <SpaceAvatar
           image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
@@ -242,7 +261,8 @@ export default function Workspace() {
       </div>
       <div className="flex w-full h-full flex-shrink-0 flex-1">
         <Channel />
-        <ChatArea />
+        {/* <ChatArea /> */}
+        <VideoCall />
       </div>
 
       <FullScreenDropzone accept={IMAGE_MIME_TYPE}>
