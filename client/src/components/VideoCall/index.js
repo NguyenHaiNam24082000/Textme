@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-// import styled from "styled-components";
+import styled from "@emotion/styled";
 import { ActionIcon } from "@mantine/core";
 // import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
 // import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
