@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import Modal from "../../Modal";
-import { Text, Divider } from "@mantine/core";
+import { Text, Divider, ActionIcon } from "@mantine/core";
 import { useUA } from "../../../hooks/use-ua-parser-js";
+import Delayed from "../../Delayed";
+import { IconClose } from "@douyinfe/semi-icons";
 
 const sidebar = [
   {
@@ -123,59 +125,64 @@ export default function ModalUsersSetting({ opened, onClose }) {
   });
   const UADetails = useUA(); //get current browser data
   return (
-    <Modal
-      size="75%"
-      opened={opened}
-      onClose={onClose}
-      classNames={{
-        modal: "h-full",
-        body: "h-full overflow-hidden flex",
-        header: "hidden",
-      }}
-      styles={{ body: { maxHeight: "100%", borderRadius: "inherit" } }}
-      padding={0}
-      zIndex="200"
-      hideCloseButton={true}
-    >
+    <Delayed show={opened}>
       <div
-        className="sidebar w-64 h-full flex flex-col bg-slate-300 py-6 pl-6 pr-4 overflow-y-auto flex-shrink-0"
-        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+        className="flex w-full h-full absolute top-0 left-0 bottom-0 right-0 bg-white"
+        style={{ zIndex: 500 }}
       >
-        <div>
-          {sidebar &&
-            sidebar.map((item, index) => {
-              const sidebarItems = item.items.map((it, index) => (
-                <div
-                  key={item.value}
-                  className={`flex items-center h-8 px-2 text-base cursor-pointer hover:bg-gray-200 ${
-                    active === it.value && "bg-gray-200"
-                  }`}
-                  style={{ marginBottom: 2, borderRadius: 6 }}
-                  onClick={() => {
-                    setActive(it.value);
-                  }}
-                >
-                  {it.title}
-                </div>
-              ));
+        <div
+          className="flex justify-end bg-slate-300 pt-10"
+          style={{ flex: "1 0 200px" }}
+        >
+          <div
+            style={{ flex: "1 0 auto", overflow: "hidden scroll" }}
+            className="pr-0 flex-row items-start flex justify-end"
+          >
+            <div
+              className="sidebar w-64 h-full flex flex-col py-6 pl-6 pr-4 overflow-y-auto flex-shrink-0"
+              style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+            >
+              <div>
+                {sidebar &&
+                  sidebar.map((item, index) => {
+                    const sidebarItems = item.items.map((it, index) => (
+                      <div
+                        key={item.value}
+                        className={`flex items-center h-8 px-2 text-base cursor-pointer hover:bg-gray-200 ${
+                          active === it.value && "bg-gray-200"
+                        }`}
+                        style={{ marginBottom: 2, borderRadius: 6 }}
+                        onClick={() => {
+                          setActive(it.value);
+                        }}
+                      >
+                        {it.title}
+                      </div>
+                    ));
 
-              return (
-                <>
-                  <div
-                    key={index}
-                    className="category text-xs font-bold py-1 pl-2 mb-1 mt-1 uppercase"
-                  >
-                    {item.title}
-                  </div>
-                  {sidebarItems}
-                </>
-              );
-            })}
+                    return (
+                      <>
+                        <div
+                          key={index}
+                          className="category text-xs font-bold py-1 pl-2 mb-1 mt-1 uppercase"
+                        >
+                          {item.title}
+                        </div>
+                        {sidebarItems}
+                      </>
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="flex-auto flex-col h-full overflow-y-auto py-6 px-12">
-        {/* Tài khoản người dùng */}
-        {/* <div className="flex flex-col w-full h-full">
+        <div
+          className="flex h-full overflow-y-auto pb-6 pt-16 px-12"
+          style={{ flex: "1 1 800px" }}
+        >
+          <div className="w-full h-full">
+            {/* Tài khoản người dùng */}
+            {/* <div className="flex flex-col w-full h-full">
           <div className="flex flex-col w-full">
             <h3 className="text-xl font-semibold mb-3">Tài khoản người dùng</h3>
             <div className="flex flex-col w-full h-auto bg-gray-200 rounded-lg">
@@ -263,32 +270,41 @@ export default function ModalUsersSetting({ opened, onClose }) {
           </div>
         </div> */}
 
-        {/* Quản lý phiên */}
-        <div className="flex flex-col w-full h-full">
-          <div className="flex flex-col w-full">
-            <h3 className="text-xl font-semibold mb-3">Các phiên đăng nhập</h3>
-            <h6 className="text-xs font-medium">
-              Vô hiệu hoá hoặc xoá tài khoản của bạn bất cứ lúc nào. Hành động
-              này sẽ đăng xuất và xoá hoàn toàn tài khoản của bạn, bao gồm lịch
-              sử trò chuyện và bạn bè.
-            </h6>
-            <div className="flex flex-col w-full">
-              <div className="flex flex-col w-full bg-slate-300 p-3 rounded-lg my-3">
-                <div className="flex w-full mb-2 text-xs font-semibold">
-                  Thiết bị này
-                </div>
+            {/* Quản lý phiên */}
+            <div className="flex flex-col w-full h-full">
+              <div className="flex flex-col w-full">
+                <h3 className="text-xl font-semibold mb-3">
+                  Các phiên đăng nhập
+                </h3>
+                <h6 className="text-xs font-medium">
+                  Vô hiệu hoá hoặc xoá tài khoản của bạn bất cứ lúc nào. Hành
+                  động này sẽ đăng xuất và xoá hoàn toàn tài khoản của bạn, bao
+                  gồm lịch sử trò chuyện và bạn bè.
+                </h6>
                 <div className="flex flex-col w-full">
-                  <div className="text-sm font-semibold">
-                    {`${UADetails.browser.name} on ${UADetails.os.name} ${UADetails.os.version}`}
+                  <div className="flex flex-col w-full bg-slate-300 p-3 rounded-lg my-3">
+                    <div className="flex w-full mb-2 text-xs font-semibold">
+                      Thiết bị này
+                    </div>
+                    <div className="flex flex-col w-full">
+                      <div className="text-sm font-semibold">
+                        {`${UADetails.browser.name} on ${UADetails.os.name} ${UADetails.os.version}`}
+                      </div>
+                      <div className="text-xs">Đăng nhập từ 7 giờ trước</div>
+                    </div>
                   </div>
-                  <div className="text-xs">Đăng nhập từ 7 giờ trước</div>
                 </div>
+                <Divider className="my-6" />
               </div>
             </div>
-            <Divider className="my-6" />
+          </div>
+          <div className="ml-5 relative w-16" style={{ flex: "0 0 36px" }}>
+            <ActionIcon className="fixed" onClick={onClose}>
+              <IconClose />
+            </ActionIcon>
           </div>
         </div>
       </div>
-    </Modal>
+    </Delayed>
   );
 }

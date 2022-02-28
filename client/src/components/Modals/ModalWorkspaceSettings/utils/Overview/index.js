@@ -2,6 +2,8 @@ import React from "react";
 import { Divider, Image, Switch, Textarea, TextInput } from "@mantine/core";
 import { Avatar, Badge, Upload } from "@douyinfe/semi-ui";
 import UploadAvatar from "../../../../../assets/images/icons/upload_avatar.svg";
+import Atropos from "atropos/react";
+import "atropos/css";
 
 export default function Overview() {
   return (
@@ -12,325 +14,80 @@ export default function Overview() {
           <h5 className="text-sm font-semibold">Xem trước</h5>
           <Switch className="cursor-pointer" />
         </div>
-        <div className="flex flex-col justify-evenly relative w-full bg-slate-100 rounded-md py-16 overflow-hidden">
+        <div className="flex flex-col justify-center items-center relative w-full bg-slate-100 rounded-md py-16 overflow-hidden">
           <div
-            className="flex justify-evenly w-full h-auto absolute"
-            style={{ top: "calc(100% - 32px)" }}
+            style={{
+              boxShadow: "rgba(0, 0, 0, 0.56) 0px 22px 70px 4px",
+              width: 300,
+            }}
+            className="card-main rounded-lg inline-flex h-80 flex-col select-none font-normal pointer overflow-hidden"
           >
-            <div className="inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden bg-slate-300"></div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
-                  <div
-                    className="-mt-12 w-16 h-16 object-cover rounded-full bg-slate-300"
-                    style={{ borderWidth: 6 }}
-                  />
-                </div>
-              </div>
-              <div className="flex-grow">
-                <div
-                  className="h-full flex flex-col bg-slate-200"
-                  style={{ padding: "24px 16px 16px" }}
-                >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    <div className="h-5 w-32 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="overflow-hidden text-xs flex-col flex mt-2 gap-2">
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-3/4 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">
-                      <div className="h-4 w-20 bg-slate-300 rounded-sm"></div>
-                    </div>
-                    <div className="flex text-xs items-center">
-                      <div className="h-4 w-12 bg-slate-300 rounded-sm"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="h-32 overflow-hidden">
+              <img
+                src="https://autumn.revolt.chat/banners/SpkJokgeOj8P-YIZyHVFfc5FMzEHI_zqEQSGyEmT5U?width=640"
+                className="w-full h-full object-cover border-none"
+              />
             </div>
-            <div className="inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden bg-slate-300"></div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
-                  <div
-                    className="-mt-12 w-16 h-16 object-cover rounded-full bg-slate-300"
-                    style={{ borderWidth: 6 }}
-                  />
-                </div>
-              </div>
-              <div className="flex-grow">
+            <div className="relative">
+              <div className="flex absolute w-full justify-center">
                 <div
-                  className="h-full flex flex-col bg-slate-200"
-                  style={{ padding: "24px 16px 16px" }}
+                  className="-mt-12 w-16 h-16 object-cover rounded-full"
+                  style={{ width: 100, height: 100 }}
+                  className="flex z-10 justify-center items-center -mt-20 object-cover rounded-full"
+                  style={{
+                    border: "6px solid #fff",
+                  }}
                 >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    <div className="h-5 w-32 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="overflow-hidden text-xs flex-col flex mt-2 gap-2">
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-3/4 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">
-                      <div className="h-4 w-20 bg-slate-300 rounded-sm"></div>
-                    </div>
-                    <div className="flex text-xs items-center">
-                      <div className="h-4 w-12 bg-slate-300 rounded-sm"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden bg-slate-300"></div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
-                  <div
-                    className="-mt-12 w-16 h-16 object-cover rounded-full bg-slate-300"
-                    style={{ borderWidth: 6 }}
-                  />
-                </div>
-              </div>
-              <div className="flex-grow">
-                <div
-                  className="h-full flex flex-col bg-slate-200"
-                  style={{ padding: "24px 16px 16px" }}
-                >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    <div className="h-5 w-32 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="overflow-hidden text-xs flex-col flex mt-2 gap-2">
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-3/4 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">
-                      <div className="h-4 w-20 bg-slate-300 rounded-sm"></div>
-                    </div>
-                    <div className="flex text-xs items-center">
-                      <div className="h-4 w-12 bg-slate-300 rounded-sm"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-evenly w-full h-auto">
-            <div className="inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden bg-slate-300"></div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
-                  <div
-                    className="-mt-12 w-16 h-16 object-cover rounded-full bg-slate-300"
-                    style={{ borderWidth: 6 }}
-                  />
-                </div>
-              </div>
-              <div className="flex-grow">
-                <div
-                  className="h-full flex flex-col bg-slate-200"
-                  style={{ padding: "24px 16px 16px" }}
-                >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    <div className="h-5 w-32 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="overflow-hidden text-xs flex-col flex mt-2 gap-2">
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-3/4 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">
-                      <div className="h-4 w-20 bg-slate-300 rounded-sm"></div>
-                    </div>
-                    <div className="flex text-xs items-center">
-                      <div className="h-4 w-12 bg-slate-300 rounded-sm"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="card-main inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden">
-                <img
-                  src="https://autumn.revolt.chat/banners/SpkJokgeOj8P-YIZyHVFfc5FMzEHI_zqEQSGyEmT5U?width=640"
-                  className="w-full h-full object-cover border-none"
-                />
-              </div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
                   <img
-                    loading="lazy"
-                    src="https://autumn.revolt.chat/icons/0nhgfJgJOed3YZXhVFSvZo3O2UZ94g9u3kZaPVJl_w?width=128"
-                    draggable="false"
-                    crossorigin="anonymous"
-                    className="-mt-12 w-16 h-16 object-cover rounded-full"
-                    style={{ borderWidth: 6 }}
+                    className="rounded-full"
+                    src="https://cdn.discordapp.com/avatars/94490510688792576/a_84032ca2190d12afb662bb4a381a4199"
                   />
-                </div>
-              </div>
-              <div className="flex-grow">
-                <div
-                  className="h-full flex flex-col bg-slate-200 gap-2"
-                  style={{ padding: "24px 16px 16px" }}
-                >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    Textme Developer
-                  </div>
-                  <div className="overflow-hidden text-xs">
-                    A very code hoặc
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">135 members</div>
-                    <div className="flex text-xs items-center">
-                      <span>low active</span>
-                    </div>
-                  </div>
+                  {/* <svg
+                    width={128}
+                    height={100}
+                    viewBox="0 0 138 100"
+                    aria-hidden="true"
+                  >
+                    <foreignObject
+                      x={0}
+                      y={0}
+                      width={100}
+                      height={100}
+                      mask="url(#svg-mask-avatar-status-round)"
+                    >
+                      <div className="sc-bBHxTw rkgnM">
+                        <img
+                          height="100px"
+                          width="100px"
+                          src="https://cdn.discordapp.com/avatars/94490510688792576/a_84032ca2190d12afb662bb4a381a4199"
+                        />
+                      </div>
+                    </foreignObject>
+                    <rect
+                      width={24}
+                      height={24}
+                      x={71}
+                      y={71}
+                      fill="hsl(359, calc(var(--saturation-factor, 1) * 82.6%), 59.4%)"
+                      mask="url(#svg-mask-status-dnd)"
+                    />
+                  </svg> */}
                 </div>
               </div>
             </div>
-            <div className="inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden bg-slate-300"></div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
-                  <div
-                    className="-mt-12 w-16 h-16 object-cover rounded-full bg-slate-300"
-                    style={{ borderWidth: 6 }}
-                  />
+            <div className="flex-grow">
+              <div
+                className="h-full flex flex-col bg-slate-200 gap-2"
+                style={{ padding: "24px 16px 16px" }}
+              >
+                <div className="flex items-center justify-center text-lg font-semibold">
+                  Textme Developer
                 </div>
-              </div>
-              <div className="flex-grow">
-                <div
-                  className="h-full flex flex-col bg-slate-200"
-                  style={{ padding: "24px 16px 16px" }}
-                >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    <div className="h-5 w-32 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="overflow-hidden text-xs flex-col flex mt-2 gap-2">
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-3/4 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">
-                      <div className="h-4 w-20 bg-slate-300 rounded-sm"></div>
-                    </div>
-                    <div className="flex text-xs items-center">
-                      <div className="h-4 w-12 bg-slate-300 rounded-sm"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="flex justify-evenly w-full h-auto absolute"
-            style={{ bottom: "calc(100% - 32px)" }}
-          >
-            <div className="inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden bg-slate-300"></div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
-                  <div
-                    className="-mt-12 w-16 h-16 object-cover rounded-full bg-slate-300"
-                    style={{ borderWidth: 6 }}
-                  />
-                </div>
-              </div>
-              <div className="flex-grow">
-                <div
-                  className="h-full flex flex-col bg-slate-200"
-                  style={{ padding: "24px 16px 16px" }}
-                >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    <div className="h-5 w-32 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="overflow-hidden text-xs flex-col flex mt-2 gap-2">
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-3/4 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">
-                      <div className="h-4 w-20 bg-slate-300 rounded-sm"></div>
-                    </div>
-                    <div className="flex text-xs items-center">
-                      <div className="h-4 w-12 bg-slate-300 rounded-sm"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>{" "}
-            <div className="inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden bg-slate-300"></div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
-                  <div
-                    className="-mt-12 w-16 h-16 object-cover rounded-full bg-slate-300"
-                    style={{ borderWidth: 6 }}
-                  />
-                </div>
-              </div>
-              <div className="flex-grow">
-                <div
-                  className="h-full flex flex-col bg-slate-200"
-                  style={{ padding: "24px 16px 16px" }}
-                >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    <div className="h-5 w-32 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="overflow-hidden text-xs flex-col flex mt-2 gap-2">
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-3/4 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">
-                      <div className="h-4 w-20 bg-slate-300 rounded-sm"></div>
-                    </div>
-                    <div className="flex text-xs items-center">
-                      <div className="h-4 w-12 bg-slate-300 rounded-sm"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>{" "}
-            <div className="inline-flex w-72 h-80 flex-col select-none rounded-md font-normal pointer overflow-hidden">
-              <div className="h-32 overflow-hidden bg-slate-300"></div>
-              <div className="relative">
-                <div className="flex absolute w-full justify-center ">
-                  <div
-                    className="-mt-12 w-16 h-16 object-cover rounded-full bg-slate-300"
-                    style={{ borderWidth: 6 }}
-                  />
-                </div>
-              </div>
-              <div className="flex-grow">
-                <div
-                  className="h-full flex flex-col bg-slate-200"
-                  style={{ padding: "24px 16px 16px" }}
-                >
-                  <div className="flex items-center justify-center text-lg font-semibold">
-                    <div className="h-5 w-32 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="overflow-hidden text-xs flex-col flex mt-2 gap-2">
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-full bg-slate-300 rounded-sm"></div>
-                    <div className="h-5 w-3/4 bg-slate-300 rounded-sm"></div>
-                  </div>
-                  <div className="flex justify-between mt-auto">
-                    <div className="text-xs flex item-center">
-                      <div className="h-4 w-20 bg-slate-300 rounded-sm"></div>
-                    </div>
-                    <div className="flex text-xs items-center">
-                      <div className="h-4 w-12 bg-slate-300 rounded-sm"></div>
-                    </div>
+                <div className="overflow-hidden text-xs">A very code hoặc</div>
+                <div className="flex justify-between mt-auto">
+                  <div className="text-xs flex item-center">135 members</div>
+                  <div className="flex text-xs items-center">
+                    <span>low active</span>
                   </div>
                 </div>
               </div>
@@ -394,21 +151,13 @@ export default function Overview() {
         </div>
       </div>
       <Divider />
-      <div className="w-full flex flex-col">
-          Biểu tượng tuỳ chỉnh
-      </div>
+      <div className="w-full flex flex-col">Biểu tượng tuỳ chỉnh</div>
       <Divider />
-      <div className="w-full flex flex-col">
-          Biểu tượng lời mời
-      </div>
+      <div className="w-full flex flex-col">Biểu tượng lời mời</div>
       <Divider />
-      <div className="w-full flex flex-col">
-          Kênh tin nhắn hệ thống
-      </div>
+      <div className="w-full flex flex-col">Kênh tin nhắn hệ thống</div>
       <Divider />
-      <div className="w-full flex flex-col">
-          Cài đặt thông báo mặc định
-      </div>
+      <div className="w-full flex flex-col">Cài đặt thông báo mặc định</div>
     </div>
   );
 }

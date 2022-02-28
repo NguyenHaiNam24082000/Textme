@@ -7,6 +7,7 @@ import "react-bubble-ui/dist/index.css";
 import Tree from "../../components/Tree";
 import ModalUserSettings from "../Modals/ModalUserSettings";
 import ModalWorkspaceSettings from "../Modals/ModalWorkspaceSettings";
+import Delayed from "../Delayed";
 
 export default function Channel() {
   const [openedModalUserSettings, setOpenedModalUserSettings] = useState(false);
@@ -14,7 +15,7 @@ export default function Channel() {
     useState(false);
   return (
     <div
-      className="flex flex-col w-64 h-full flex-shrink-0"
+      className="flex flex-col w-64 h-full flex-shrink-0 overflow-hidden"
       style={{ backgroundColor: "#f3f4f6", borderRight: "2px solid #e5e7eb" }}
     >
       <Menu
@@ -67,7 +68,10 @@ export default function Channel() {
               <Button className="bg-yellow-400">Screen</Button>
             </Group>
           </div>
-          <div className="flex w-full truncate h-14 justify-between items-center" style={{borderTop: "2px solid #e5e7eb"}}>
+          <div
+            className="flex w-full truncate h-14 justify-between items-center"
+            style={{ borderTop: "2px solid #e5e7eb" }}
+          >
             <div className="flex truncate items-center">
               <Menu
                 // trigger="hover"
@@ -161,14 +165,15 @@ export default function Channel() {
           </div>
         </div>
       </div>
-      {/* <ModalUserSettings
+      <ModalUserSettings
         opened={openedModalUserSettings}
         onClose={() => setOpenedModalUserSettings(false)}
       />
+
       <ModalWorkspaceSettings
         opened={openedModalWorkspaceSettings}
         onClose={() => setOpenedModalWorkspaceSettings(false)}
-      /> */}
+      />
     </div>
   );
 }
