@@ -256,19 +256,8 @@ export default function ChatArea() {
                 endMessage={100}
                 scrollableTarget="scrollableDiv"
               >
-                <motion.div
-                  initial="hidden"
-                  animate="show"
+                <div
                   className="mb-5"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    show: {
-                      opacity: 1,
-                      transition: {
-                        staggerChildren: 0.5,
-                      },
-                    },
-                  }}
                 >
                   {data.map((post, index) => (
                     // <InfinityGauntlet snap={true}>
@@ -282,7 +271,7 @@ export default function ChatArea() {
                     </AnimatePresence>
                     // </InfinityGauntlet>
                   ))}
-                </motion.div>
+                </div>
               </InfiniteScroll>
             </div>
           </div>
