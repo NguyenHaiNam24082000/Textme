@@ -10,7 +10,6 @@ import useSound from "use-sound";
 import fireSound from "../../assets/sounds/fire.mp3";
 import wowSound from "../../assets/sounds/wow.mp3";
 import test from "../../assets/images/test.gif";
-import fireSparkles from "../../assets/images/fire-sparkles.gif";
 
 const item = {
   hidden: {
