@@ -10,6 +10,7 @@ import useSound from "use-sound";
 import fireSound from "../../assets/sounds/fire.mp3";
 import wowSound from "../../assets/sounds/wow.mp3";
 import test from "../../assets/images/test.gif";
+import fireSparkles from "../../assets/images/fire-sparkles.gif";
 
 const item = {
   hidden: {
@@ -132,23 +133,20 @@ export default function Message(props) {
         <div className="relative">
           <p className="absolute left-0 text-black">Rely</p>
           <motion.div
-            variants={item}
-            initial="hidden"
-            animate={controls}
             ref={ref}
             style={{
               x,
               cursor: "pointer",
               zIndex: 2,
-              backgroundColor: fire ? "#f5d020" : "",
-              backgroundImage: fire
-                ? "linear-gradient(315deg, #f5d020 0%, #f53803 74%)"
-                : "",
+              // background: fire
+              //   ? `url(https://us.123rf.com/450wm/macrovector/macrovector1905/macrovector190500014/122825424-flame-of-gold-fire-on-dark-transparent-background-with-red-sparks-flying-up-realistic-vector-illustr.jpg?ver=6)`
+              //   : "",
+                // backgroundSize: "contain",
             }}
             className={`${
-              isActuallyExtraMessage && !fire ? "message-last" : ""
+              isActuallyExtraMessage ? "message-last" : ""
             } ${
-              hasActuallyAfterMessage && !fire ? "message-first" : ""
+              hasActuallyAfterMessage ? "message-first" : ""
             } chat-content-text relative`}
             whileTap={{
               cursor: "grabbing",
@@ -164,8 +162,8 @@ export default function Message(props) {
             {props.message.id === 89 && (
               <>
                 {/* <Flame /> */}
-                {/* <Fire /> */}
-                <lottie-player
+                {/* // <Fire /> */}
+                {/* <lottie-player
                   src="https://assets8.lottiefiles.com/packages/lf20_gkmkgw96.json"
                   background="transparent"
                   autoplay
@@ -194,7 +192,7 @@ export default function Message(props) {
                     transform: "translate(20%,-85%) scale(-3,3)",
                     position: "absolute",
                   }}
-                ></lottie-player>
+                ></lottie-player> */}
                 {/* <lottie-player
                 src="https://assets8.lottiefiles.com/packages/lf20_no9qrf5p.json"
                 background="transparent"
@@ -209,7 +207,6 @@ export default function Message(props) {
                   top: "50%",
                   // bottom: 0,
                   transform: "translate(0,-25%) scale(1)",
-                  position: "absolute",
                 }}
               ></lottie-player> */}
               </>
