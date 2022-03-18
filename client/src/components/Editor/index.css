@@ -2,8 +2,8 @@
   box-sizing: border-box;
   /* border: 1px solid #ddd; */
   cursor: text;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 8px 8px;
+  border-radius: 4px;
   /* margin-bottom: 2em; */
   /* box-shadow: inset 0px 1px 8px -3px #ababab; */
   background: #f3f4f6;
@@ -19,4 +19,26 @@
   position: absolute;
   color: gray;
   user-select: none;
+}
+
+.headlineButtonWrapper 
+{
+  z-index: 100;
+}
+
+.upload-image::before
+{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  visibility: hidden;
+  background: rgba(22,22,26,0.6);
+}
+
+.upload-image:hover::before
+{
+  visibility: visible;
 }

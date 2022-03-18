@@ -118,7 +118,7 @@ const InputWrapper = ({
       withArrow
       styles={{ popover: { width: "100%" } }}
       className="w-full"
-      noFocusTrap
+      trapFocus={false}
       transition="pop-top-left"
       onFocusCapture={onFocusCapture}
       onBlurCapture={onBlurCapture}

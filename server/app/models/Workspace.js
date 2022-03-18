@@ -15,16 +15,19 @@ const workspaceSchema = new mongoose.Schema(
       type: String,
       default: "https://i.imgur.com/X2JhY8y.png",
     },
-    members: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    banner: {
+      type: String,
+      default: "https://i.imgur.com/X2JhY8y.png",
+    },
+    tags: [
+      {
+        type: String,
+      },
+    ]
   },
   {
     toJSON: { virtuals: true },
@@ -33,12 +36,12 @@ const workspaceSchema = new mongoose.Schema(
   { timestamp: true }
 );
 
-workspaceSchema.virtual("membersCount", {
-    ref: "User",
-    localField: "_id",
-    foreignField: "workspaces",
-    count: true
-});
+// workspaceSchema.virtual("membersCount", {
+//     ref: "User",
+//     localField: "_id",
+//     foreignField: "workspaces",
+//     count: true
+// });
 
 const Workspace = mongoose.model("Workspace", workspaceSchema);
 

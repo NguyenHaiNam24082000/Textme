@@ -170,13 +170,21 @@
   }
 }
 
+
+#defaultCanvas0
+{
+  width: 100% !important;
+  height: auto !important;
+  overflow: hidden;
+}
+
 ::-webkit-scrollbar,
 ::-webkit-scrollbar-thumb {
   background-color: transparent;
 }
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 120px;
+  width: 6px;
+  height: 6px;
 }
 :hover::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);

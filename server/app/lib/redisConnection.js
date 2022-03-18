@@ -1,12 +1,16 @@
-const redisObject = require("redis-om");
+const redisObject = require("redis");
 
 let subConnection;
 let con;
 
 const createConnection = () => {
-  const redis = redisObject.createClient({
-    url: process.env.REDIS_HOST,
-  });
+  //production
+  // const redis = redisObject.createClient({
+  //   url: process.env.REDIS_HOST,
+  // });
+
+  //development
+  const redis = redisObject.createClient();
 
   redis.on("connect", () => {
     console.log("Redis connected");
@@ -22,9 +26,13 @@ const createConnection = () => {
 };
 
 const createSubConnection = async () => {
-  const redis = redisObject.createClient({
-    url: process.env.REDIS_HOST,
-  });
+  //production
+  // const redis = redisObject.createClient({
+  //   url: process.env.REDIS_HOST,
+  // });
+
+  //development
+  const redis = redisObject.createClient();
 
   redis.on("connect", () => {
     console.log("Redis connected");

@@ -1,7 +1,7 @@
 import { Upload } from "@douyinfe/semi-ui";
 import { Button, Card, Collapse, Group, Text, TextInput } from "@mantine/core";
 import React,{ useState} from "react";
-import Modal from "../../Modal";
+import Modal from "../Modal";
 import UploadImage from "../../UI/UploadImage";
 
 const titleTypeRoom = {

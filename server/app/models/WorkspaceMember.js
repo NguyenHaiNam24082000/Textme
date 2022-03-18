@@ -1,24 +1,29 @@
-const moongoose = require("moongoose");
+const mongoose = require("mongoose");
 
-const workspaceMemberSchema = new moongoose.Schema(
-    {
-        user: {
-            type: moongoose.Schema.Types.ObjectId,
-            ref: "User",
-        },
-        guild: {
-            type: moongoose.Schema.Types.ObjectId,
-            ref: "Guild",
-        },
-        role: {
-            type: [moongoose.Schema.Types.ObjectId],
-            ref: "Role",
-        },
+const workspaceMemberSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    {
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true },
+    workspace: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Workspace",
     },
-    { timestamp: true }
+    role: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Role",
+      default: [],
+      required: [true, "Role must be required"],
+    },
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
+  { timestamp: true }
 );
 
+const WorkspaceMember = mongoose.model("WorkspaceMember", workspaceMemberSchema);
+
+module.exports = WorkspaceMember;

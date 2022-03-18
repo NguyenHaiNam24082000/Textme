@@ -1,0 +1,136 @@
+.avatar {
+    @apply rounded-full my-1;
+    background-color: #2e3136;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    position: relative;
+  }
+  .avatar:not(.active) {
+      -webkit-animation: avatar-hover-out 0.4s linear forwards;
+              animation: avatar-hover-out 0.4s linear forwards;
+    }
+  
+  .avatar:not(.active):hover,
+  .avatar:not(.active):focus {
+    -webkit-animation: avatar-hover-in 0.8s ease forwards;
+    animation: avatar-hover-in 0.8s ease forwards;
+  }
+  
+  @-webkit-keyframes avatar-hover-in {
+      0% {
+        border-radius: 50%;
+        /* background-color: #2E3136; */
+      }
+      40% {
+        border-radius: 5px;
+      }
+      70% {
+        border-radius: 15px;
+      }
+      80% {
+        background-color: #7289DA;
+      }
+      100% {
+        border-radius: 10px;
+        background-color: #7289DA;
+      }
+    }
+    
+    @keyframes avatar-hover-in {
+      0% {
+        border-radius: 50%;
+        /* background-color: #2E3136; */
+      }
+      40% {
+        border-radius: 5px;
+      }
+      70% {
+        border-radius: 15px;
+      }
+      80% {
+        background-color: #7289DA;
+      }
+      100% {
+        border-radius: 10px;
+        background-color: #7289DA;
+      }
+    }
+    @-webkit-keyframes avatar-hover-out {
+      0% {
+        border-radius: 10px;
+        background-color: #7289DA;
+      }
+      100% {
+        border-radius: 50%;
+        background-color: #2E3136;
+      }
+    }
+    @keyframes avatar-hover-out {
+      0% {
+        border-radius: 10px;
+        background-color: #7289DA;
+      }
+      100% {
+        border-radius: 50%;
+        background-color: #2E3136;
+      }
+    }
+  
+  /* .space-active
+  {
+    @apply flex justify-center;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background-color: #f7f6f3;
+    width: 100%;
+    position: relative;
+  }
+  .space-active > .avatar
+  {
+    border-radius: 10px !important;
+  } */
+  
+   /* pre:nth-child(1)
+  {
+   position: absolute;
+   top: -10px;
+   left: 0;
+   height: 10px;
+   width: 100%;
+   background-color: #f7f6f3;
+   z-index: -100;
+  }
+  .space-active pre:nth-child(1)::before
+  {
+   position: absolute;
+   content: "";
+   top: 0;
+   left: 0;
+   height: 100%;
+   width: 100%;
+   background-color:  #EBE7E4;
+   z-index: -100;
+   border-bottom-right-radius: 10px;
+  }
+   pre:nth-child(2)
+  {
+   position: absolute;
+   bottom: -10px;
+   left: 0;
+   height: 10px;
+   width: 100%;
+   background-color: #f7f6f3;
+   z-index: -100;
+  }
+  .space-active pre:nth-child(2)::before
+  {
+   position: absolute;
+   content: "";
+   bottom: 0;
+   left: 0;
+   height: 100%;
+   width: 100%;
+   background-color:  #EBE7E4;
+   z-index: -100;
+   border-top-right-radius: 10px;
+  } */

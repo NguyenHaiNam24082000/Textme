@@ -23,7 +23,7 @@ const createUser = async (userBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(error));
   }
 
-  userBody.shortId = uid();
+  userBody.discriminator = uid();
   // userBody.color = COLORS[Math.floor(Math.random() * COLORS.length)];
   const user = await User.create(userBody);
   return user;
@@ -93,6 +93,10 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+const getAllUsers = async () => {
+  return User.find();
+}
+
 module.exports = {
   createUser,
   queryUsers,
@@ -100,4 +104,5 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  getAllUsers,
 };

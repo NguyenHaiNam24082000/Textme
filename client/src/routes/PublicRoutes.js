@@ -11,7 +11,7 @@ const PublicRoutes = () => {
   const history = useNavigate();
   const isAuth = useAuth();
   useEffect(() => {
-    isAuth && history("/app");
+    isAuth && history("/chanel/@me");
   }, [isAuth]);
   return <Outlet />;
 };

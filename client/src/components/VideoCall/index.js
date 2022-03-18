@@ -23,6 +23,7 @@ import { Group } from "@mantine/core";
 import { Button } from "@mantine/core";
 import { IconCaretdown, IconChevronDown } from "@douyinfe/semi-icons";
 import { Menu, Divider, Text } from "@mantine/core";
+import { SelfieSegmentation } from "@mediapipe/selfie_segmentation";
 import "./index.css";
 const FloatingTrackContainer = styled.div`
   position: absolute;
@@ -41,75 +42,156 @@ export default function VideoCall() {
   const [videoInput, setVideoInput] = useState([]);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const contextRef = useRef(null);
   const webcamRef = useRef(null);
   const [bodypixnet, setBodypixnet] = useState();
   const [prevClassName, setPrevClassName] = useState();
+
   useEffect(() => {
-    console.log("VideoCall");
-    //get enumerateMediaDevices
-    navigator.mediaDevices
-      .getUserMedia({ video: false, audio: true })
-      .then(() => {
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-          devices.forEach((device) => {
-            if (device.kind === "audioinput") {
-              setAudioInput([...audioInput, device]);
-            }
-            if (device.kind === "videoinput") {
-              setVideoInput([...videoInput, device]);
-              console.log(device);
-            }
-            // console.log(
-            //   device.kind + ": " + device.label + " id = " + device.deviceId
-            // );
-          });
-        });
-      });
-    bodyPix.load().then((net) => {
-      setBodypixnet(net);
+    contextRef.current = canvasRef.current.getContext("2d");
+    const constraints = {
+      video: { width: { min: 1280 }, height: { min: 720 } },
+    };
+    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+      webcamRef.current.srcObject = stream;
+      sendToMediaPipe();
     });
+
+    const selfieSegmentation = new SelfieSegmentation({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
+    });
+
+    selfieSegmentation.setOptions({
+      modelSelection: 1,
+      selfieMode: true,
+    });
+
+    selfieSegmentation.onResults(onResults);
+
+    const sendToMediaPipe = async () => {
+      if (!webcamRef.current.videoWidth) {
+        console.log(webcamRef.current.videoWidth);
+        requestAnimationFrame(sendToMediaPipe);
+      } else {
+        await selfieSegmentation.send({ image: webcamRef.current });
+        requestAnimationFrame(sendToMediaPipe);
+      }
+    };
   }, []);
 
-  const drawimage = async (webcam, context, canvas) => {
-    // create tempCanvas
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = webcam.videoWidth;
-    tempCanvas.height = webcam.videoHeight;
-    const tempCtx = tempCanvas.getContext("2d");
-    (async function drawMask() {
-      requestAnimationFrame(drawMask);
-      // draw mask on tempCanvas
-      const segmentation = await bodypixnet.segmentPerson(webcam);
-      const mask = bodyPix.toMask(segmentation);
-      tempCtx.putImageData(mask, 0, 0);
-      // draw original image
-      context.drawImage(webcam, 0, 0, canvas.width, canvas.height);
-      // use destination-out, then only masked area will be removed
-      context.save();
-      context.globalCompositeOperation = "destination-out";
-      context.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
-      context.restore();
-    })();
+  const onResults = (results) => {
+    contextRef.current.save();
+    contextRef.current.clearRect(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+    contextRef.current.drawImage(
+      results.segmentationMask,
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+    // Only overwrite existing pixels.
+    contextRef.current.globalCompositeOperation = "source-out";
+    contextRef.current.fillStyle = "#00FF00";
+    contextRef.current.fillRect(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+
+    // Only overwrite missing pixels.
+    contextRef.current.globalCompositeOperation = "destination-atop";
+    contextRef.current.drawImage(
+      results.image,
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+
+    contextRef.current.restore();
   };
 
-  const clickHandler = async (className) => {
-    const webcam = webcamRef.current.video;
-    const canvas = canvasRef.current;
-    webcam.width = canvas.width = webcam.videoWidth;
-    webcam.height = canvas.height = webcam.videoHeight;
-    const context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    if (prevClassName) {
-      canvas.classList.remove(prevClassName);
-      setPrevClassName(className);
-    } else {
-      setPrevClassName(className);
-    }
-    canvas.classList.add(className);
-    if (bodypixnet) {
-      drawimage(webcam, context, canvas);
-    }
-  };
+  // useEffect(() => {
+  //   console.log("VideoCall");
+  //   // get enumerateMediaDevices
+  //   navigator.mediaDevices
+  //     .getUserMedia({ video: true, audio: false })
+  //     .then((stream) => {
+  //       webcamRef.current.srcObject = stream;
+  //       // navigator.mediaDevices.enumerateDevices().then((devices) => {
+  //       //   devices.forEach((device) => {
+  //       //     if (device.kind === "audioinput") {
+  //       //       setAudioInput([...audioInput, device]);
+  //       //     }
+  //       //     if (device.kind === "videoinput") {
+  //       //       setVideoInput([...videoInput, device]);
+  //       //       console.log(device);
+  //       //     }
+  //       //     // console.log(
+  //       //     //   device.kind + ": " + device.label + " id = " + device.deviceId
+  //       //     // );
+  //       //   });
+  //       // });
+  //     });
+  //   bodyPix.load({
+  //     architecture: "MobileNetV1",
+  //     outputStride: 16,
+  //     multiplier: 0.75,
+  //     quantBytes: 2,
+  //   }).then((net) => {
+  //     setBodypixnet(net);
+  //   });
+  // }, []);
+
+  // const drawimage = async (webcam, context, canvas) => {
+  //   // create tempCanvas
+  //   const tempCanvas = document.createElement("canvas");
+  //   tempCanvas.width = webcam.clientWidth;
+  //   tempCanvas.height = webcam.clientHeight;
+  //   const tempCtx = tempCanvas.getContext("2d");
+  //   (async function drawMask() {
+  //     requestAnimationFrame(drawMask);
+  //     // draw mask on tempCanvas
+  //     const segmentation = await bodypixnet.segmentPerson(webcam,{
+  //       internalResolution: "high",
+  //     });
+  //     const mask = bodyPix.toMask(segmentation);
+  //     tempCtx.putImageData(mask, 0, 0);
+  //     // draw original image
+  //     context.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+  //     // use destination-out, then only masked area will be removed
+  //     context.save();
+  //     context.globalCompositeOperation = "destination-out";
+  //     context.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+  //     context.restore();
+  //   })();
+  // };
+
+  // const clickHandler = async (className) => {
+  //   const webcam = webcamRef.current;
+  //   const canvas = canvasRef.current;
+  //   webcam.width = canvas.width = webcam.clientWidth;
+  //   webcam.height = canvas.height = webcam.clientHeight;
+  //   const context = canvas.getContext("2d");
+  //   context.clearRect(0, 0, canvas.width, canvas.height);
+  //   if (prevClassName) {
+  //     canvas.classList.remove(prevClassName);
+  //     setPrevClassName(className);
+  //   } else {
+  //     setPrevClassName(className);
+  //   }
+  //   canvas.classList.add(className);
+  //   if (bodypixnet) {
+  //     drawimage(webcam, context, canvas);
+  //   }
+  // };
 
   // const getVideo = () => {
   //   navigator.mediaDevices
@@ -122,6 +204,19 @@ export default function VideoCall() {
   // useEffect(() => {
   //   getVideo();
   // }, [videoRef]);
+
+  const getDisplayMedia = () => {
+    try {
+      navigator.mediaDevices.getDisplayMedia({
+        video: false
+      }).then((stream) => {
+        webcamRef.current.srcObject = stream;
+      });
+    } catch (e) {
+      console.log("Unable to acquire screen capture: " + e);
+    }
+  };
+
   return (
     <div className="bg-white flex w-full h-full relative">
       {/* <FloatingTrackContainer>
@@ -140,8 +235,8 @@ export default function VideoCall() {
         }
       /> */}
       <div className="flex relative w-6/12">
-        <Webcam
-          audio={false}
+        <video
+          autoPlay
           ref={webcamRef}
           className="absolute inset-0 z-10 w-full h-auto"
         />
@@ -160,7 +255,7 @@ export default function VideoCall() {
                   radius="xl"
                   variant="filled"
                   className="absolute bottom-0 right-0"
-                  onClick={() => clickHandler("video-background")}
+                  // onClick={() => clickHandler("video-background")}
                 >
                   <IconChevronDown />
                 </ActionIcon>
@@ -226,7 +321,7 @@ export default function VideoCall() {
               cursor: "pointer",
             }}
           >
-            <ActionIcon size={56} radius="xl" variant="light">
+            <ActionIcon size={56} radius="xl" variant="light" onClick={getDisplayMedia}>
               <MdOutlineScreenShare className="w-6 h-auto" />
             </ActionIcon>
           </Badge>

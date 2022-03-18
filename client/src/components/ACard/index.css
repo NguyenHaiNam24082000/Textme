@@ -1,0 +1,22 @@
+    .card {
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 150ms ease, box-shadow 100ms ease;
+      padding: 24px;
+      paddingLeft: 48px;
+    }
+      .card:hover {
+        @apply shadow-md;
+        transform: scale(1.02);
+      }
+  
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 6;
+        /* backgroundImage: theme.fn.linearGradient(0; theme.colors.pink[6]; theme.colors.orange[6]); */
+      }

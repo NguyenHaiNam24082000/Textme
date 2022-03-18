@@ -1,7 +1,14 @@
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { motion, useMotionValue, useAnimation } from "framer-motion";
-import { Highlight, TypographyStylesProvider, Avatar } from "@mantine/core";
+import {
+  Highlight,
+  TypographyStylesProvider,
+  Avatar,
+  ActionIcon,
+  Menu,
+  Divider,
+} from "@mantine/core";
 import "./index.css";
 import Sparkles from "../MessageEffect/Sparkles";
 import "@lottiefiles/lottie-player";
@@ -10,7 +17,13 @@ import useSound from "use-sound";
 import fireSound from "../../assets/sounds/fire.mp3";
 import wowSound from "../../assets/sounds/wow.mp3";
 import test from "../../assets/images/test.gif";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import "emoji-mart/css/emoji-mart.css";
+import { Picker } from "emoji-mart";
+import ACard from "../ACard";
+import CodeBlockPreview from "../PreviewFeature/CodeBlockPreview";
+import DocumentPreview from "../PreviewFeature/DocumentPreview";
+import MusicPreview from "../PreviewFeature/MusicPreview";
 const item = {
   hidden: {
     opacity: 0,
@@ -68,6 +81,7 @@ export default function Message(props) {
         <Avatar
           radius="xl"
           size={40}
+          className="hover:shadow-md cursor-pointer"
           src="https://cdn.discordapp.com/icons/854810300876062770/f4121b15626152fd6c6ba71e078f9936.webp?size=128"
         />
       </div>
@@ -92,77 +106,154 @@ export default function Message(props) {
   const fire = props.message.id === 89;
   const MessageText = () => {
     return (
-      <Highlight
-        style={{
-          overflowWrap: "break-word",
-          zIndex: 3,
-          borderRadius: "inherit",
-          backgroundImage: `url(${test})`,
-        }}
-        className="w-full px-3 py-2 h-full bg-inherit"
-        highlight={props.searchMessage.split(" ")}
-        onClick={() => (fire ? play() : play2())}
-        children={
-          "Lorem chào aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        }
-      ></Highlight>
+      // <Highlight
+      //   style={{
+      //     overflowWrap: "break-word",
+      //     zIndex: 3,
+      //     borderRadius: "inherit",
+      //     backgroundImage: `url(${test})`,
+      //   }}
+      //   className="message-content w-full h-full bg-inherit"
+      //   highlight={props.searchMessage.split(" ")}
+      //   onClick={() => (fire ? play() : play2())}
+      //   children={
+      //     "Lorem chào aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      //   }
+      // ></Highlight>
+      // <ACard />
+      // <CodeBlockPreview />
+      <div className="flex flex-col">
+        <DocumentPreview />
+        <MusicPreview url={"https://vnno-vn-5-tf-mp3-320s1-zmp3.zadn.vn/6b2b7943f7041e5a4715/8109663103068771612?authen=exp=1647341485~acl=/6b2b7943f7041e5a4715/*~hmac=4f0ebbb630c35a1b4cdfc21d790c0ffb&fs=MTY0NzE2ODY4NTA2OHx3ZWJWNnwwfDExNy4yLjY2LjE4OA"}/>
+      </div>
     );
   };
 
   return (
-    <div
-      className={`chat-box-bubble ${
-        props.message.userId === 10 || props.message.userId === 6
-          ? "chat-box-sender"
-          : ""
-      }`}
-      // onDragEnd={(event, info) => {
-      //   if (Math.abs(info.point.x) > 200) {
-      //     setIsVisible(false);
-      //   }
-      // }}
-      style={{
-        marginTop: !isActuallyExtraMessage && "16px",
-      }}
-      key={props.key}
-    >
-      <div className="chat-content">
-        <LeftSide />
-        <MessageHeader />
-        <div className="relative">
-          <p className="absolute left-0 text-black">Rely</p>
-          <motion.div
-            ref={ref}
-            style={{
-              x,
-              cursor: "pointer",
-              zIndex: 2,
-              // background: fire
-              //   ? `url(https://us.123rf.com/450wm/macrovector/macrovector1905/macrovector190500014/122825424-flame-of-gold-fire-on-dark-transparent-background-with-red-sparks-flying-up-realistic-vector-illustr.jpg?ver=6)`
-              //   : "",
-                // backgroundSize: "contain",
-            }}
-            className={`${
-              isActuallyExtraMessage ? "message-last" : ""
-            } ${
-              hasActuallyAfterMessage ? "message-first" : ""
-            } chat-content-text relative`}
-            whileTap={{
-              cursor: "grabbing",
-            }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-          >
-            {props.message.id === 100 || props.message.userId === 6 ? (
-              <Sparkles children={<MessageText />} />
-            ) : (
-              <MessageText />
-            )}
-            {props.message.id === 89 && (
-              <>
-                {/* <Flame /> */}
-                {/* // <Fire /> */}
-                {/* <lottie-player
+    <>
+      {props.isUnread && (
+        <div className="sticky z-20 flex w-full -top-1">
+          <div className="absolute top-3 left-2">
+            <div className="text-center my-1">
+              <span
+                className="text-white font-bold h-6 px-2 inline-flex justify-center items-center rounded-md shadow-md text-xs cursor-pointer"
+                style={{ border: "2px solid #FD6671", background: "#FD6671" }}
+              >
+                New
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`${!isActuallyExtraMessage ? "mt-3" : ""} ${
+          !hasActuallyAfterMessage ? "mb-3" : ""
+        }`}
+      >
+        <div className="sticky top-2 z-20 flex justify-center w-full">
+          <div className="absolute">
+            <div className="text-center my-1">
+              <Menu
+                placement="center"
+                control={
+                  <span
+                    className="bg-white font-bold h-6 px-2 inline-flex justify-center items-center rounded-md shadow-md text-xs cursor-pointer"
+                    style={{
+                      border: !props.isUnread
+                        ? "2px solid #e2e2e2"
+                        : "2px solid #FD6671",
+                    }}
+                  >
+                    Thursday, April 23
+                  </span>
+                }
+              >
+                <Menu.Label>Jump to...</Menu.Label>
+                <Menu.Item>Most recent</Menu.Item>
+                <Menu.Item>Last month</Menu.Item>
+                <Menu.Item>The every beginning</Menu.Item>
+                <Divider />
+                <Menu.Item>Jump to a specific date</Menu.Item>
+              </Menu>
+              {/* <span
+                className="text-white font-bold h-6 px-2 inline-flex justify-center items-center rounded-md shadow-md text-xs cursor-pointer"
+                style={{ border: "2px solid #FD6671", background: "#FD6671" }}
+              >
+                New
+              </span> */}
+            </div>
+          </div>
+        </div>
+        <div className="w-full z-10">
+          <div className="bg-transparent relative py-4">
+            <div
+              className="left-0 right-0 relative"
+              style={{
+                borderTop: !props.isUnread
+                  ? "2px solid #e2e2e2"
+                  : "2px solid #FD6671",
+              }}
+            ></div>
+          </div>
+        </div>
+        {/* // <div
+    //   className={`chat-box-bubble ${
+    //     props.message.userId === 10 || props.message.userId === 6
+    //       ? "chat-box-sender"
+    //       : ""
+    //   }`} */}
+        <div
+          className={`chat-box ${
+            props.message.userId === 10 || props.message.userId === 6
+              ? "chat-box-sender"
+              : ""
+          }`}
+          // onDragEnd={(event, info) => {
+          //   if (Math.abs(info.point.x) > 200) {
+          //     setIsVisible(false);
+          //   }
+          // }}
+          // style={{
+          //   marginTop: !isActuallyExtraMessage && "12px",
+          // }}
+          key={props.key}
+        >
+          <div className="chat-content">
+            <LeftSide />
+            <MessageHeader />
+            <div className="relative">
+              {/* <p className="absolute left-0 text-black">Rely</p> */}
+              <div
+                ref={ref}
+                style={{
+                  x,
+                  cursor: "pointer",
+                  zIndex: 2,
+                  // background: fire
+                  //   ? `url(https://us.123rf.com/450wm/macrovector/macrovector1905/macrovector190500014/122825424-flame-of-gold-fire-on-dark-transparent-background-with-red-sparks-flying-up-realistic-vector-illustr.jpg?ver=6)`
+                  //   : "",
+                  // backgroundSize: "contain",
+                }}
+                className={`${isActuallyExtraMessage ? "message-last" : ""} ${
+                  hasActuallyAfterMessage ? "message-first" : ""
+                } chat-content-text relative`}
+                whileTap={{
+                  cursor: "grabbing",
+                }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+              >
+                {props.message.id === 100 || props.message.userId === 6 ? (
+                  <Sparkles children={<MessageText />} />
+                ) : (
+                  <MessageText />
+                )}
+                {props.message.id === 89 && (
+                  <>
+                    {/* <Flame /> */}
+                    {/* // <Fire /> */}
+                    {/* <lottie-player
                   src="https://assets8.lottiefiles.com/packages/lf20_gkmkgw96.json"
                   background="transparent"
                   autoplay
@@ -192,7 +283,7 @@ export default function Message(props) {
                     position: "absolute",
                   }}
                 ></lottie-player> */}
-                {/* <lottie-player
+                    {/* <lottie-player
                 src="https://assets8.lottiefiles.com/packages/lf20_no9qrf5p.json"
                 background="transparent"
                 autoplay
@@ -208,20 +299,79 @@ export default function Message(props) {
                   transform: "translate(0,-25%) scale(1)",
                 }}
               ></lottie-player> */}
-              </>
-            )}
-            {props.message.id === 90 && (
-              <>
-                {/* <img
+                  </>
+                )}
+                {props.message.id === 90 && (
+                  <>
+                    {/* <img
                   className="absolute -top-6 -left-6 z-10 h-full w-auto -rotate-12"
                   src="https://video-public.canva.com/VADlsz-nbMw/videos/990131e940.gif"
                 /> */}
-              </>
-            )}
-          </motion.div>
+                  </>
+                )}
+              </div>
+              <div className="absolute right-0 top-0">
+                <div className="absolute right-0 -top-6 pr-4 pl-8 z-10">
+                  <div
+                    className="flex items-center h-8 rounded-md bg-white relative overflow-hidden transition-shadow shadow-sm hover:shadow-md"
+                    style={{ border: "2px solid #e2e2e2" }}
+                  >
+                    <ActionIcon size={32}>👏</ActionIcon>
+                    <ActionIcon size={32}>👏</ActionIcon>
+                    <ActionIcon size={32}>👏</ActionIcon>
+                    <ActionIcon size={32}>
+                      <FontAwesomeIcon icon="fa-solid fa-face-laugh" />
+                    </ActionIcon>
+                    <ActionIcon size={32}>
+                      <FontAwesomeIcon icon="fa-solid fa-pen" />
+                    </ActionIcon>
+                    <Menu
+                      position="right"
+                      size="lg"
+                      control={
+                        <ActionIcon size={32}>
+                          <FontAwesomeIcon icon="fa-solid fa-ellipsis" />
+                        </ActionIcon>
+                      }
+                    >
+                      <Menu.Item
+                        icon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
+                      >
+                        Chỉnh sửa tin nhắn
+                      </Menu.Item>
+                      <Menu.Item
+                        icon={<FontAwesomeIcon icon="fa-solid fa-thumbtack" />}
+                      >
+                        Ghim tin nhắn
+                      </Menu.Item>
+                      <Menu.Item
+                        icon={<FontAwesomeIcon icon="fa-solid fa-reply" />}
+                      >
+                        Trả lời
+                      </Menu.Item>
+                      <Menu.Item>Tạo chủ đề</Menu.Item>
+                      <Menu.Item>Đánh dấu chưa đọc</Menu.Item>
+                      <Menu.Item
+                        icon={<FontAwesomeIcon icon="fa-solid fa-link" />}
+                      >
+                        Sao chép đường dẫn tin nhắn
+                      </Menu.Item>
+                      <Menu.Item>Sao chép ID</Menu.Item>
+                      <Menu.Item
+                        color="red"
+                        icon={<FontAwesomeIcon icon="fa-solid fa-trash-can" />}
+                      >
+                        Xoá tin nhắn
+                      </Menu.Item>
+                    </Menu>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

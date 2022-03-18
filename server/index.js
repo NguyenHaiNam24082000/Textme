@@ -8,42 +8,61 @@ const SummaryTool = require("node-summary");
 const translate = require("@vitalets/google-translate-api");
 const helmet = require("helmet");
 const express = require("express");
-const xss = require('xss-clean');
-const mongoSanitize = require('express-mongo-sanitize');
+const xss = require("xss-clean");
+const mongoSanitize = require("express-mongo-sanitize");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cors = require("cors");
-const authRoute = require("./app/routes/v1/authRoute");
+const routes = require("./app/routes");
 const app = express();
 const compression = require("compression");
 const http = require("http");
-const socketio = require("socket.io");
-const passport = require('passport');
-const { jwtStrategy } = require('./app/configs/passport');
-const { errorConverter, errorHandler } = require('./app/middlewares/error');
+const socketIo = require("./app/sockets/io");
+const passport = require("passport");
+const { jwtStrategy } = require("./app/configs/passport");
+const { errorConverter, errorHandler } = require("./app/middlewares/error");
+const session = require("express-session");
 
 // const os = require("os");
 
 // process.env.UV_THREADPOOL_SIZE = os.cpus().length >= 2 ? 2 : 1;
 
-connectDB();
-const server = http.createServer(app);
-const io = socketio(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
+const port = process.env.APP_PORT;
+let server;
+const createServer = () => {
+  if (connectDB()) {
+    server = http.createServer(app);
+    // init redis connection
+    // getConnection();
 
-io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.on("chatMessage", (msg) => {
-    console.log("message: " + msg);
-  });
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
-});
+    // init socket
+    socketIo.setup(server, {
+      origin: "*",
+      methods: ["GET", "POST"],
+    });
+
+    server.listen(port, () => {
+      console.info(`--- 🌟  Started --- http://localhost:${port}`);
+    });
+  }
+};
+createServer();
+// const io = socketio(server, {
+//   cors: {
+//     origin: "*",
+//     methods: ["GET", "POST"],
+//   },
+// });
+
+// io.on("connection", (socket) => {
+//   console.log(`${socket.id} connected`);
+//   socket.on("chatMessage", (msg) => {
+//     console.log("message: " + msg);
+//   });
+//   socket.on("disconnect", () => {
+//     console.log("user disconnected");
+//   });
+// });
 
 //enabling CORS for all requests
 app.use(
@@ -61,6 +80,7 @@ app.use(
 //     credentials: true,
 //   })
 // );
+// app.use(session({ secret: 'abc' }));
 
 //Body Parser
 app.use(express.json());
@@ -76,7 +96,8 @@ app.use(morgan("combined"));
 
 // jwt authentication
 app.use(passport.initialize());
-passport.use('jwt', jwtStrategy);
+// app.use(passport.session());
+passport.use("jwt", jwtStrategy);
 
 // sanitize request data
 app.use(xss());
@@ -101,8 +122,6 @@ app.use(errorConverter);
 
 // handle error
 app.use(errorHandler);
-
-const port = process.env.APP_PORT;
 
 //Fake API
 
@@ -171,7 +190,7 @@ app.get("/api/v1/", (req, res, next) => {
 });
 
 //Mount the route
-app.use("/api/v1/auth", authRoute);
+app.use("/api/v1", routes);
 
 // app.use("/", ()=>{
 //   console.log("Server is running");
@@ -193,8 +212,6 @@ app.post("/api/v1/translate", (req, res, next) => {
       console.error(err);
     });
 });
-
-server.listen(port, () => console.log(`Listening on port ${port}`));
 
 // var title =
 //   "Swayy is a beautiful new dashboard for discovering and curating online content [Invites]";

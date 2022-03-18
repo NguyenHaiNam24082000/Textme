@@ -1,11 +1,11 @@
-import { getRequest, postRequest } from "../axiosQuery";
+import { getRequest, postRequest, patchRequest } from "../axiosQuery";
 
 export const sendFriendRequest = (payload) => {
   return postRequest("/api/v1/friend/add-friend-request", payload);
 };
 
 export const getPendingFriendRequest = () => {
-  return getRequestst("/api/v1/friend/pending-requests");
+  return getRequest("/api/v1/friend/pending-requests");
 };
 
 export const getOutGoingRequestApi = () => {

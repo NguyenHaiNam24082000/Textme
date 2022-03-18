@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { useSelector } from "react-redux";
 import { getProfile } from "../apis/account";
 import { useQuery } from "react-query";
 import { ACCOUNT_KEY } from "../configs/queryKeys";
@@ -26,8 +27,8 @@ const slice = createSlice({
       state.user = action.payload;
       localStorage.setItem("user", JSON.stringify(action.payload));
       localStorage.setItem("email_cache", action.payload.user.email);
-      localStorage.setItem("user_id_cache",action.payload.user._id);
-      localStorage.setItem("deviceProperties","");
+      localStorage.setItem("user_id_cache", action.payload.user._id);
+      localStorage.setItem("deviceProperties", "");
     },
     logoutSuccess: (state, action) => {
       state.user = null;
@@ -48,6 +49,11 @@ const slice = createSlice({
     },
   },
 });
+
+export const GetMe = () => {
+  const user = useSelector((state) => state.user?.user);
+  return user;
+};
 
 export default slice.reducer;
 export const { loginSuccess, logoutSuccess } = slice.actions;

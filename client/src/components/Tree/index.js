@@ -56,6 +56,28 @@ export default function TreeComponent() {
         },
       ],
     },
+    {
+      label: "North America",
+      value: "North America",
+      key: "2",
+      button: buttons,
+      children: [
+        {
+          label: "United States",
+          value: "United States",
+          key: "2-0",
+          icon: <IconHash />,
+          button: buttons,
+        },
+        {
+          label: "Canada",
+          value: "Canada",
+          key: "2-1",
+          icon: <IconHash />,
+          button: buttons,
+        },
+      ],
+    },
   ];
   const [searchKey, setSearchKey] = useState("");
   const [treeData, setTreeData] = useState(initialData);

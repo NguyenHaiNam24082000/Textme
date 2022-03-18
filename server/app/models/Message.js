@@ -1,40 +1,61 @@
 const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema(
-    {
-        content: {
+  {
+    content: {
+      type: String,
+      required: [true, "Content must be required"],
+      trim: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    channel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Channel",
+    },
+    embed: {
+      type: Array,
+      default: [],
+      items: {
+        type: Object,
+        properties: {
+          title: {
             type: String,
-            required: [true, "Content must be required"],
-            trim: true,
+          },
+          description: {
+            type: String,
+          },
+          url: {
+            type: String,
+          },
+          imageURL: {
+            type: String,
+          },
         },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-        },
-        channel: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Channel",
-        },
+      },
     },
-    {
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true },
-    },
-    { timestamp: true }
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
+  { timestamp: true }
 );
 
-messageSchema.virtual("user", {
-    ref: "User",
-    localField: "user",
-    foreignField: "_id",
-    justOne: true,
+messageSchema.virtual("User", {
+  ref: "User",
+  localField: "user",
+  foreignField: "_id",
+  justOne: true,
 });
 
-messageSchema.virtual("channel", {
-    ref: "Channel",
-    localField: "channel",
-    foreignField: "_id",
-    justOne: true,
+messageSchema.virtual("Channel", {
+  ref: "Channel",
+  localField: "channel",
+  foreignField: "_id",
+  justOne: true,
 });
 
 // messageSchema.virtual("workspace", {
@@ -65,3 +86,7 @@ messageSchema.virtual("channel", {
 //         select: "name",
 //     },
 // });
+
+const Message = mongoose.model("Message", messageSchema);
+
+module.exports = Message;

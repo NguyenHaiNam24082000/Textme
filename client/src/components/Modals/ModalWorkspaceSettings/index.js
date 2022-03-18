@@ -1,6 +1,6 @@
 import { ActionIcon, Divider } from "@mantine/core";
 import React, { useState } from "react";
-import Modal from "../../Modal";
+import Modal from "../Modal";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
 import "./index.css";
 import Categories from "./utils/Categories";
