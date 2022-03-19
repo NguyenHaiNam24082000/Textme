@@ -12,9 +12,9 @@ export default function Modal({
   style,
   styles,
   classNames,
-  hideCloseButton=true,
-  padding="xl",
-  ref=null,
+  hideCloseButton = true,
+  padding = "xl",
+  ref = null,
 }) {
   return (
     <ModalContainer
@@ -34,9 +34,11 @@ export default function Modal({
       zIndex={zIndex}
       withCloseButton={hideCloseButton}
       title={
-        <Text style={{ fontSize: "var(--font-size-xxxlarge)" }} weight={600}>
-          {title}
-        </Text>
+        title ? (
+          <Text style={{ fontSize: "var(--font-size-xxxlarge)" }} weight={600}>
+            {title}
+          </Text>
+        ) : null
       }
     >
       {children}

@@ -1,14 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
-import { getProfile } from "../apis/account";
-import { useQuery } from "react-query";
-import { ACCOUNT_KEY } from "../configs/queryKeys";
+import { Me } from "../reactQuery/user";
 
 export const getMe = createAsyncThunk("user/getMe", async (params) => {
-  return useQuery(ACCOUNT_KEY, async () => {
-    const { data } = await getProfile(params);
-    return data;
-  });
+  return Me(params);
 });
 
 const initialUser = localStorage.getItem("user")

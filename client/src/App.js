@@ -83,6 +83,8 @@ import {
   faUserPlus as fasFaUserPlus,
   faUserXmark as fasFaUserXmark,
   faComments as fasFaComments,
+  faXmark as fasFaXmark,
+  faCheck as fasFaCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -163,7 +165,9 @@ library.add(
   fasFaUserClock,
   fasFaUserPlus,
   fasFaUserXmark,
-  fasFaComments
+  fasFaComments,
+  fasFaXmark,
+  fasFaCheck
 );
 
 const client = new QueryClient({

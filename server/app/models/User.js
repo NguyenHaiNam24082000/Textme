@@ -135,6 +135,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      select: false,
     },
     discriminator: {
       type: String,

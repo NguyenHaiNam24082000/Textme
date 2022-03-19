@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import {IMAGE_MIME_TYPE} from "@mantine/dropzone"
 import { Button, SplitButtonGroup } from "@douyinfe/semi-ui";
-import InlineEdit from "@atlaskit/inline-edit";
+// import InlineEdit from "@atlaskit/inline-edit";
 import Modal from "../../components/Modals/Modal";
 import { RiFileGifLine } from "react-icons/ri";
 import Cropper from "react-easy-crop";

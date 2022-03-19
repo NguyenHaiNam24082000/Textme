@@ -14,7 +14,7 @@ const getPendingRequests = catchAsync(async (req, res, next) => {
 });
 
 const outGoingRequests = catchAsync(async (req, res, next) => {
-  const outGoingRequests = await friendService.getOutGoingRequests(req.user);
+  const outGoingRequests = await friendService.outGoingRequests(req.user);
   res.status(httpStatus.OK).send(outGoingRequests);
 });
 

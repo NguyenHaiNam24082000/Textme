@@ -94,6 +94,7 @@
     "jsmediatags": "^3.9.7",
     "kalidokit": "^1.1.5",
     "load-script": "^2.0.0",
+    "lodash.get": "^4.4.2",
     "logrocket": "^2.2.0",
     "maplibre-gl": "^2.1.7",
     "markdown-draft-js": "^2.4.0",

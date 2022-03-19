@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import {
-  getPendingRequests,
+  getPendingFriendRequest,
   getOutGoingRequestApi,
   allFriendsRequestApi,
 } from "../../apis/friend";
@@ -13,7 +13,7 @@ import {
 
 export const PendingRequests = () => {
   return useQuery(PENDING_REQUESTS_KEY, async () => {
-    const { data } = await getPendingRequests();
+    const { data } = await getPendingFriendRequest();
     return data;
   });
 };

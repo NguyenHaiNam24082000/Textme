@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  pendingRequests,
-  outGoingRequests,
-  allFriends,
+  PendingRequests,
+  OutGoingRequests,
+  AllFriends,
 } from "../reactQuery/friend";
 
 const slice = createSlice({
@@ -23,32 +23,43 @@ const slice = createSlice({
     },
   },
   extraReducers: {
-    [addFriend.pending]: (state, action) => {
+    [PendingRequests.pending]: (state, action) => {
       state.isLoading = true;
     },
-    [addFriend.fulfilled]: (state, action) => {
+    [PendingRequests.fulfilled]: (state, action) => {
       state.isLoading = false;
-      state.friends.push(action.payload);
+      state.friends = action.payload;
     },
-    [addFriend.rejected]: (state, action) => {
+    [PendingRequests.rejected]: (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
     },
-    [removeFriend.pending]: (state, action) => {
+    [OutGoingRequests.pending]: (state, action) => {
       state.isLoading = true;
     },
-    [removeFriend.fulfilled]: (state, action) => {
+    [OutGoingRequests.fulfilled]: (state, action) => {
       state.isLoading = false;
-      state.friends = state.friends.filter(
-        (friend) => friend._id !== action.payload
-      );
+      state.friends = action.payload;
     },
-    [removeFriend.rejected]: (state, action) => {
+    [OutGoingRequests.rejected]: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
+    [AllFriends.pending]: (state, action) => {
+      state.isLoading = true;
+    },
+    [AllFriends.fulfilled]: (state, action) => {
+      state.isLoading = false;
+      state.friends = action.payload;
+    },
+    [AllFriends.rejected]: (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
     },
   },
 });
+
+
 
 export default slice.reducer;
 export const { addFriend, removeFriend } = slice.actions;
