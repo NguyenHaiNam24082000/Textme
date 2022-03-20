@@ -8,37 +8,53 @@ const ApiError = require("../utils/ApiError");
  * @param {Object} body
  * @returns {Promise<User>}
  */
-const createChannel = async (user, body) => {
-  const { name, description } = body;
-
+const createChannel = async (options) => {
   const channel = await Channel.create({
-    name,
-    description,
-    owner: user._id,
+    ...options,
   });
 
   return channel;
 };
 
-/**
- * Create a DM channel between a user and a friend
- * @param {Object} user
- * @param {Object} body
- * @returns {Promise<User>}
- */
-const createDM = async (user, body) => {
-  const { friendId, name, description } = body;
+const createTextChannel = async (user, body) => {
+  return await createChannel({
+    name: body.name,
+    type: "TEXT",
+    owner: user.id,
+    members: [],
+  });
+};
+
+const createVoiceChannel = async (user, body) => {
+  return await createChannel({
+    name: body.name,
+    type: "VOICE",
+    owner: user.id,
+    members: [],
+  });
+};
+
+const createDMChannel = async (user, body) => {
+  const { friendId, name } = body;
   const alreadyInChannel = await alreadyInDMChannel(user, friendId);
   if (alreadyInChannel) {
     return alreadyInChannel;
   }
-  const channel = await Channel.create({
-    name,
-    description,
-    owner: user._id,
-    members: [user._id, friendId],
+  const DMChannel = await createChannel({
+    type: "DM",
+    members: [user.id, friendId],
   });
-  return channel;
+  const friend = Friend.findOne({
+    $or: [
+      { sender: user.id, receiver: friendId },
+      { sender: friendId, receiver: user.id },
+    ],
+  });
+  if (friend) {
+    friend.channel = DMChannel._id;
+    friend.save();
+  }
+  return DMChannel;
 };
 
 const alreadyInDMChannel = async (user, friend) => {
@@ -49,6 +65,27 @@ const alreadyInDMChannel = async (user, friend) => {
     ],
   });
   return channel;
+};
+
+const alreadyInGroupChannel = async (user, members) => {
+  const channel = await Channel.findOne({
+    $and: [{ owner: user._id }, { members: { $in: members } }],
+  });
+  return channel;
+};
+
+const createGroupChannel = async (user, body) => {
+  const { name, members } = body;
+  const alreadyInChannel = await alreadyInGroupChannel(user, members);
+  if (alreadyInChannel) {
+    return alreadyInChannel;
+  }
+  const groupChannel = await createChannel({
+    name,
+    type: "GROUP",
+    members,
+  });
+  return groupChannel;
 };
 
 /**
@@ -97,8 +134,9 @@ const getDMByUsers = async (users) => {
 };
 
 module.exports = {
-  createChannel,
-  createDM,
+  createDMChannel,
+  createTextChannel,
+  createVoiceChannel,
   queryChannels,
   getDMByUsers,
 };

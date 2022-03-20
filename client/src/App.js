@@ -85,6 +85,7 @@ import {
   faComments as fasFaComments,
   faXmark as fasFaXmark,
   faCheck as fasFaCheck,
+  faEllipsisVertical as fasFaEllipsisVertical,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -167,7 +168,8 @@ library.add(
   fasFaUserXmark,
   fasFaComments,
   fasFaXmark,
-  fasFaCheck
+  fasFaCheck,
+  fasFaEllipsisVertical
 );
 
 const client = new QueryClient({

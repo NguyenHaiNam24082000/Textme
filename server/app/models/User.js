@@ -240,8 +240,8 @@ const userSchema = new mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-// userSchema.plugin(toJSON);
-// userSchema.plugin(paginate);
+userSchema.plugin(toJSON);
+userSchema.plugin(paginate);
 
 /**
  * Check if email is taken

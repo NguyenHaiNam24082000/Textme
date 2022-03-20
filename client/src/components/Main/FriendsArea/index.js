@@ -127,9 +127,9 @@ export default function FriendsMain() {
           <AddFriend />
         </Tabs.Tab>
       </Tabs>
-      <ModalUserProfile opened={true} onClose={false}>
+      {/* <ModalUserProfile opened={true} onClose={false}>
 
-      </ModalUserProfile>
+      </ModalUserProfile> */}
     </main>
   );
 }

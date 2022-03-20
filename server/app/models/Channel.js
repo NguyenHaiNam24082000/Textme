@@ -19,8 +19,8 @@ const channelSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      required: [true, "Name must be required"],
       trim: true,
+      default: null,
     },
     description: {
       type: String,
