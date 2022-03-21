@@ -2,6 +2,22 @@
 .chat-box-bubble > * {
   color: #fff !important;
 }
+
+.chat-box:hover
+{
+  @apply bg-gray-100;
+}
+
+.msg-toolbar
+{
+  visibility: hidden;
+}
+
+.chat-box:hover .msg-toolbar
+{
+  visibility: visible;
+}
+
 /* normal */
 .chat-box .chat-content-text:hover {
   /* background-color: #444e66; */

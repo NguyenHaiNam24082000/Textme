@@ -310,7 +310,7 @@ export default function Message(props) {
                   </>
                 )}
               </div>
-              <div className="absolute right-0 top-0">
+              <div className="msg-toolbar absolute right-0 top-0">
                 <div className="absolute right-0 -top-6 pr-4 pl-8 z-10">
                   <div
                     className="flex items-center h-8 rounded-md bg-white relative overflow-hidden transition-shadow shadow-sm hover:shadow-md"

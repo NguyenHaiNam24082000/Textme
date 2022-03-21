@@ -86,6 +86,8 @@ import {
   faXmark as fasFaXmark,
   faCheck as fasFaCheck,
   faEllipsisVertical as fasFaEllipsisVertical,
+  faPhoneVolume as fasFaPhoneVolume,
+  faVideoSlash as fasFaVideoSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -169,7 +171,9 @@ library.add(
   fasFaComments,
   fasFaXmark,
   fasFaCheck,
-  fasFaEllipsisVertical
+  fasFaEllipsisVertical,
+  fasFaPhoneVolume,
+  fasFaVideoSlash
 );
 
 const client = new QueryClient({
@@ -278,6 +282,10 @@ function App() {
                               <Route path="/server/:server" element={<Me />} />
                               <Route
                                 path="/channel/:channel"
+                                element={<Me />}
+                              />
+                              <Route
+                                path="/channel/@me/:channel"
                                 element={<Me />}
                               />
                               <Route path="/friends" element={<Me />} />

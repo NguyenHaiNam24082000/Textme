@@ -222,7 +222,9 @@ export default function EditorDraft() {
   const [openChannels, setOpenChannels] = useState(false);
   const [openSlash, setOpenSlash] = useState(false);
   const [suggestionsMembers, setSuggestionsMembers] = useState(mentions["@"]);
-  const [suggestionsChannels, setSuggestionsChannels] = useState(mentions["in:"]);
+  const [suggestionsChannels, setSuggestionsChannels] = useState(
+    mentions["in:"]
+  );
   const [suggestionsSlash, setSuggestionsSlash] = useState(mentions["/"]);
   const [openedEditor, setOpenedEditor] = useState(false);
   const [markdown, setMarkdown] = useState("");
@@ -1292,20 +1294,23 @@ export default function EditorDraft() {
         </>
       ) : (
         <div
-          className="mb-6 flex items-center justify-between cursor-pointer"
+          className="mb-6 flex flex-1 overflow-hidden items-center justify-between cursor-pointer"
           style={{
             border: "2px solid #e5e7eb",
             backgroundColor: "#e5e7eb",
             borderRadius: 6,
             padding: 8,
+            width: "unset",
           }}
           onClick={() => setOpenedEditor(true)}
         >
-          <div className="text-gray-500 text-sm truncate overflow-ellipsis">
+          <span className="text-gray-500 text-sm truncate overflow-ellipsis flex flex-1 gap-1">
             {/* Rely to #test */}
-            <span style={{ color: "red" }}>Draft</span>{" "}
-            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-          </div>
+            <span style={{ color: "red" }}>Draft:</span>
+            <span className="flex flex-auto truncate overflow-ellipsis">
+              aaaaaaaaaaaaaa
+            </span>
+          </span>
           <div>
             <Kbd>R</Kbd>
           </div>

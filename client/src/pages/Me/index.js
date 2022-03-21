@@ -1,6 +1,6 @@
 import { useMotionValue } from "framer-motion";
 import React, { useState } from "react";
-import { useRouteMatch, useLocation } from "react-router-dom";
+import { useMatch, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useRecoilValue } from "recoil";
 import useSound from "use-sound";
@@ -8,6 +8,7 @@ import { useMeSocket } from "../../apis/socket/useMeSocket";
 import config from "../../assets/jsons/cherrymx-brown-abs/config.json";
 import sound from "../../assets/sounds/audio.ogg";
 import Friends from "./Friends";
+import DMPage from "./DMPage";
 // import Channel from "../../components/Channel";
 // import ChatArea from "../../components/ChatArea";
 // import ModalCreateWorkspace from "../../components/Modals/ModalCreateWorkspace";
@@ -52,13 +53,14 @@ export default function Me() {
       <ServerListSidebar />
       {/* <LeftSidebar /> */}
       <div className="flex flex-auto">
-        {location.pathname === "/channel/@me" ||
+        {location.pathname.includes("/channel/@me") ||
         location.pathname === "/friends" ? (
           <HomeSidebar />
         ) : (
           <ChannelListSidebar />
         )}
         {location.pathname === "/friends" && <Friends />}
+        {useMatch("/channel/@me/:channelId") && <DMPage />}
         {/* {isVisibleChanel && (
           <div
             className="flex flex-col w-64 h-full flex-shrink-0 overflow-hidden"

@@ -78,7 +78,9 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
             className="flex-auto h-32 items-start py-3"
           >
             <div className="flex items-end w-full">
-              <span className="text-white text-2xl font-bold">@{pendingUsername(user, pending)}</span>
+              <span className="text-white text-2xl font-bold">
+                @{user && pending && pendingUsername(user, pending)}
+              </span>
               <span className="text-slate-300 text-2xl font-medium">
                 #12345
               </span>
@@ -95,7 +97,7 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
           </Group>
           <div className="flex flex-col justify-end h-32 py-5">
             <div className="flex items-center gap-2">
-              {isIncoming(user, pending) ? (
+              {user && pending && isIncoming(user, pending) ? (
                 <Button
                   className="bg-green-600"
                   leftIcon={<FontAwesomeIcon icon="fa-solid fa-user-plus" />}
@@ -108,7 +110,9 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
                   className="bg-red-600"
                   leftIcon={<FontAwesomeIcon icon="fa-solid fa-user-minus" />}
                 >
-                  {isIncoming(user, pending) ? "Cancel Friend Request" : "Unfriend"}
+                  {user && pending && isIncoming(user, pending)
+                    ? "Cancel Friend Request"
+                    : "Unfriend"}
                 </Button>
               )}
 

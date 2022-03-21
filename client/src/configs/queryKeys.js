@@ -2,5 +2,5 @@ export const ACCOUNT_KEY = "ACCOUNT_KEY";
 export const PENDING_REQUESTS_KEY = "PENDING_REQUESTS_KEY";
 export const OUT_GOING_REQUESTS_KEY = "OUT_GOING_REQUESTS_KEY";
 export const ALL_FRIENDS_KEY = "ALL_FRIENDS_KEY";
-export const OPEN_ROOMS = "OPEN_ROOMS";
-export const ROOM_MESSAGES_KEY = (roomId) => `ROOM_MESSAGES_KEY-${roomId}`;
+export const OPEN_CHANNEL = "OPEN_CHANNEL";
+export const CHANNEL_MESSAGES_KEY = (channelId) => `CHANNEL_MESSAGES_KEY-${channelId}`;

@@ -1,5 +1,5 @@
 const httpStatus = require("http-status");
-const Channel = require("../models");
+const { Channel,Friend } = require("../models");
 const ApiError = require("../utils/ApiError");
 
 /**
@@ -35,7 +35,7 @@ const createVoiceChannel = async (user, body) => {
 };
 
 const createDMChannel = async (user, body) => {
-  const { friendId, name } = body;
+  const { friendId } = body;
   const alreadyInChannel = await alreadyInDMChannel(user, friendId);
   if (alreadyInChannel) {
     return alreadyInChannel;
@@ -43,7 +43,7 @@ const createDMChannel = async (user, body) => {
   const DMChannel = await createChannel({
     type: "DM",
     members: [user.id, friendId],
-  });
+  }).populate("members");
   const friend = Friend.findOne({
     $or: [
       { sender: user.id, receiver: friendId },
@@ -63,7 +63,7 @@ const alreadyInDMChannel = async (user, friend) => {
       { owner: user._id, members: friend._id },
       { owner: friend._id, members: user._id },
     ],
-  });
+  }).populate("members");
   return channel;
 };
 
@@ -120,17 +120,37 @@ const queryChannels = async (filter, options) => {
   return channels;
 };
 
-const getDMByUsers = async (users) => {
+// const getDMByUsers = async (users) => {
+//   const query = Channel.find({
+//     $or: [
+//       { owner: users[0]._id, members: users[1]._id },
+//       { owner: users[1]._id, members: users[0]._id },
+//     ],
+//   });
+
+//   const channel = await query;
+
+//   return channel;
+// };
+
+const getAllDMChannels = async (user) => {
   const query = Channel.find({
-    $or: [
-      { owner: users[0]._id, members: users[1]._id },
-      { owner: users[1]._id, members: users[0]._id },
-    ],
-  });
+    $and: [{ members: user }, { type: "DM" }],
+  }).populate("members");
 
-  const channel = await query;
+  const channels = await query;
 
-  return channel;
+  return channels;
+};
+
+const getAllGroupChannels = async (user) => {
+  const query = Channel.find({
+    $and: [{ members: user }, { type: "GROUP" }],
+  }).populate("members");
+
+  const channels = await query;
+
+  return channels;
 };
 
 module.exports = {
@@ -138,5 +158,7 @@ module.exports = {
   createTextChannel,
   createVoiceChannel,
   queryChannels,
-  getDMByUsers,
+  // getDMByUsers,
+  getAllDMChannels,
+  getAllGroupChannels,
 };

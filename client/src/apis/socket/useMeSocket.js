@@ -4,7 +4,7 @@ import getSocket from "./index";
 import { GetMe } from "../../store/userSlice";
 import {ME_SOCKET}  from "../../configs/socketRoute";
 import {
-    OPEN_ROOMS,
+    OPEN_CHANNEL,
     PENDING_REQUESTS_KEY,
     OUT_GOING_REQUESTS_KEY,
     ALL_FRIENDS_KEY,
@@ -25,7 +25,7 @@ export const useMeSocket = () => {
             {
                 socket.emit(ME_SOCKET.ONLINE, {userId:me?.user?._id});
                 socket.on("roomOpened", () => {
-                    cache.invalidateQueries(OPEN_ROOMS);
+                    cache.invalidateQueries(OPEN_CHANNEL);
                 });
                 socket.on("friendRequest", () => {
                     cache.invalidateQueries(PENDING_REQUESTS_KEY);

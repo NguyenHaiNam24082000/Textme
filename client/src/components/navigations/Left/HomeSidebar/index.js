@@ -11,6 +11,7 @@ import {
   Group,
   ActionIcon,
   Tooltip,
+  Avatar,
 } from "@mantine/core";
 import {
   Bulb,
@@ -22,6 +23,7 @@ import {
 } from "tabler-icons-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import DMList from "./DMList";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -156,14 +158,6 @@ const collections = [
   { emoji: "💁‍♀️", label: "Customers" },
 ];
 
-function EmptyDmList() {
-  return (
-    <div className="p-3">
-      <EmptyListPlaceholder className="text-slate-200 fill-current" />
-    </div>
-  );
-}
-
 export default function HomeSidebar() {
   const { classes } = useStyles();
   return (
@@ -216,7 +210,7 @@ export default function HomeSidebar() {
             </Tooltip>
           </Group>
         </Group>
-        <EmptyDmList />
+        <DMList />
       </div>
     </SidebarBase>
   );

@@ -3,11 +3,13 @@ import { ActionIcon, Group, Menu, Text } from "@mantine/core";
 import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { useNavigate } from "react-router";
-import {
+import { getOrCreateDMChannel } from "../../../apis/channel";
+import friendObject, {
   pendingDiscriminator,
   pendingStatus,
   pendingUsername,
 } from "../../../commons/friendObject";
+import { OPEN_CHANNEL } from "../../../configs/queryKeys";
 import ModalUserProfile from "../../Modals/ModalUserProfile";
 
 export default function FriendItem({ user, friend }) {
@@ -23,8 +25,17 @@ export default function FriendItem({ user, friend }) {
     e.stopPropagation();
     setIsLoading(true);
     try {
-      
+      const {data} = await getOrCreateDMChannel(friendObject(user, friend).id);
+      if(data){
+        cache.invalidateQueries(OPEN_CHANNEL);
+        history(`/channel/${data.id}`);
+      }
+      else
+      {
+        setIsLoading(false);
+      }
     } catch (err) {
+      // const result = apiErrorHandler(err);
       setIsLoading(false);
     }
   };
@@ -66,8 +77,8 @@ export default function FriendItem({ user, friend }) {
           </ActionIcon>
         )} */}
           <ActionIcon
-            //   loading={isLoading}
-            //   onClick={cancelPending}
+            loading={isLoading}
+            onClick={openDM}
             size="xl"
             radius="xl"
             variant="light"
@@ -78,8 +89,8 @@ export default function FriendItem({ user, friend }) {
             radius="md"
             control={
               <ActionIcon
-                //   loading={isLoading}
-                //   onClick={cancelPending}
+                loading={isLoading}
+                onClick={openDM}
                 size="xl"
                 radius="xl"
                 variant="light"
