@@ -76,6 +76,7 @@ import { useNotifications } from "@mantine/notifications";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
 import { Progress } from "@douyinfe/semi-ui";
+import { useQueryClient } from "react-query";
 
 const INLINE_STYLES = [
   { label: "Bold", style: "BOLD" },
@@ -217,6 +218,7 @@ export default function EditorDraft() {
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty("")
   );
+  const cache = useQueryClient();
   const [openStaticToolbar, setOpenStaticToolbar] = useState(false);
   const [openMembers, setOpenMembers] = useState(false);
   const [openChannels, setOpenChannels] = useState(false);
@@ -621,7 +623,7 @@ export default function EditorDraft() {
   const handleRichTextEditorChange = (newEditorState) => {
     // Convert input from draftjs state to markdown
     const rawEditorState = convertToRaw(newEditorState.getCurrentContent());
-    console.log(rawEditorState);
+    // console.log(rawEditorState);
     const newMarkdown = draftToMarkdown(
       rawEditorState
       // {
@@ -640,7 +642,6 @@ export default function EditorDraft() {
       //   }
       // }
     );
-
     // const decoratedEditorState = EditorState.set(newEditorState, { decorator });
 
     setEditorState(newEditorState);
@@ -827,12 +828,11 @@ export default function EditorDraft() {
     setSuggestionsChannels(defaultSuggestionsFilter(value, mentions, trigger));
   }, []);
 
-  const handleSendMessage = useCallback(() => {
+  const handleSendMessage = () => {
     const contentState = editorState.getCurrentContent();
     const rawContent = convertToRaw(contentState);
     const markdownString = draftToMarkdown(rawContent);
-    console.log(markdownString);
-  }, []);
+  };
 
   const handleKeyCommand = (command, editorState) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
@@ -1255,7 +1255,7 @@ export default function EditorDraft() {
                     variant="subtle"
                     size="xs"
                     color="gray"
-                    onClick={handleSendMessage}
+                    onClick={() => handleSendMessage()}
                   >
                     Send now
                   </Button>

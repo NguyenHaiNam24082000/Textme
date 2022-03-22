@@ -8,6 +8,9 @@ const slice = createSlice({
     isVisibleComplement: get("complementToggled")
       ? get("complementToggled")
       : false,
+    isMute: get("mute") ?? false,
+    isDeafen: get("deafen") ?? false,
+    //isCallEnded: 
   },
   reducers: {
     expandedChannel: (state, action) => {
@@ -17,6 +20,12 @@ const slice = createSlice({
     },
     expandedComplement: (state, action) => {
       state.isVisibleComplement = !state.isVisibleComplement;
+    },
+    mute: (state, action) => {
+      state.isMute = action.payload;
+    },
+    deafen: (state, action) => {
+      state.isDeafen = action.payload;
     },
     openedModal: (state, action) => {
       state.openedModal = action.payload;
@@ -33,6 +42,11 @@ export const isVisibleModal = (type) =>
     (name) => name === type.name
   );
 
+export const isVisibleChanel = (state) => state.ui.isVisibleChanel;
+export const isVisibleComplement = (state) => state.ui.isVisibleComplement;
+export const isMute = (state) => state.ui.isMute;
+export const isDeafen = (state) => state.ui.isDeafen;
+
 // export const closeModal = (dispatch) => {
 //     dispatch(actions.closedModal());
 //     dispatch
@@ -41,5 +55,11 @@ export const isVisibleModal = (type) =>
 export const isVisibleChanelSelector = (state) => state.ui.isVisibleChanel;
 
 export default slice.reducer;
-export const { expandedChannel, expandedComplement, openedModal, closedModal } =
-  slice.actions;
+export const {
+  expandedChannel,
+  expandedComplement,
+  openedModal,
+  closedModal,
+  mute,
+  deafen,
+} = slice.actions;

@@ -15,16 +15,20 @@ import useSound from "use-sound";
 import { MdScreenShare } from "react-icons/md";
 import VideoCall from "../../../VideoCall";
 import ModalUserProfile from "../../../Modals/ModalUserProfile";
-
+import { useDispatch, useSelector } from "react-redux";
+import { mute, deafen } from "../../../../store/uiSlice";
 export default function DMChannelNavbar() {
   const [voiceCall, setVoiceCall] = useState(false);
   const [videoCall, setVideoCall] = useState(false);
   const [openedMenuReactions, setOpenedMenuReactions] = useState(false);
-  const [mute, setMute] = useState(false);
+  // const [mute, setMute] = useState(false);
   const [video, setVideo] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [play, { stop, isPlaying, duration }] = useSound(ringBack);
   const [playEnd, { stopEnd, isPlayingEnd }] = useSound(callEnd);
+  const isMute = useSelector((state) => state.ui.isMute);
+  const isDeafen = useSelector((state) => state.ui.isDeafen);
+  const dispatch = useDispatch();
   useEffect(() => {
     let ringSound = null;
     if (voiceCall || videoCall) {
@@ -87,6 +91,7 @@ export default function DMChannelNavbar() {
                   className="cursor-pointer"
                   onClick={() => {
                     setVoiceCall(true);
+                    dispatch(mute(false));
                   }}
                 />
                 <FontAwesomeIcon
@@ -133,7 +138,7 @@ export default function DMChannelNavbar() {
                   size="xl"
                   src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
                 />
-                {mute ? (
+                {isMute ? (
                   <div
                     className="rounded-full w-9 h-9 bg-red-500 absolute right-0 bottom-0 flex justify-center items-center text-white"
                     style={{ border: "5px solid #f3f4f6" }}
@@ -182,15 +187,15 @@ export default function DMChannelNavbar() {
                 <MdScreenShare />
               </ActionIcon>
               <ActionIcon
-                color={mute ? "red" : ""}
+                color={isMute ? "red" : ""}
                 size="xl"
                 radius="xl"
                 variant="filled"
-                onClick={() => setMute((v) => !v)}
+                onClick={() => dispatch(mute(!isMute))}
               >
                 <FontAwesomeIcon
                   icon={`fa-solid ${
-                    mute ? "fa-microphone-slash" : "fa-microphone"
+                    isMute ? "fa-microphone-slash" : "fa-microphone"
                   }`}
                 />
               </ActionIcon>
@@ -258,8 +263,14 @@ export default function DMChannelNavbar() {
                   </Group>
                 </div>
               </Popover>
-              <ActionIcon color="red" size="xl" radius="xl" variant="filled" onClick={()=>playEnd()}>
-                <FontAwesomeIcon icon="fa-solid fa-phone-volume" />
+              <ActionIcon
+                color="red"
+                size="xl"
+                radius="xl"
+                variant="filled"
+                onClick={() => playEnd()}
+              >
+                <FontAwesomeIcon icon="fa-solid fa-phone" className="rotate-[135deg]"/>
               </ActionIcon>
             </div>
           </div>

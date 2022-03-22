@@ -113,6 +113,8 @@
     "react-beautiful-dnd": "^13.1.0",
     "react-bubble-ui": "^1.1.1",
     "react-confetti": "^6.0.1",
+    "react-contexify": "^5.0.0",
+    "react-contextmenu": "^2.14.0",
     "react-cropper": "^2.1.8",
     "react-dnd": "^15.1.1",
     "react-dnd-html5-backend": "^15.1.2",

@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import "@lottiefiles/lottie-player";
-import { Button, Group, Text } from "@mantine/core";
+import { Button, Checkbox, Group, Text } from "@mantine/core";
 
 export default function NSFW({ setIsContinue, setIsGoBack }) {
+  const [isChecked, setIsChecked] = useState(false);
   return (
     <div className="bg-white flex flex-col flex-auto min-w-0 min-h-0 justify-center items-center gap-8">
       <lottie-player
@@ -18,7 +19,7 @@ export default function NSFW({ setIsContinue, setIsGoBack }) {
         This channel is marked as NSFW.
       </Text>
       <Text size="md" weight="bold">
-        I confirm that I am at least 18 years old.
+        <Checkbox label="I confirm that I am at least 18 years old." size="md" checked={isChecked} onChange={(event) => setIsChecked(event.currentTarget.checked)} />
       </Text>
       <Group spacing="sm">
         <Button
@@ -28,7 +29,7 @@ export default function NSFW({ setIsContinue, setIsGoBack }) {
         >
           Go back
         </Button>
-        <Button color="green" onClick={() => setIsContinue(true)}>
+        <Button disabled={!isChecked} color="green" onClick={() => setIsContinue(true)}>
           Enter Channel
         </Button>
       </Group>

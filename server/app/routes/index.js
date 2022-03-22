@@ -3,6 +3,7 @@ const authRoute = require('./v1/authRoute');
 const userRoute = require('./v1/userRoute');
 const friendRoute = require('./v1/friendRoute');
 const channelRoute = require('./v1/channelRoute');
+const messageRoute = require('./v1/messageRoute');
 // const postRoute = require('./postRoute');
 // const commentRoute = require('./commentRoute');
 
@@ -12,5 +13,6 @@ router.use('/auth', authRoute);
 router.use('/user', userRoute);
 router.use('/friend', friendRoute);
 router.use('/channel', channelRoute);
+router.use('/message', messageRoute);
 
 module.exports = router;

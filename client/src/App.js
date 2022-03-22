@@ -88,6 +88,8 @@ import {
   faEllipsisVertical as fasFaEllipsisVertical,
   faPhoneVolume as fasFaPhoneVolume,
   faVideoSlash as fasFaVideoSlash,
+  faPhone as fasFaPhone,
+  faPodcast as fasFaPodcast,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -173,7 +175,9 @@ library.add(
   fasFaCheck,
   fasFaEllipsisVertical,
   fasFaPhoneVolume,
-  fasFaVideoSlash
+  fasFaVideoSlash,
+  fasFaPhone,
+  fasFaPodcast
 );
 
 const client = new QueryClient({

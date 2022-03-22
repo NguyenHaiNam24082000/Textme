@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { toJSON, paginate } = require("./plugins");
 
 const messageSchema = new mongoose.Schema(
   {
@@ -7,14 +8,56 @@ const messageSchema = new mongoose.Schema(
       required: [true, "Content must be required"],
       trim: true,
     },
-    user: {
+    systemMessage: {
+      type: Boolean,
+      default: false,
+    },
+    sender: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: [true, "Sender must be required"],
     },
     channel: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Channel",
+      required: [true, "Channel must be required"],
     },
+    reply: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
+    messagesEdited: [
+      {
+        content: {
+          type: String,
+          trim: true,
+        },
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        editedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    reactions: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        emoji: {
+          type: String,
+          trim: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     embed: {
       type: Array,
       default: [],
@@ -43,6 +86,10 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamp: true }
 );
+
+// add plugin that converts mongoose to json
+messageSchema.plugin(toJSON);
+messageSchema.plugin(paginate);
 
 messageSchema.virtual("User", {
   ref: "User",
