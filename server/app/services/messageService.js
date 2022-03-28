@@ -51,6 +51,9 @@ const createMessage = async (user, body) => {
     sender: user._id,
   });
 
+  channel.lastMessage = message._id;
+  await channel.save();
+
   return message;
 };
 
@@ -97,9 +100,22 @@ const queryMessages = async (filter, options, user) => {
 const editMessage = async (user, data) => {
   const { messageId, message } = data;
 
+  const oldMessage = await Message.findOne({
+    _id: messageId,
+    sender: user._id,
+  });
+
   const result = await Message.findOneAndUpdate(
-    { _id: messageId, senderId: user._id },
-    { message },
+    { _id: messageId, sender: user._id },
+    {
+      content: message,
+      messagesEdited: [
+        ...oldMessage.messagesEdited,
+        {
+          content: oldMessage.content,
+        },
+      ],
+    },
     { upsert: true, new: true }
   );
 

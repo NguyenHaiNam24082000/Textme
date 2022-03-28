@@ -26,7 +26,17 @@ const getMessages = catchAsync(async (req, res, next) => {
   res.status(httpStatus.OK).send(messages);
 });
 
+const editMessage = catchAsync(async (req, res, next) => {
+  const { message } = req.body;
+  const { messageId } = req.params;
+
+  const result = await messageService.editMessage(req.user, { message, messageId });
+  res.status(httpStatus.CREATED).send(result);
+});
+
+
 module.exports = {
   sendMessage,
   getMessages,
+  editMessage,
 };

@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { useNavigate } from "react-router";
 import { getOrCreateDMChannel } from "../../../apis/channel";
+import { cancelPendingRequestApi } from "../../../apis/friend";
 import friendObject, {
   pendingDiscriminator,
   pendingStatus,
   pendingUsername,
 } from "../../../commons/friendObject";
-import { OPEN_CHANNEL } from "../../../configs/queryKeys";
+import { ALL_FRIENDS_KEY, OPEN_CHANNEL } from "../../../configs/queryKeys";
+import { ME_SOCKET } from "../../../configs/socketRoute";
 import ModalUserProfile from "../../Modals/ModalUserProfile";
 
 export default function FriendItem({ user, friend }) {
@@ -28,13 +30,28 @@ export default function FriendItem({ user, friend }) {
       const {data} = await getOrCreateDMChannel(friendObject(user, friend).id);
       if(data){
         cache.invalidateQueries(OPEN_CHANNEL);
-        history(`/channel/${data.id}`);
+        history(`/channel/@me/${data._id}`);
       }
       else
       {
         setIsLoading(false);
       }
     } catch (err) {
+      // const result = apiErrorHandler(err);
+      setIsLoading(false);
+    }
+  };
+
+  const cancelPending = async (e) => {
+    e.stopPropagation();
+    setIsLoading(true);
+    try {
+      await cancelPendingRequestApi(friend.id);
+      cache.invalidateQueries(ALL_FRIENDS_KEY);
+
+      setIsLoading(false);
+    } catch
+    (err) {
       // const result = apiErrorHandler(err);
       setIsLoading(false);
     }
@@ -89,8 +106,9 @@ export default function FriendItem({ user, friend }) {
             radius="md"
             control={
               <ActionIcon
-                loading={isLoading}
-                onClick={openDM}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
                 size="xl"
                 radius="xl"
                 variant="light"
@@ -100,7 +118,7 @@ export default function FriendItem({ user, friend }) {
             }
           >
             <Menu.Item>Blocked Friend</Menu.Item>
-            <Menu.Item>Remove Friend</Menu.Item>
+            <Menu.Item onClick={cancelPending}>Remove Friend</Menu.Item>
           </Menu>
         </Group>
       </Group>

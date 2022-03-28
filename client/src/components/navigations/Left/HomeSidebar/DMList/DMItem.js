@@ -7,13 +7,14 @@ import { useNavigate } from "react-router";
 export default function DMItem({ user, channel, match }) {
   const history = useNavigate();
   const openDM = () => {
-    history(`/channel/@me/${channel.id}`);
+    history(`/channel/@me/${channel._id}`);
   };
+  console.log(channel,"match");
   return (
     <div className="flex w-full px-2">
       <UnstyledButton
         className={`rounded-md p-2 hover:bg-slate-200 w-full ${
-          match?.params?.channelId === channel.id ? "bg-red-200" : ""
+          match?.params?.channelId === channel._id ? "bg-red-200" : ""
         }`}
         onClick={openDM}
       >
@@ -25,11 +26,11 @@ export default function DMItem({ user, channel, match }) {
 
           <div style={{ flex: 1 }}>
             <Text size="sm" weight={500}>
-              HaiNam
+              {channel.type === "GROUP" ? channel.name : channel.members[0]._id!==user._id? channel.members[0].username:channel.members[1].username}
             </Text>
 
             <Text color="dimmed" size="xs">
-              hahahahahahah · 1h
+              {channel.lastMessage.content} · 1h
             </Text>
           </div>
           {/* <ActionIcon size="lg" radius="xl" variant="light">

@@ -136,7 +136,7 @@ const queryChannels = async (filter, options) => {
 const getAllDMChannels = async (user) => {
   const query = Channel.find({
     $and: [{ members: user }, { type: "DM" }],
-  }).populate("members");
+  }).populate("members").populate("lastMessage");
 
   const channels = await query;
 
@@ -146,7 +146,7 @@ const getAllDMChannels = async (user) => {
 const getAllGroupChannels = async (user) => {
   const query = Channel.find({
     $and: [{ members: user }, { type: "GROUP" }],
-  }).populate("members");
+  }).populate("members").populate("lastMessage");
 
   const channels = await query;
 

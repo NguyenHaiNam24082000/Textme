@@ -1,37 +1,17 @@
 import { useQuery } from "react-query";
-import {
-  getPendingFriendRequest,
-  getOutGoingRequestApi,
-  allFriendsRequestApi,
-} from "../../apis/friend";
+import { getAllDMChannels, getAllGroupChannels } from "../../apis/channel";
+import { OPEN_CHANNEL } from "../../configs/queryKeys";
 
-import {
-  PENDING_REQUESTS_KEY,
-  OUT_GOING_REQUESTS_KEY,
-  ALL_FRIENDS_KEY,
-} from "../../configs/queryKeys";
-
-export const PendingRequests = () => {
-  return useQuery(PENDING_REQUESTS_KEY, async () => {
-    const { data } = await getPendingFriendRequest();
+export function GetOpenChannels() {
+  return useQuery(OPEN_CHANNEL, async () => {
+    let data = [];
+    try {
+      let dmChannels = await getAllDMChannels().then((res) => res.data);
+      let groupChannels = await getAllGroupChannels().then((res) => res.data);
+      data = [...dmChannels, ...groupChannels];
+    } catch (error) {
+      console.log(error);
+    }
     return data;
   });
-};
-
-// export const getOrCreateDMChannel = () => {
-//     return useQuery()
-// }
-
-export const OutGoingRequests = () => {
-  return useQuery(OUT_GOING_REQUESTS_KEY, async () => {
-    const { data } = await getOutGoingRequestApi();
-    return data;
-  });
-};
-
-export const AllFriends = () => {
-  return useQuery(ALL_FRIENDS_KEY, async () => {
-    const { data } = await allFriendsRequestApi();
-    return data;
-  });
-};
+}

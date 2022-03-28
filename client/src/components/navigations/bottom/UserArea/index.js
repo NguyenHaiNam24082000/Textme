@@ -15,11 +15,13 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { deafen, mute } from "../../../../store/uiSlice";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import { GetMe } from "../../../../store/userSlice";
 const MENU_ID = "menu-id";
 
 export default function UserArea() {
   const [visible, setVisible] = useState(false);
   const [referenceElement, setReferenceElement] = useState(null);
+  const me = GetMe();
   const isMute = useSelector((state) => state.ui.isMute);
   const isDeafen = useSelector((state) => state.ui.isDeafen);
   const dispatch = useDispatch();
@@ -333,8 +335,8 @@ export default function UserArea() {
           </Menu>
 
           <div className="flex flex-col truncate justify-center">
-            <div className="font-bold text-xs truncate">Nguyen Hai Nam</div>
-            <div className="text-xs truncate">#00000000003213213211</div>
+            <div className="font-bold text-xs truncate">{me?.user?.username}</div>
+            <div className="text-xs truncate">#{me?.user?.discriminator}</div>
           </div>
         </div>
         <div className="flex ">

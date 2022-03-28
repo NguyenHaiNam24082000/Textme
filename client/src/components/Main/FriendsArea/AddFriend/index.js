@@ -3,6 +3,7 @@ import { Empty } from "@douyinfe/semi-ui";
 import { Button, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { Search } from "tabler-icons-react";
+import { getUsers } from "../../../../apis/account";
 import AddFriendItem from "./AddFriendItem";
 
 const isNumeric = (value) => {
@@ -12,39 +13,54 @@ const isNumeric = (value) => {
 export default function AddFriend() {
   const [search, setSearch] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-  // const handleSendFriendRequest = async (e) => {
-  //   e.preventDefault();
-  //   const [name,discriminator] = search.split("#");
-  //   if(discriminator.length !== 5)
-  //   {
-  //     setAlertMessage("Please enter user Id correctly");
-  //     return;
-  //   }
-  //   if (!isNumeric(discriminator)) {
-  //     setAlertMessage("User Id must be a number");
-  //     return;
-  //   }
-  //   const { data } = await sendFriendRequest({
-  //     variables: {
-  //       username: search,
-  //     },
-  //   });
-  //   console.log(data);
-  // };
+  const [listUsers, setListUsers] = useState([]);
+  const handleSendFriendRequest = async (e) => {
+    e.preventDefault();
+    const [name, discriminator] = search.split("#");
+    let payload = {};
+    if (discriminator) {
+      if (discriminator.length !== 5) {
+        setAlertMessage("Please enter user Id correctly");
+        return;
+      }
+      if (!isNumeric(discriminator)) {
+        setAlertMessage("User Id must be a number");
+        return;
+      }
+      payload = {
+        discriminator,
+      };
+    }
+    payload = JSON.parse(JSON.stringify({
+      username: name,
+      ...payload,
+    }))
+    const { data } = await getUsers(payload);
+    console.log({username:name, ...payload},"aaaaaaaaaaaaa");
+    if (data) {
+      setListUsers(data.results);
+    } else {
+      setListUsers([]);
+    }
+    console.log(data, "getUsers");
+  };
   return (
     <div>
       <TextInput
         icon={<Search size={18} />}
         size="md"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
         rightSection={
-          <Button variant="filled" size="xs">
+          <Button variant="filled" size="xs" onClick={handleSendFriendRequest}>
             Send friend request
           </Button>
         }
         placeholder="Enter a username#0000"
         rightSectionWidth={150}
       />
-      <AddFriendItem />
+      {listUsers.length > 0 &&
+        listUsers.map((user) => <AddFriendItem user={user} />)}
       <Empty
         image={<IllustrationFailure style={{ width: 200, height: 200 }} />}
         title="Let's find a teammate"

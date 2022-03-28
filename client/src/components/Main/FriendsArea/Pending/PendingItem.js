@@ -28,6 +28,7 @@ export default function PendingItem({ user, pending }) {
 
   const socket = getSocket(me?.tokens?.access?.token);
 
+
   const cancelPending = async (e) => {
     e.stopPropagation();
     setIsLoading(true);
@@ -50,13 +51,14 @@ export default function PendingItem({ user, pending }) {
     setIsLoading(true);
 
     try {
-      const result = await acceptPendingRequestApi(pending.id);
+      const {data} = await acceptPendingRequestApi(pending.id);
       cache.invalidateQueries(PENDING_REQUESTS_KEY);
       cache.invalidateQueries(ALL_FRIENDS_KEY);
 
       socket.emit(ME_SOCKET.SEND_ACCEPT_FRIEND_REQUEST, {
-        receiverId: result?.data?.receiver?.id,
+        receiverId: data?.sender,
       });
+      console.log(data?.sender,"datasender");
       setIsLoading(false);
     } catch (err) {
       setIsLoading(false);

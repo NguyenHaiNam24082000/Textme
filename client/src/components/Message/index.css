@@ -3,18 +3,15 @@
   color: #fff !important;
 }
 
-.chat-box:hover
-{
+.chat-box:hover {
   @apply bg-gray-100;
 }
 
-.msg-toolbar
-{
+.msg-toolbar {
   visibility: hidden;
 }
 
-.chat-box:hover .msg-toolbar
-{
+.chat-box:hover .msg-toolbar {
   visibility: visible;
 }
 
@@ -36,11 +33,12 @@
 }
 
 .chat-box {
-  @apply flex pl-16 pr-1 mr-2 relative;
+  @apply flex pl-[72px] pr-1 mr-2 relative;
 }
 
 .chat-avatar {
   @apply absolute left-3;
+  margin-top: 2px;
 }
 
 .chat-box .chat-content {
@@ -61,12 +59,13 @@
 }
 
 .chat-box .chat-content-text {
-  @apply py-1;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
-.chat-content-text > * {
+/* .chat-content-text > * {
   @apply text-sm;
-}
+} */
 
 /* bubble */
 .chat-box-bubble {
@@ -251,4 +250,59 @@
     opacity: 0;
     transform: translateY(-10em) scale(0);
   }
+}
+
+.message-accessories {
+  display: grid;
+  grid-auto-flow: row;
+  grid-row-gap: 0.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+  text-indent: 0;
+  min-height: 0;
+  min-width: 0;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  position: relative;
+}
+
+.reactions {
+  display: flex;
+  justify-self: start;
+  align-self: start;
+  flex: 1 0 auto;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: -0.5rem;
+  padding-bottom: 0.25rem;
+}
+
+.reaction {
+  border-radius: 0.5rem;
+  cursor: pointer;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  margin-right: 0.25rem;
+  margin-bottom: 0.25rem;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-transition: none 0.1s ease;
+  transition: none 0.1s ease;
+  -webkit-transition-property: background-color, border-color;
+  transition-property: background-color, border-color;
+  background: var(--background-secondary);
+  border: 1px solid transparent;
+}
+
+.reaction-inner {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 0.125rem 0.375rem;
 }

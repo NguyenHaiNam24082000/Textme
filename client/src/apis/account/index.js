@@ -11,3 +11,7 @@ export const getProfile = (id) => {
 export const updateProfile = (id, payload) => {
   return patchRequest(`/api/v1/users/${id}`, payload);
 };
+
+export const getUsers = (payload) => {
+  return getRequest(`/api/v1/users/get-users`, payload);
+};

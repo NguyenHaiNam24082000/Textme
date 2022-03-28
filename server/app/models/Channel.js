@@ -61,11 +61,11 @@ const channelSchema = new mongoose.Schema(
       default: false,
     },
   },
+  { timestamps: true },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
-  { timestamp: true }
+  }
 );
 
 const Channel = mongoose.model("Channel", channelSchema);

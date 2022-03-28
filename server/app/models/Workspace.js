@@ -33,7 +33,7 @@ const workspaceSchema = new mongoose.Schema(
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 // workspaceSchema.virtual("membersCount", {

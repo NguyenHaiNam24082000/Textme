@@ -21,7 +21,7 @@ const workspaceMemberSchema = new mongoose.Schema(
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 const WorkspaceMember = mongoose.model("WorkspaceMember", workspaceMemberSchema);

@@ -39,6 +39,7 @@ export default function Pending() {
     setOutGoingList(outGoingRequests);
   }, [outGoingRequests]);
 
+
   const handleSearch = (e) => {
     const search = e.target.value;
     const filteredPendingList = pendingRequests.filter(
@@ -86,8 +87,8 @@ export default function Pending() {
           pendingList.map((item) => (
             <PendingItem key={item.id} user={user} pending={item} />
           ))}
-        {outGoingList &&
-          outGoingList.map((item) => (
+        {outGoingRequests &&
+          outGoingRequests.map((item) => (
             <PendingItem key={item.id} user={user} pending={item} />
           ))}
       </div>

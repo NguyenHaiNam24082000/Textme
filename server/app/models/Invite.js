@@ -17,7 +17,7 @@ const inviteSchema = new mongoose.Schema(
         toJSON: { virtuals: true },
         toObject: { virtuals: true },
     },
-    { timestamp: true }
+    { timestamps: true }
 );
 
 const Invite = mongoose.model("Invite", inviteSchema);

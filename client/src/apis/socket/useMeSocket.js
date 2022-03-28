@@ -20,10 +20,9 @@ export const useMeSocket = () => {
         {
             socket = getSocket(accessToken);
             socket.connect();
-            console.log("aaaaa",socket)
             if(socket)
             {
-                socket.emit(ME_SOCKET.ONLINE, {userId:me?.user?._id});
+                socket.emit(ME_SOCKET.ONLINE, {userId:me?.user?.id});
                 socket.on("roomOpened", () => {
                     cache.invalidateQueries(OPEN_CHANNEL);
                 });

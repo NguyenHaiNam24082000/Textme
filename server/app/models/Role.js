@@ -29,7 +29,7 @@ const roleSchema = new mongoose.Schema(
         toJSON: { virtuals: true },
         toObject: { virtuals: true },
     },
-    { timestamp: true }
+    { timestamps: true }
 );
 
 const Role = mongoose.model("Role", roleSchema);

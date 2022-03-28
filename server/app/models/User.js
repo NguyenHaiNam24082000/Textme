@@ -135,7 +135,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      select: false,
+      // select: false,
     },
     discriminator: {
       type: String,
@@ -236,7 +236,7 @@ const userSchema = new mongoose.Schema(
       },
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 // add plugin that converts mongoose to json

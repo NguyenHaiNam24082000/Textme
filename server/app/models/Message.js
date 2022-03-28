@@ -32,10 +32,6 @@ const messageSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
         editedAt: {
           type: Date,
           default: Date.now,
@@ -80,11 +76,11 @@ const messageSchema = new mongoose.Schema(
       },
     },
   },
+  { timestamps: true },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
-  { timestamp: true }
 );
 
 // add plugin that converts mongoose to json

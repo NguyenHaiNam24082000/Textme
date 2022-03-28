@@ -14,4 +14,7 @@ const botSchema = new moongoose.Schema({
     type: String,
     default: "https://i.imgur.com/X2JhY8y.png",
   },
+},
+{
+  timestamps: true,
 });

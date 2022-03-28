@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { Group } from "@mantine/core";
 import EmptyListPlaceholder from "../../../../UI/EmptyListPlaceholder";
 import { getAllDMChannels } from "../../../../../apis/channel";
+import { GetOpenChannels } from "../../../../../reactQuery/channel";
 
 const ShowOpenDMChannel = ({ user, channels }) => {
   const match = useMatch("/channel/@me/:channelId");
@@ -22,17 +23,16 @@ const EmptyDmList = () => {
 };
 
 export default function DMList() {
+  const {isLoading,data:channelList} = GetOpenChannels();
   const { user } = useSelector((state) => state.user);
   const [channels, setChannels] = useState();
   useEffect(async () => {
-    const res = await getAllDMChannels();
-    setChannels(res.data);
-    console.log(res.data, "channel");
-  }, []);
+    setChannels(channelList);
+  }, [channelList]);
   console.log(channels, "channels");
   return (
     <>
-      {channels && channels?.length ? (
+      {!isLoading && channels && channels?.length ? (
         <Group className="flex flex-col">
           <ShowOpenDMChannel user={user} channels={channels} />
         </Group>

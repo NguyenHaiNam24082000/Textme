@@ -6,6 +6,7 @@ import {
   Avatar,
   Highlight,
   Input,
+  Loader,
   SegmentedControl,
   Text,
 } from "@mantine/core";
@@ -17,6 +18,10 @@ import { useDispatch } from "react-redux";
 import { CSSTransition } from "react-transition-group";
 import Editor from "../../Editor";
 import Message from "../../Message";
+import { CHANNEL_MESSAGES_KEY } from "../../../configs/queryKeys";
+import { useInfiniteQuery } from "react-query";
+import { getMessages } from "../../../apis/messages";
+import InfiniteScroll from "react-infinite-scroll-component";
 // import "./index.css";
 
 const users = [
@@ -82,7 +87,7 @@ const spring = {
   damping: 30,
 };
 
-function ChatArea() {
+function ChatArea({ channel, user }) {
   const [activeMenu, setActiveMenu] = useState("main");
   const [openedSearchBar, setOpenedSearchBar] = useState(false);
   const [degree, setDegree] = useState(0);
@@ -96,7 +101,7 @@ function ChatArea() {
   const idle = useIdle(2000, { events: ["scroll"] });
   const [items, setItems] = useState(Array.from({ length: 20 }));
   const [pageMessage, setPageMessage] = useState(1);
-  const [data, setData] = useState([]);
+  // const [data, setData] = useState([]);
   const [menuHeight, setMenuHeight] = useState(null);
   const dropdownRef = useRef(null);
   const [tabKey, setTabKey] = useState(1);
@@ -104,6 +109,24 @@ function ChatArea() {
   const [members, setMembers] = useState([]);
   const [previousIdMember, setPreviousIdMember] = useState(null);
   const dispatch = useDispatch();
+  console.log(channel, "aAaaaaa");
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery(
+      CHANNEL_MESSAGES_KEY(channel?._id),
+      async ({ pageParam }) => {
+        const { data } = await getMessages(channel?._id, pageParam);
+        return data;
+      },
+      {
+        getNextPageParam: (lastPage) => {
+          const { page, totalPages } = lastPage;
+          return page < totalPages ? page + 1 : undefined;
+        },
+      }
+    );
+  const messages = data
+    ? data.pages.flatMap((page) => page?.results ?? [])
+    : [];
 
   useEffect(() => {
     // fetch(pageMessage);
@@ -159,298 +182,52 @@ function ChatArea() {
   }, [inputRef?.current]);
 
   return (
-    //   <div className="flex flex-col flex-auto min-w-0 min-h-0 relative">
-    //     <section
-    //       className="h-auto w-full min-w-0 relative flex "
-    //       style={{ flex: "0 0 auto" }}
-    //     >
-    //       <div
-    //         className="flex w-full h-12 px-2"
-    //         style={{ backgroundColor: "#f3f4f6" }}
-    //       >
-    //         <div
-    //           className="flex w-full h-full items-center justify-between px-2"
-    //           style={{ borderBottom: "2px solid #e1e1e1" }}
-    //         >
-    //           <div className="flex gap-2 items-center">
-    //             <FontAwesomeIcon
-    //               icon="fa-regular fa-window-maximize"
-    //               className="fa-rotate-90 cursor-pointer"
-    //               onClick={() => {
-    //                 dispatch(expandedChannel());
-    //               }}
-    //             />
-    //             <Button
-    //               size="md"
-    //               icon={<IconHash size="small" />}
-    //               variant="subtle"
-    //               radius="sm"
-    //               compact
-    //             >
-    //               test
-    //             </Button>
-    //             <div className="flex gap-2 items-center h-auto">
-    //               <div
-    //                 className="w-1 rounded h-9"
-    //                 style={{ backgroundColor: "#000000" }}
-    //               ></div>
-    //               <div className="flex flex-col">
-    //                 <div className="text-sm font-semibold">Xin chào</div>
-    //                 <div className="text-xs">aaaaaaaaaa</div>
-    //               </div>
-    //             </div>
-    //           </div>
-    //           <Group>
-    //             <Group
-    //               spacing={4}
-    //               className="rounded-full"
-    //               style={{ border: "2px solid #3bb246", padding: "2px 4px" }}
-    //             >
-    //               <Switch
-    //                 checkedText={
-    //                   <FontAwesomeIcon icon="fa-solid fa-microphone" />
-    //                 }
-    //                 uncheckedText={
-    //                   <FontAwesomeIcon icon="fa-solid fa-microphone-slash" />
-    //                 }
-    //                 // size="large"
-    //               />
-    //               <Avatar
-    //                 radius="xl"
-    //                 size={22}
-    //                 src="https://scontent.fhan15-2.fna.fbcdn.net/v/t1.6435-9/62498267_1122772321257230_1257182363998224384_n.jpg?_nc_cat=104&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=VPPfNnnvFVAAX8VxZxh&_nc_ht=scontent.fhan15-2.fna&oh=00_AT8POEy0BdNfsodV94sKHFnY8XSVf3__t5f7o7SYBVlS0w&oe=6248A0A1"
-    //               />
-    //               <Avatar
-    //                 radius="xl"
-    //                 size={22}
-    //                 src="https://scontent.fhan15-2.fna.fbcdn.net/v/t1.6435-9/62498267_1122772321257230_1257182363998224384_n.jpg?_nc_cat=104&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=VPPfNnnvFVAAX8VxZxh&_nc_ht=scontent.fhan15-2.fna&oh=00_AT8POEy0BdNfsodV94sKHFnY8XSVf3__t5f7o7SYBVlS0w&oe=6248A0A1"
-    //               />
-    //               <Avatar
-    //                 radius="xl"
-    //                 size={22}
-    //                 classNames={{
-    //                   placeholder: "font-bold text-white bg-green-600",
-    //                 }}
-    //               >
-    //                 +3
-    //               </Avatar>
-    //             </Group>
-    //             <FontAwesomeIcon
-    //               icon="fa-solid fa-bell"
-    //               className="cursor-pointer fa-shake"
-    //             />
-    //             <FontAwesomeIcon
-    //               icon="fa-solid fa-thumbtack"
-    //               className="cursor-pointer fa-bounce"
-    //             />
-    //             <FontAwesomeIcon
-    //               icon="fa-solid fa-inbox"
-    //               className="cursor-pointer"
-    //             />
-    //             <FontAwesomeIcon
-    //               icon="fa-solid fa-magnifying-glass"
-    //               className="cursor-pointer"
-    //               onClick={() => setActiveMenu("search")}
-    //             />
-    //             <FontAwesomeIcon
-    //               icon="fa-solid fa-circle-info"
-    //               className="cursor-pointer"
-    //               onClick={() => setActiveMenu("main")}
-    //             />
-    //           </Group>
-    //           {/* <button ref={referenceElement}>Reference element</button>
-    //     <Popper referenceElement={referenceElement} mounted={true}>
-    //       <Paper
-    //         style={{
-    //           backgroundColor: "red",
-    //         }}
-    //       >
-    //         Pop
-    //       </Paper>
-    //     </Popper> */}
-    //         </div>
-    //       </div>
-    //       {/* <div className="flex w-full h-9 flex-shrink-0 absolute top-full left-0 right-0 bg-white z-10">
-    //         {idle ? "idle" : "not idle"}
-    //       </div> */}
-    //       {/* {openedSearchBar && (
-    //         <div className="flex w-full h-14 py-2 px-4 bg-black items-center">
-    //           <Autocomplete
-    //             className="w-full"
-    //             maxSelectedValues={1}
-    //             searchable
-    //             value={searchMessage}
-    //             onChange={setSearchMessage}
-    //             placeholder="Pick one"
-    //             data={["React", "Angular", "Svelte", "Vue"]}
-    //           />
-    //           <ActionIcon>
-    //             <IconChevronUp />
-    //           </ActionIcon>
-    //           <ActionIcon>
-    //             <IconChevronDown />
-    //           </ActionIcon>
-    //           <Button onClick={() => setOpenedSearchBar(false)}>Close</Button>
-    //         </div>
-    //       )} */}
-    //     </section>
     <div className="flex flex-auto min-w-0 min-h-0 relative overflow-hidden ">
       <main className="flex min-w-0 min-h-0 relative flex-col flex-auto">
         <div className="chat-area flex flex-col flex-auto relative min-h-0 min-w-0">
-          {/* <Parallax /> */}
-          {/* <ActionIcon
-                className="absolute bottom-2 right-8 z-10"
-                size="xl"
-                radius="xl"
-                variant="outline"
-                onClick={scrollToBottom}
-              >
-                <IconChevronDown />
-              </ActionIcon> */}
           <div
             ref={viewportRef}
-            id="scrollableDiv"
-            className="flex flex-col flex-auto min-h-0 absolute top-0 left-0 right-0 bottom-0  overflow-y-scroll overflow-x-hidden"
+            id="chat-viewport"
+            className="flex flex-col flex-auto min-h-0 absolute top-0 left-0 right-0 bottom-0  overflow-y-scroll overflow-x-hidden justify-end"
           >
-            {/*  <InfiniteScroll
-                  dataLength={data.length + 1}
-                  next={fetchMoreData}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column-reverse",
-                    overflowX: "hidden",
-                  }} //To put endMessage and loader to the top.
-                  inverse={true} //
-                  hasMore={true}
-                  loader={
-                    <div className="flex w-full h-auto justify-center items-center my-2">
-                      <Loader />
-                    </div>
-                  }
-                  endMessage={100}
-                  scrollableTarget="scrollableDiv"
-                > */}
-            {/* <div className="mb-5 overflow-y-auto"> */}
-            {/* {data.map((post, index) => (
-                      // <InfinityGauntlet snap={true}>
-                      <AnimatePresence key={index}>
-                        <Message
-                          message={post}
-                          key={index}
-                          searchMessage={searchMessage}
-                          messages={data}
-                        />
-                      </AnimatePresence>
-                      // </InfinityGauntlet>
-                    ))} */}
-            <Message
-              message={"test"}
-              // key={index}
-              searchMessage={searchMessage}
-              messages={data}
-            />
-            <Message
-              message={"test"}
-              // key={index}
-              searchMessage={searchMessage}
-              messages={data}
-            />
-            <Message
-              message={"test"}
-              // key={index}
-              searchMessage={searchMessage}
-              messages={data}
-            />
-            <Message
-              message={"test"}
-              // key={index}
-              searchMessage={searchMessage}
-              messages={data}
-            />
-            <Message
-              message={"test"}
-              // key={index}
-              searchMessage={searchMessage}
-              messages={data}
-            />
-            <Message
-              message={"test"}
-              // key={index}
-              searchMessage={searchMessage}
-              messages={data}
-            />
-            {/* <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  isUnread={true}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                />
-                <Message
-                  message={"test"}
-                  // key={index}
-                  searchMessage={searchMessage}
-                  messages={data}
-                /> */}
+            <InfiniteScroll
+              dataLength={messages.length}
+              next={fetchNextPage}
+              style={{
+                display: "flex",
+                flexDirection: "column-reverse",
+                overflowX: "hidden",
+              }} //To put endMessage and loader to the top.
+              inverse={true} //
+              hasMore={hasNextPage}
+              loader={
+                <div className="flex w-full h-auto justify-center items-center my-2">
+                  Loading...
+                </div>
+              }
+              endMessage={hasNextPage}
+              scrollableTarget="chat-viewport"
+            >
+              <div className="mb-5">
+                {messages &&
+                  messages.map((post, index) => (
+                    // <InfinityGauntlet snap={true}>
+                    // <AnimatePresence key={index}>
+                    <Message
+                      message={post}
+                      key={index}
+                      user={user}
+                      searchMessage={searchMessage}
+                      messages={messages}
+                    />
+                    // </AnimatePresence>
+                    // </InfinityGauntlet>
+                  ))}
+              </div>
+            </InfiniteScroll>
+            {/* </div> */}
           </div>
-          {/* </InfiniteScroll> */}
-          {/* </div> */}
-        </div>
-        {/* <div className="m-4 relative flex-shrink-0">
+          {/* <div className="m-4 relative flex-shrink-0">
               <div
                 style={{
                   border: "2px solid #e5e7eb",
@@ -462,19 +239,18 @@ function ChatArea() {
                 aAaaaaaaaa
               </div>
             </div> */}
-        <Editor />
-        {/* <main className="flex flex-col h-auto w-full absolute bottom-0 left-0 px-4 pb-2">
+          {/* <main className="flex flex-col h-auto w-full absolute bottom-0 left-0 px-4 pb-2">
         {/* <FallingGlitter/> */}
-        {/* <BubbleUI options={options} className="w-full h-full">
+          {/* <BubbleUI options={options} className="w-full h-full">
           {children}
         </BubbleUI> */}
-        {/* </div> */}
-        {/* <div
+          {/* </div> */}
+          {/* <div
         className="flex w-80 h-full"
         style={{ padding: "8px 8px 8px 4px" }}
       >
         <div className="flex w-full h-full rounded-lg"> */}
-        {/* <AnimateSharedLayout type="crossfade">
+          {/* <AnimateSharedLayout type="crossfade">
             {images.map((img, index) => (
               <motion.img
                 className="w-32 h-32"
@@ -519,8 +295,10 @@ function ChatArea() {
               )}
             </AnimatePresence>
           </AnimateSharedLayout> */}
-        {/* </div>
+          {/* </div>
       </div> */}
+        </div>
+        <Editor channel={channel} user={user}/>
       </main>
       <aside
         className="flex w-96 h-full flex-shrink-0 overflow-hidden relative"

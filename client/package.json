@@ -151,6 +151,7 @@
     "socket.io-client": "^4.4.1",
     "styled-components": "^5.3.3",
     "tabler-icons-react": "^1.37.0",
+    "text-diff": "^1.0.1",
     "tinycolor2": "^1.4.2",
     "ua-parser-js": "^1.0.2",
     "use-file-upload": "^1.0.11",

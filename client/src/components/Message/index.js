@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { motion, useMotionValue, useAnimation } from "framer-motion";
 import {
@@ -8,6 +8,8 @@ import {
   ActionIcon,
   Menu,
   Divider,
+  Text,
+  Badge,
 } from "@mantine/core";
 import "./index.css";
 import Sparkles from "../MessageEffect/Sparkles";
@@ -24,6 +26,9 @@ import ACard from "../ACard";
 import CodeBlockPreview from "../PreviewFeature/CodeBlockPreview";
 import DocumentPreview from "../PreviewFeature/DocumentPreview";
 import MusicPreview from "../PreviewFeature/MusicPreview";
+import MessageInlineEditor from "../MessageInlineEditor";
+import { getTime, isNewDay, getTimeDifference } from "../../commons/dataUtils";
+import ModalMessageEdits from "../Modals/ModalMessageEdits";
 const item = {
   hidden: {
     opacity: 0,
@@ -43,6 +48,7 @@ export default function Message(props) {
   const x = useMotionValue(0);
   const [play] = useSound(fireSound);
   const [play2] = useSound(wowSound);
+  const [edit, setEdit] = useState(false);
   let i;
   useEffect(() => {
     if (inView) {
@@ -50,31 +56,59 @@ export default function Message(props) {
     }
   }, [controls, inView]);
 
+  const checkSameTime = (message1, message2) => {
+    return getTimeDifference(message1.createdAt, message2.createdAt) < 5;
+  };
+
   const isExtraMessage = () => {
     const index = props.messages.findIndex((m) => m.id === props.message.id);
-    const prev = props.messages[index - 1];
-    if (!prev) return false;
-    return prev.userId === props.message.userId;
+    // const prev = props.messages[index - 1];
+    // if (!prev) return false;
+    if (index + 1 >= props.messages.length) return false;
+    const next = props.messages[index + 1];
+    return (
+      (next.userId === props.message.userId &&
+        checkSameTime(props.message, next)) ||
+      props.message.systemMessage
+    );
   };
 
   const hasAfterMessage = () => {
     const index = props.messages.findIndex((m) => m.id === props.message.id);
     i = index;
+    // if (index + 1 >= props.messages.length) return false;
+    // const next = props.messages[index + 1];
+    // return next.userId === props.message.userId;
+    const prev = props.messages[index - 1];
+    if (!prev) return false;
+    return true;
+  };
+
+  const hasNewDate = () => {
+    const index = props.messages.findIndex((m) => m.id === props.message.id);
     if (index + 1 >= props.messages.length) return false;
     const next = props.messages[index + 1];
-    return next.userId === props.message.userId;
+    return isNewDay(next.createdAt, props.message.createdAt);
   };
 
   const isActuallyExtraMessage = isExtraMessage();
   const hasActuallyAfterMessage = hasAfterMessage();
+  const isActuallyNewDay = hasNewDate();
 
   const LeftSide = () => {
     return isActuallyExtraMessage ? (
       <div
-        style={{ width: 40, fontSize: 10, color: "rgb(116, 127, 141)" }}
-        className="chat-time"
+        style={{
+          width: 56,
+          fontSize: 10,
+          marginRight: 4,
+          color: "rgb(116, 127, 141)",
+          height: 22,
+          lineHeight: "22px",
+        }}
+        className="chat-time text-center"
       >
-        10:00
+        {getTime(props.message.createdAt)}
       </div>
     ) : (
       <div className="chat-avatar">
@@ -92,13 +126,13 @@ export default function Message(props) {
     return isActuallyExtraMessage ? null : (
       <div className="chat-content-member">
         <span className="text-sm font-bold" style={{ color: "rgb(255,0,17)" }}>
-          Nguyen Hai Nam
+          {props.message.sender.username}
         </span>
         <span
           style={{ fontSize: 10, color: "#72767d", direction: "ltr" }}
           className="flex h-full mx-3 items-center"
         >
-          6 tuần
+          {getTime(props.message.createdAt)}
         </span>
       </div>
     );
@@ -106,26 +140,52 @@ export default function Message(props) {
   const fire = props.message.id === 89;
   const MessageText = () => {
     return (
-      // <Highlight
-      //   style={{
-      //     overflowWrap: "break-word",
-      //     zIndex: 3,
-      //     borderRadius: "inherit",
-      //     backgroundImage: `url(${test})`,
-      //   }}
-      //   className="message-content w-full h-full bg-inherit"
-      //   highlight={props.searchMessage.split(" ")}
-      //   onClick={() => (fire ? play() : play2())}
-      //   children={
-      //     "Lorem chào aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      //   }
-      // ></Highlight>
-      // <ACard />
+      <>
+        {props.message.systemMessage && (
+          <Badge
+            sx={{ paddingLeft: 0 }}
+            // size="xs"
+            radius="xl"
+            color="teal"
+            leftSection={
+              <Avatar
+                radius="xl"
+                alt="Avatar for badge"
+                size={18}
+                mr={5}
+                src="https://cdn.discordapp.com/icons/854810300876062770/f4121b15626152fd6c6ba71e078f9936.webp?size=128"
+              />
+            }
+          >
+            {props.message.sender.username}
+          </Badge>
+        )}
+        <Highlight
+          style={{
+            overflowWrap: "break-word",
+            zIndex: 3,
+            borderRadius: "inherit",
+            backgroundImage: `url(${test})`,
+          }}
+          className="message-content text-sm h-full bg-inherit text-black"
+          highlight={props.searchMessage.split(" ")}
+          // onClick={() => (fire ? play() : play2())}
+          children={props.message.content}
+        ></Highlight>
+        {props.message.messagesEdited.length>=1 && (
+          <Text size="xs" color="dimmed" className="align-baseline">
+            (Đã chỉnh sửa)
+            <ModalMessageEdits />
+          </Text>
+          
+        )}
+        {/* // <ACard />
       // <CodeBlockPreview />
-      <div className="flex flex-col">
-        <DocumentPreview />
-        <MusicPreview url={"https://vnno-vn-5-tf-mp3-320s1-zmp3.zadn.vn/6b2b7943f7041e5a4715/8109663103068771612?authen=exp=1647341485~acl=/6b2b7943f7041e5a4715/*~hmac=4f0ebbb630c35a1b4cdfc21d790c0ffb&fs=MTY0NzE2ODY4NTA2OHx3ZWJWNnwwfDExNy4yLjY2LjE4OA"}/>
-      </div>
+      // <div className="flex flex-col">
+      //   <DocumentPreview />
+      //   <MusicPreview url={"https://vnno-vn-5-tf-mp3-320s1-zmp3.zadn.vn/6b2b7943f7041e5a4715/8109663103068771612?authen=exp=1647341485~acl=/6b2b7943f7041e5a4715/*~hmac=4f0ebbb630c35a1b4cdfc21d790c0ffb&fs=MTY0NzE2ODY4NTA2OHx3ZWJWNnwwfDExNy4yLjY2LjE4OA"}/>
+      // </div> */}
+      </>
     );
   };
 
@@ -151,52 +211,56 @@ export default function Message(props) {
           !hasActuallyAfterMessage ? "mb-3" : ""
         }`}
       >
-        <div className="sticky top-2 z-20 flex justify-center w-full">
-          <div className="absolute">
-            <div className="text-center my-1">
-              <Menu
-                placement="center"
-                control={
-                  <span
-                    className="bg-white font-bold h-6 px-2 inline-flex justify-center items-center rounded-md shadow-md text-xs cursor-pointer"
-                    style={{
-                      border: !props.isUnread
-                        ? "2px solid #e2e2e2"
-                        : "2px solid #FD6671",
-                    }}
+        {isActuallyNewDay && (
+          <>
+            <div className="sticky top-2 z-20 flex justify-center w-full">
+              <div className="absolute">
+                <div className="text-center my-1">
+                  <Menu
+                    placement="center"
+                    control={
+                      <span
+                        className="bg-white font-bold h-6 px-2 inline-flex justify-center items-center rounded-md shadow-md text-xs cursor-pointer"
+                        style={{
+                          border: !props.isUnread
+                            ? "2px solid #e2e2e2"
+                            : "2px solid #FD6671",
+                        }}
+                      >
+                        Thursday, April 23
+                      </span>
+                    }
                   >
-                    Thursday, April 23
-                  </span>
-                }
-              >
-                <Menu.Label>Jump to...</Menu.Label>
-                <Menu.Item>Most recent</Menu.Item>
-                <Menu.Item>Last month</Menu.Item>
-                <Menu.Item>The every beginning</Menu.Item>
-                <Divider />
-                <Menu.Item>Jump to a specific date</Menu.Item>
-              </Menu>
-              {/* <span
+                    <Menu.Label>Jump to...</Menu.Label>
+                    <Menu.Item>Most recent</Menu.Item>
+                    <Menu.Item>Last month</Menu.Item>
+                    <Menu.Item>The every beginning</Menu.Item>
+                    <Divider />
+                    <Menu.Item>Jump to a specific date</Menu.Item>
+                  </Menu>
+                  {/* <span
                 className="text-white font-bold h-6 px-2 inline-flex justify-center items-center rounded-md shadow-md text-xs cursor-pointer"
                 style={{ border: "2px solid #FD6671", background: "#FD6671" }}
               >
                 New
               </span> */}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="w-full z-10">
-          <div className="bg-transparent relative py-4">
-            <div
-              className="left-0 right-0 relative"
-              style={{
-                borderTop: !props.isUnread
-                  ? "2px solid #e2e2e2"
-                  : "2px solid #FD6671",
-              }}
-            ></div>
-          </div>
-        </div>
+            <div className="w-full z-10">
+              <div className="bg-transparent relative py-4">
+                <div
+                  className="left-0 right-0 relative"
+                  style={{
+                    borderTop: !props.isUnread
+                      ? "2px solid #e2e2e2"
+                      : "2px solid #FD6671",
+                  }}
+                ></div>
+              </div>
+            </div>
+          </>
+        )}
         {/* // <div
     //   className={`chat-box-bubble ${
     //     props.message.userId === 10 || props.message.userId === 6
@@ -238,77 +302,37 @@ export default function Message(props) {
                 className={`${isActuallyExtraMessage ? "message-last" : ""} ${
                   hasActuallyAfterMessage ? "message-first" : ""
                 } chat-content-text relative`}
-                whileTap={{
-                  cursor: "grabbing",
-                }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
+                // whileTap={{
+                //   cursor: "grabbing",
+                // }}
+                // drag="x"
+                // dragConstraints={{ left: 0, right: 0 }}
               >
                 {props.message.id === 100 || props.message.userId === 6 ? (
                   <Sparkles children={<MessageText />} />
                 ) : (
-                  <MessageText />
-                )}
-                {props.message.id === 89 && (
                   <>
-                    {/* <Flame /> */}
-                    {/* // <Fire /> */}
-                    {/* <lottie-player
-                  src="https://assets8.lottiefiles.com/packages/lf20_gkmkgw96.json"
-                  background="transparent"
-                  autoplay
-                  loop
-                  style={{
-                    zIndex: 2,
-                    width: "auto",
-                    height: "100%",
-                    left: 0,
-                    bottom: 0,
-                    transform: "translate(-20%,-85%) scale(3)",
-                    position: "absolute",
-                  }}
-                ></lottie-player>
-                <lottie-player
-                  src="https://assets8.lottiefiles.com/packages/lf20_gkmkgw96.json"
-                  background="transparent"
-                  autoplay
-                  loop
-                  style={{
-                    zIndex: 2,
-                    width: "auto",
-                    height: "100%",
-                    right: 0,
-                    bottom: 0,
-                    transform: "translate(20%,-85%) scale(-3,3)",
-                    position: "absolute",
-                  }}
-                ></lottie-player> */}
-                    {/* <lottie-player
-                src="https://assets8.lottiefiles.com/packages/lf20_no9qrf5p.json"
-                background="transparent"
-                autoplay
-                loop
-                style={{
-                  zIndex: 1,
-                  width: "auto",
-                  height: "auto",
-                  left: 0,
-                  right: 0,
-                  top: "50%",
-                  // bottom: 0,
-                  transform: "translate(0,-25%) scale(1)",
-                }}
-              ></lottie-player> */}
+                    {edit ? (
+                      <MessageInlineEditor message={props.message.content} />
+                    ) : (
+                      <MessageText />
+                    )}
                   </>
                 )}
-                {props.message.id === 90 && (
-                  <>
-                    {/* <img
-                  className="absolute -top-6 -left-6 z-10 h-full w-auto -rotate-12"
-                  src="https://video-public.canva.com/VADlsz-nbMw/videos/990131e940.gif"
-                /> */}
-                  </>
-                )}
+              </div>
+              <div className="message-accessories">
+                <div className="reactions">
+                  <div>
+                    <div className="reaction">
+                      <div>
+                        <div className="reaction-inner">
+                          <span>😀</span>
+                          <span>1</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="msg-toolbar absolute right-0 top-0">
                 <div className="absolute right-0 -top-6 pr-4 pl-8 z-10">
@@ -322,9 +346,11 @@ export default function Message(props) {
                     <ActionIcon size={32}>
                       <FontAwesomeIcon icon="fa-solid fa-face-laugh" />
                     </ActionIcon>
-                    <ActionIcon size={32}>
-                      <FontAwesomeIcon icon="fa-solid fa-pen" />
-                    </ActionIcon>
+                    {!props.message.systemMessage && (
+                      <ActionIcon size={32} onClick={() => setEdit(true)}>
+                        <FontAwesomeIcon icon="fa-solid fa-pen" />
+                      </ActionIcon>
+                    )}
                     <Menu
                       position="right"
                       size="lg"
@@ -334,11 +360,14 @@ export default function Message(props) {
                         </ActionIcon>
                       }
                     >
-                      <Menu.Item
-                        icon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
-                      >
-                        Chỉnh sửa tin nhắn
-                      </Menu.Item>
+                      {!props.message.systemMessage || props.message.sender._id===props.user._id && (
+                        <Menu.Item
+                          icon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
+                          onClick={() => setEdit(true)}
+                        >
+                          Chỉnh sửa tin nhắn
+                        </Menu.Item>
+                      )}
                       <Menu.Item
                         icon={<FontAwesomeIcon icon="fa-solid fa-thumbtack" />}
                       >
@@ -357,12 +386,16 @@ export default function Message(props) {
                         Sao chép đường dẫn tin nhắn
                       </Menu.Item>
                       <Menu.Item>Sao chép ID</Menu.Item>
-                      <Menu.Item
-                        color="red"
-                        icon={<FontAwesomeIcon icon="fa-solid fa-trash-can" />}
-                      >
-                        Xoá tin nhắn
-                      </Menu.Item>
+                      {!props.message.systemMessage || props.message.sender._id===props.user._id && (
+                        <Menu.Item
+                          color="red"
+                          icon={
+                            <FontAwesomeIcon icon="fa-solid fa-trash-can" />
+                          }
+                        >
+                          Xoá tin nhắn
+                        </Menu.Item>
+                      )}
                     </Menu>
                   </div>
                 </div>

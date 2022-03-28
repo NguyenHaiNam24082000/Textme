@@ -10,9 +10,9 @@ const messageRoute = require('./v1/messageRoute');
 const router = express.Router();
 
 router.use('/auth', authRoute);
-router.use('/user', userRoute);
+router.use('/users', userRoute);
 router.use('/friend', friendRoute);
 router.use('/channel', channelRoute);
-router.use('/message', messageRoute);
+router.use('/messages', messageRoute);
 
 module.exports = router;
