@@ -73,9 +73,8 @@ export default function Pending() {
     <div>
       <TextInput
         icon={<Search size={18} />}
-        radius="md"
         size="md"
-        placeholder="Search questions"
+        placeholder="Search"
         onChange={handleSearch}
       />
       <PendingHeader

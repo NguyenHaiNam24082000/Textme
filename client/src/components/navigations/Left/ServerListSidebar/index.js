@@ -9,6 +9,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from "@modulz/radix-icons";
+import { MdExplore} from "react-icons/md";
 // import { AwesomeButton } from "react-awesome-button";
 // import "react-awesome-button/dist/styles.css";
 // import "react-awesome-button/dist/themes/theme-blue.css";
@@ -74,6 +75,7 @@ export default function Sidebar() {
             alt="avatar"
           />
         {/* </FocusRing> */}
+        <MdExplore />
         <SpaceAvatar
           image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
           alt="avatar"
@@ -130,6 +132,7 @@ export default function Sidebar() {
           image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
           alt="avatar"
         />
+        <MdExplore />
         {/* <div
           className="h-14 w-16 justify-center items-center flex fixed z-50 bottom-0 left-0 "
           style={{ backgroundColor: "#f7f6f3" }}

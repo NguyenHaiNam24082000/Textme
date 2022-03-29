@@ -22,7 +22,7 @@ import { CHANNEL_MESSAGES_KEY } from "../../../configs/queryKeys";
 import { useInfiniteQuery } from "react-query";
 import { getMessages } from "../../../apis/messages";
 import InfiniteScroll from "react-infinite-scroll-component";
-// import "./index.css";
+import "./index.css";
 
 const users = [
   {
@@ -108,6 +108,8 @@ function ChatArea({ channel, user }) {
   const [searchMember, setSearchMember] = useState("");
   const [members, setMembers] = useState([]);
   const [previousIdMember, setPreviousIdMember] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [currentMessageSelected, setCurrentMessageSelected] = useState(null);
   const dispatch = useDispatch();
   console.log(channel, "aAaaaaa");
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -124,19 +126,18 @@ function ChatArea({ channel, user }) {
         },
       }
     );
-  const messages = data
-    ? data.pages.flatMap((page) => page?.results ?? [])
-    : [];
 
   useEffect(() => {
-    // fetch(pageMessage);
-    // setMembers([...users]);
-    // setInterval(() => {
-    //   socket.emit("chatMessage", (d) => {
-    //     setData([...data, "aaa"]);
-    //   });
-    // }, 10000);
-  }, []);
+    const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
+    setMessages(msg.reverse());
+  }, [data]);
+
+  useEffect(() => {
+    const resetCurrentMessages = setTimeout(() => {
+      setCurrentMessageSelected(null);
+    }, 3000);
+    return () => clearTimeout(resetCurrentMessages);
+  }, [currentMessageSelected]);
 
   useEffect(() => {
     if (searchMember.length === 0) {
@@ -156,22 +157,6 @@ function ChatArea({ channel, user }) {
 
   const scrollToBottom = () =>
     viewportRef.current.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-
-  const fetch = (pageNumber = 1) => {
-    if (pageNumber <= 10) {
-      // axios
-      //   .get("https://jsonplaceholder.typicode.com/posts", {
-      //     params: { page: pageNumber },
-      //   })
-      //   .then((res) => {
-      //     setData((d) => d.concat(res.data));
-      //     setPageMessage((p) => p + 1);
-      //   });
-    }
-  };
-  const fetchMoreData = (page) => {
-    return fetch(page);
-  };
 
   const onSearchChangeMembers = (e) => {
     setSearchMember(e.target.value);
@@ -210,15 +195,17 @@ function ChatArea({ channel, user }) {
             >
               <div className="mb-5">
                 {messages &&
-                  messages.map((post, index) => (
+                  messages.reverse().map((message, index) => (
                     // <InfinityGauntlet snap={true}>
                     // <AnimatePresence key={index}>
                     <Message
-                      message={post}
-                      key={index}
+                      message={message}
+                      key={message.id}
                       user={user}
                       searchMessage={searchMessage}
                       messages={messages}
+                      currentMessageSelected={currentMessageSelected}
+                      setCurrentMessageSelected={setCurrentMessageSelected}
                     />
                     // </AnimatePresence>
                     // </InfinityGauntlet>
@@ -298,9 +285,9 @@ function ChatArea({ channel, user }) {
           {/* </div>
       </div> */}
         </div>
-        <Editor channel={channel} user={user}/>
+        <Editor channel={channel} user={user} />
       </main>
-      <aside
+      {/* <aside
         className="flex w-96 h-full flex-shrink-0 overflow-hidden relative"
         style={{
           backgroundColor: "#f3f4f6",
@@ -411,30 +398,6 @@ function ChatArea({ channel, user }) {
                   ]}
                 />
               </div>
-              {/* <Tabs defaultActiveKey={`${tabKey}`}>
-                    <TabPane
-                      tab="Images/Videos"
-                      itemKey="1"
-                      className="overflow-hidden"
-                    >
-                      <div className="flex flex-col w-full h-full bg-red-500">
-                        <DateRangePicker
-                          amountOfMonths={3}
-                          placeholder="Time"
-                          className="py-2 my-1"
-                        />
-                        <div className="flex w-full h-full">
-                          <ImageGrid />
-                        </div>
-                      </div>
-                    </TabPane>
-                    <TabPane tab="Files" itemKey="2">
-                      <DateRangePicker amountOfMonths={3} placeholder="Time" />
-                    </TabPane>
-                    <TabPane tab="Links" itemKey="3">
-                      <DateRangePicker amountOfMonths={3} placeholder="Time" />
-                    </TabPane>
-                  </Tabs> */}
             </div>
           </div>
         </CSSTransition>
@@ -574,7 +537,7 @@ function ChatArea({ channel, user }) {
             </div>
           </div>
         </CSSTransition>
-      </aside>
+      </aside> */}
     </div>
     //     {/* <div className=" absolute p-2 z-50">
     //       <div className="bg-yellow-500 shadow-lg rounded-md w-80 flex flex-col h-auto p-2">

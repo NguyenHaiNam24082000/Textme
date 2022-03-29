@@ -24,6 +24,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import DMList from "./DMList";
+import { PendingRequests } from "../../../../reactQuery/friend";
+import { useSpotlight } from "@mantine/spotlight";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -87,6 +89,7 @@ const useStyles = createStyles((theme) => ({
   mainLinkInner: {
     display: "flex",
     alignItems: "center",
+    gap: "8px",
     flex: 1,
   },
 
@@ -140,12 +143,6 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const links = [
-  { icon: Bulb, label: "Home", notifications: 3, to: "/channel/@me" },
-  { icon: Checkbox, label: "Friends", notifications: 4, to: "/friends" },
-  // { icon: User, label: "Contacts" },
-];
-
 const collections = [
   { emoji: "👍", label: "Sales" },
   { emoji: "🚚", label: "Deliveries" },
@@ -160,31 +157,62 @@ const collections = [
 
 export default function HomeSidebar() {
   const { classes } = useStyles();
+  const spotlight = useSpotlight();
+  const { data: pendingRequestsData } = PendingRequests();
+
+  const links = [
+    {
+      icon: <FontAwesomeIcon icon="fa-solid fa-house" />,
+      label: "Home",
+      notifications: 0,
+      to: "/channel/@me",
+    },
+    {
+      icon: <FontAwesomeIcon icon="fa-solid fa-user-group" />,
+      label: "Friends",
+      notifications: pendingRequestsData?.length,
+      to: "/friends",
+    },
+    // { icon: User, label: "Contacts" },
+  ];
+
   return (
     <SidebarBase>
-      <div></div>
       <div>
-        <TextInput
-          placeholder="Search"
-          size="xs"
-          icon={<Search size={12} />}
-          rightSectionWidth={70}
-          rightSection={<Code className={classes.searchCode}>Ctrl + K</Code>}
-          styles={{ rightSection: { pointerEvents: "none" } }}
-          mb="sm"
-        />
+        <div
+          className="flex w-full h-12 flex-shrink-0 px-2 cursor-pointer"
+        >
+          <div
+            className="flex w-full h-full items-center justify-center px-2"
+            style={{ borderBottom: "2px solid #e5e7eb" }}
+          >
+            <TextInput
+              placeholder="Search"
+              size="xs"
+              icon={<Search size={12} />}
+              rightSectionWidth={70}
+              rightSection={
+                <Code className={classes.searchCode}>Ctrl + K</Code>
+              }
+              styles={{ rightSection: { pointerEvents: "none" } }}
+              className="pointer-events-none cursor-pointer"
+              onClick={spotlight.openSpotlight}
+            />
+          </div>
+        </div>
         {links &&
           links.map((link) => (
-            <Link to={link.to} key={link.label}>
+            <Link to={link.to} key={link.label} className="no-underline">
               <UnstyledButton className={classes.mainLink}>
                 <div className={classes.mainLinkInner}>
-                  <link.icon size={20} className={classes.mainLinkIcon} />
+                  {link.icon}
                   <span>{link.label}</span>
                 </div>
-                {link.notifications && (
+                {link.notifications > 0 && (
                   <Badge
                     size="sm"
                     variant="filled"
+                    color="red"
                     className={classes.mainLinkBadge}
                   >
                     {link.notifications}

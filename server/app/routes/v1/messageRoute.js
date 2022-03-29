@@ -7,6 +7,7 @@ const messageController = require("../../controllers/Message/messageController")
 
 router.post("/send-message", auth(),upload.none(),messageController.sendMessage);
 router.get("/:channelId", auth(),messageController.getMessages);
+router.get("/:channelId/search", auth(),messageController.searchMessages);
 router.put('/edit-message/:messageId', auth(), messageController.editMessage);
 
 module.exports = router;

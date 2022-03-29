@@ -18,7 +18,7 @@ function PendingHeader({ allFriends }) {
   );
 }
 
-const EmptyState = () => {
+const EmptyState = ({setActiveTab}) => {
   return (
     <Center className="flex-auto">
       <Empty
@@ -30,6 +30,7 @@ const EmptyState = () => {
           <Button
             style={{ padding: "6px 24px", marginRight: 12 }}
             type="primary"
+            onClick={() => setActiveTab(4)}
           >
             Add Friend
           </Button>
@@ -39,7 +40,7 @@ const EmptyState = () => {
   );
 };
 
-export default function All() {
+export default function All({setActiveTab}) {
   const { user } = useSelector((state) => state.user);
   const { data: friends } = AllFriends();
   const [allFriends, setAllFriends] = useState(friends);
@@ -64,20 +65,19 @@ export default function All() {
     <div>
       <TextInput
         icon={<Search size={18} />}
-        radius="md"
         size="md"
-        placeholder="Search questions"
+        placeholder="Search"
         onChange={handleSearch}
       />
       <PendingHeader allFriends={allFriends} />
       <div className="flex flex-col items-center justify-center">
-        {allFriends &&
-          allFriends.map((friend) => (
+        {friends &&
+          friends.map((friend) => (
             <FriendItem key={friend?.id} friend={friend} user={user} />
           ))}
       </div>
     </div>
   ) : (
-    <EmptyState />
+    <EmptyState setActiveTab={setActiveTab}/>
   );
 }

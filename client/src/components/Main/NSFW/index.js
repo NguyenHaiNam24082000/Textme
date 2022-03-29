@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import "@lottiefiles/lottie-player";
 import { Button, Checkbox, Group, Text } from "@mantine/core";
+import { useNavigate } from 'react-router-dom';
 
-export default function NSFW({ setIsContinue, setIsGoBack }) {
+export default function NSFW({ setIsContinue }) {
   const [isChecked, setIsChecked] = useState(false);
+  const  history = useNavigate();
   return (
     <div className="bg-white flex flex-col flex-auto min-w-0 min-h-0 justify-center items-center gap-8">
       <lottie-player
@@ -25,7 +27,7 @@ export default function NSFW({ setIsContinue, setIsGoBack }) {
         <Button
           variant="outline"
           color="dark"
-          onClick={() => setIsGoBack(true)}
+          onClick={() => history(-1)}
         >
           Go back
         </Button>

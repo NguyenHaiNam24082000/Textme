@@ -22,6 +22,16 @@ const messageSchema = new mongoose.Schema(
       ref: "Channel",
       required: [true, "Channel must be required"],
     },
+    pinned:{
+      type: Boolean,
+      default: false,
+    },
+    mentions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     reply: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",

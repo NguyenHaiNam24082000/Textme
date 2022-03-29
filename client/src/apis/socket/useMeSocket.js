@@ -33,6 +33,11 @@ export const useMeSocket = () => {
                     cache.invalidateQueries(OUT_GOING_REQUESTS_KEY)
                     cache.invalidateQueries(ALL_FRIENDS_KEY)
                 });
+                socket.on("cancelFriendRequest", () => {
+                    cache.invalidateQueries(ALL_FRIENDS_KEY);
+                    cache.invalidateQueries(PENDING_REQUESTS_KEY);
+                    cache.invalidateQueries(OUT_GOING_REQUESTS_KEY);
+                });
             }
         }
         return () => {

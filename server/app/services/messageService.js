@@ -1,4 +1,5 @@
 const httpStatus = require("http-status");
+const { removeAccents } = require("../commons/removeAccents");
 const { FriendRequest, Channel, Message } = require("../models");
 // const { FRIEND_STATUS } = require("../configs/friendStatus");
 const ApiError = require("../utils/ApiError");
@@ -71,7 +72,7 @@ const queryMessages = async (filter, options, user) => {
   const channel = await Channel.findOne({
     $or: [{ owner: user._id }, { members: user._id }],
 
-    _id: filter.channelId,
+    _id: filter.channel,
   });
 
   if (!channel) {
@@ -88,6 +89,45 @@ const queryMessages = async (filter, options, user) => {
   // }
 
   const messages = await Message.paginate(filterClone, options);
+  return messages;
+};
+
+const searchMessages = async (filter, options, user) => {
+  const sortBy= `createdAt:${options.sort_order}`;
+  const optionsClone={
+    sortBy,
+    limit:options.limit,
+    page:options.page,
+    limit:options.limit,
+  }
+  if(options.sort_by.toLowerCase()==="relevance"){
+    const content=removeAccents(filter.content);
+    filter.content={$regex:`.*${content}.*`};
+  }
+  else{
+    filter.content={$regex:`.*${filter.content}.*`};
+  }
+  const filterClone = { ...filter };
+  const channel = await Channel.findOne({
+    $or: [{ owner: user._id }, { members: user._id }],
+
+    _id: filter.channel,
+  });
+
+  if (!channel) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      `there is no channel between you and your friend!`
+    );
+  }
+
+  // if (user._id.toString() === room.sender.toString()) {
+  //   filterClone.messageDeletedBySender = false;
+  // } else {
+  //   filterClone.messageDeletedByReceiver = false;
+  // }
+
+  const messages = await Message.paginate(filterClone, optionsClone);
   return messages;
 };
 
@@ -163,4 +203,5 @@ module.exports = {
   queryMessages,
   editMessage,
   deleteMessage,
+  searchMessages,
 };

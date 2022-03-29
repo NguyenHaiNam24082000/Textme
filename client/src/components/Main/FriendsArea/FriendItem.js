@@ -5,6 +5,7 @@ import { useQueryClient } from "react-query";
 import { useNavigate } from "react-router";
 import { getOrCreateDMChannel } from "../../../apis/channel";
 import { cancelPendingRequestApi } from "../../../apis/friend";
+import getSocket from "../../../apis/socket";
 import friendObject, {
   pendingDiscriminator,
   pendingStatus,
@@ -12,15 +13,18 @@ import friendObject, {
 } from "../../../commons/friendObject";
 import { ALL_FRIENDS_KEY, OPEN_CHANNEL } from "../../../configs/queryKeys";
 import { ME_SOCKET } from "../../../configs/socketRoute";
+import { GetMe } from "../../../store/userSlice";
 import ModalUserProfile from "../../Modals/ModalUserProfile";
 
 export default function FriendItem({ user, friend }) {
+  const me = GetMe();
   const [isLoading, setIsLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
   const [alertMessage, setAlertMessage] = useState("");
   const [openedModalUserProfile, setOpenedModalUserProfile] = useState(false);
 
   const cache = useQueryClient();
+  const socket = getSocket(me?.tokens?.access?.token);
   const history = useNavigate();
 
   const openDM = async (e) => {
@@ -48,7 +52,11 @@ export default function FriendItem({ user, friend }) {
     try {
       await cancelPendingRequestApi(friend.id);
       cache.invalidateQueries(ALL_FRIENDS_KEY);
-
+      const receiverId = friend.sender.id===me.id? friend.receiver.id: friend.sender.id;
+      console.log(receiverId,"receiverId");
+      socket.emit(ME_SOCKET.SEND_CANCEL_FRIEND_REQUEST, {
+        receiverId: receiverId,
+      });
       setIsLoading(false);
     } catch
     (err) {

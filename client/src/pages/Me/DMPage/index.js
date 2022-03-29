@@ -14,13 +14,12 @@ export default function DMPage() {
   const {isLoading,data:channels} = GetOpenChannels();
   const {user}=useSelector(state=>state.user);
   const {channel:channelId}=useParams();
-  console.log(channelId,"channelId");
-  const [isGoBack, setIsGoBack] = useState(false);
+  // const [isGoBack, setIsGoBack] = useState(false);
   const [isContinue, setIsContinue] = useState(false);
   const [isNSFW, setIsNSFW] = useState(false);
 
   useEffect(() => {
-    setIsNSFW(isContinue);
+    setIsNSFW(!isContinue);
   }, [isContinue]);
 
   let channel=null;
@@ -28,13 +27,16 @@ export default function DMPage() {
   {
     channel = channels.find((c) => c._id === channelId);
   }
-  console.log(channel,"channel");
+  
+  useEffect(() => {
+    setIsNSFW(channel?.nsfw);
+  }, [channel]);
 
   useMessageSocket(channel?._id,CHANNEL_MESSAGES_KEY(channel?._id));
 
   return (
     <MainBase>
-      {isNSFW ? (
+      {!isNSFW ? (
         <>
           <DMChannelNavbar />
           {/* //{" "}
@@ -43,7 +45,7 @@ export default function DMPage() {
         </>
       ) : (
         //   {/* </div> */}
-        <NSFW setIsContinue={setIsContinue} setIsGoBack={setIsGoBack} />
+        <NSFW setIsContinue={setIsContinue} />
       )}
     </MainBase>
   );

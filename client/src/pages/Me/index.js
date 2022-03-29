@@ -21,6 +21,7 @@ import {
 import { themeState } from "../../recoil/themeState";
 import { isVisibleChanelSelector } from "../../store/uiSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Home from "./Home";
 
 export default function Me() {
   useMeSocket();
@@ -60,6 +61,7 @@ export default function Me() {
           <ChannelListSidebar />
         )}
         {location.pathname === "/friends" && <Friends />}
+        {location.pathname === "/channel/@me"&& <Home/>}
         {useMatch("/channel/@me/:channelId") && <DMPage />}
         {/* {isVisibleChanel && (
           <div

@@ -10,9 +10,11 @@ export const editMessage = (messageId, payload) => {
   });
 };
 
-export const getMessages = (channelId, page) => {
+export const getMessages = (channelId, page, limit = 50) => {
   return getRequest(
-    `/api/v1/messages/${channelId}${page ? `?page=${page}` : ""}`
+    `/api/v1/messages/${channelId}${limit ? `?limit=${limit}` : ""}${
+      page ? `&page=${page}` : ""
+    }`
   );
 };
 

@@ -36,7 +36,6 @@ export default function AddFriend() {
       ...payload,
     }))
     const { data } = await getUsers(payload);
-    console.log({username:name, ...payload},"aaaaaaaaaaaaa");
     if (data) {
       setListUsers(data.results);
     } else {

@@ -40,6 +40,9 @@ export default function PendingItem({ user, pending }) {
       } else {
         cache.invalidateQueries(OUT_GOING_REQUESTS_KEY);
       }
+      socket.emit(ME_SOCKET.SEND_CANCEL_FRIEND_REQUEST, {
+        receiverId: pending.sender.id === me.id ? pending.receiver.id : pending.sender.id,
+      });
       setIsLoading(false);
     } catch (err) {
       setIsLoading(false);

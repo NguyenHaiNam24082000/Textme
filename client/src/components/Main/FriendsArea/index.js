@@ -2,6 +2,7 @@ import { Avatar } from "@douyinfe/semi-ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ActionIcon,
+  Badge,
   Button,
   Group,
   Tabs,
@@ -20,12 +21,13 @@ import Pending from "./Pending";
 
 export default function FriendsMain() {
   // const [data,setData]= useState(PendingRequests());
-  const { data } = PendingRequests();
-  const { dataOutGoing } = OutGoingRequests();
-  console.log(data, dataOutGoing);
+  const { data: pendingRequestsData } = PendingRequests();
+  const [activeTab, setActiveTab] = useState(0);
   return (
     <main className="flex min-w-0 min-h-0 relative flex-col flex-auto">
       <Tabs
+        active={activeTab}
+        onTabChange={setActiveTab}
         variant="pills"
         tabPadding="md"
         className="px-2"
@@ -36,27 +38,6 @@ export default function FriendsMain() {
           icon={<FontAwesomeIcon icon="fa-solid fa-earth-asia" />}
           label="Online"
         >
-          <TextInput
-            icon={<Search size={18} />}
-            radius="xl"
-            size="md"
-            // rightSection={
-            //   <ActionIcon
-            //     size={32}
-            //     radius="xl"
-            //     color={theme.primaryColor}
-            //     variant="filled"
-            //   >
-            //     {theme.dir === "ltr" ? (
-            //       <ArrowRight size={18} />
-            //     ) : (
-            //       <ArrowLeft size={18} />
-            //     )}
-            //   </ActionIcon>
-            // }
-            placeholder="Search questions"
-            rightSectionWidth={42}
-          />
           <Online />
         </Tabs.Tab>
         <Tabs.Tab
@@ -84,11 +65,20 @@ export default function FriendsMain() {
             placeholder="Search questions"
             rightSectionWidth={42}
           /> */}
-          <All />
+          <All setActiveTab={setActiveTab}/>
         </Tabs.Tab>
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-user-clock" />}
-          label="Pending"
+          label={
+            <div className="flex gap-2">
+              <span>Pending</span>
+              {pendingRequestsData?.length > 0 && (
+                <div className="text-xs text-white bg-red-500 rounded-full w-4 h-4 flex justify-center items-center">
+                  {pendingRequestsData?.length}
+                </div>
+              )}
+            </div>
+          }
         >
           <Pending />
         </Tabs.Tab>
@@ -97,27 +87,6 @@ export default function FriendsMain() {
           label="Blocked"
         >
           <Blocked />
-          <TextInput
-            icon={<Search size={18} />}
-            radius="xl"
-            size="md"
-            // rightSection={
-            //   <ActionIcon
-            //     size={32}
-            //     radius="xl"
-            //     color={theme.primaryColor}
-            //     variant="filled"
-            //   >
-            //     {theme.dir === "ltr" ? (
-            //       <ArrowRight size={18} />
-            //     ) : (
-            //       <ArrowLeft size={18} />
-            //     )}
-            //   </ActionIcon>
-            // }
-            placeholder="Search questions"
-            rightSectionWidth={42}
-          />
         </Tabs.Tab>
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-user-plus" />}
