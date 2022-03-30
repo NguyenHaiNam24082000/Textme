@@ -41,7 +41,7 @@ export default function SpaceAvatar({ onClick, image, title }) {
             <Avatar
               src={image}
               alt={title}
-              className="avatar"
+              className="space-avatar"
               size="medium"
               onClick={() => {
                 setActive(!active);

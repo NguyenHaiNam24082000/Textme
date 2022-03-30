@@ -24,12 +24,12 @@ export default function DMItem({ user, channel, match }) {
             radius="xl"
           />
 
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1 }} className="overflow-ellipsis truncate">
             <Text size="sm" weight={500}>
               {channel.type === "GROUP" ? channel.name : channel.members[0]._id!==user._id? channel.members[0].username:channel.members[1].username}
             </Text>
 
-            <Text color="dimmed" size="xs">
+            <Text className="overflow-ellipsis truncate" color="dimmed" size="xs">
               {channel.lastMessage.content} · 1h
             </Text>
           </div>

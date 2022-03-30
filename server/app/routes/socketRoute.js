@@ -18,34 +18,40 @@ module.exports = [
   },
   {
     name: CHANNEL_SOCKET.JOIN_CHANNEL,
-    controller: async (socket, { userId, roomId }) => {
+    controller: async (socket, { userId, channelId }) => {
       const userObject = await userService.getUserById(userId);
       if (!userObject) {
         throw new Error("User not found");
       }
       await Promise.all([
-        redis.set(`${SOCKET_ID_IN_ROOM}${socket.id}`, roomId),
+        redis.set(`${SOCKET_ID_IN_ROOM}${socket.id}`, channelId),
         redis.set(`${USER}${socket.id}`, JSON.stringify(userObject)),
-        redis.hSet(`${USERS_IN_ROOM}${roomId}`, userId, socket.id),
+        redis.hSet(`${USERS_IN_ROOM}${channelId}`, userId, socket.id),
       ]);
 
-      socket.join(roomId);
+      const usersInRoom = await redis.get(`${SOCKET_ID_IN_ROOM}${socket.id}`);
+
+      console.log(usersInRoom, "usersInRoom");
+
+      socket.join(channelId);
     },
   },
   {
     name: CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE,
     controller: async (socket, { msg, receiverId }) => {
-      const [roomId, userObject] = await Promise.all([
+      const [channelId, userObject] = await Promise.all([
         redis.get(`${SOCKET_ID_IN_ROOM}${socket.id}`),
         redis.get(`${USER}${socket.id}`),
       ]);
 
+      console.log(channelId, userObject,"channelId, userObject");
+
       const newMessage = msg;
       newMessage.senderId = JSON.parse(userObject);
 
-      if (roomId) socket.to(roomId).emit("roomNewMessage", newMessage);
+      if (channelId) socket.to(channelId).emit("channelNewMessage", newMessage);
 
-      const totalUsers = await redis.hGetAll(`${USERS_IN_ROOM}${roomId}`);
+      const totalUsers = await redis.hGetAll(`${USERS_IN_ROOM}${channelId}`);
 
       if (Object.keys(totalUsers).length === 1) {
         socket.to(receiverId).emit("roomOpened");
@@ -79,9 +85,9 @@ module.exports = [
   },
   {
     name: CHANNEL_SOCKET.CHANNEL_SEND_DELETE_MESSAGE,
-    controller: async (socket, { roomId, messageId }) => {
-      if (roomId) {
-        socket.to(roomId).emit("roomDeleteMessage", { messageId, roomId });
+    controller: async (socket, { channelId, messageId }) => {
+      if (channelId) {
+        socket.to(channelId).emit("roomDeleteMessage", { messageId, channelId });
       }
     },
   },
@@ -89,15 +95,15 @@ module.exports = [
     name: CHANNEL_SOCKET.CHANNEL_SEND_EDIT_MESSAGE,
     controller: async (socket, message) => {
       if (message) {
-        socket.to(message.roomId).emit("roomEditMessage", message);
+        socket.to(message.channelId).emit("roomEditMessage", message);
       }
     },
   },
   {
     name: CHANNEL_SOCKET.LEAVE_CHANNEL,
-    controller: async (socket, roomId) => {
+    controller: async (socket, channelId) => {
       redis.del(`${SOCKET_ID_IN_ROOM}${socket.id}`);
-      socket.leave(roomId);
+      socket.leave(channelId);
     },
   },
   {

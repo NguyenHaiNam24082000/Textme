@@ -17,13 +17,16 @@ const workspaceMemberSchema = new mongoose.Schema(
       required: [true, "Role must be required"],
     },
   },
+  { timestamps: true },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
-  { timestamps: true }
+  }
 );
 
-const WorkspaceMember = mongoose.model("WorkspaceMember", workspaceMemberSchema);
+const WorkspaceMember = mongoose.model(
+  "WorkspaceMember",
+  workspaceMemberSchema
+);
 
 module.exports = WorkspaceMember;

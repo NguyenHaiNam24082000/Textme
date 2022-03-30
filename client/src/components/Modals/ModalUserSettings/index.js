@@ -11,6 +11,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import Checkbox from "../../Checkbox";
 import Hotkeys from "./utils/Hotkeys";
+import { useHotkeys } from '@mantine/hooks';
+
 const sidebar = [
   {
     title: "Cài đặt người dùng",
@@ -126,8 +128,11 @@ const sidebar = [
 
 export default function ModalUsersSetting({ opened, onClose }) {
   const [active, setActive] = useState(sidebar[0].items[0].value);
+  useHotkeys([
+    ['escape', () => onClose()],
+  ]);
   return (
-    <Delayed show={opened}>
+    // <Delayed show={opened}>
       <div
         className="flex w-full h-full absolute top-0 left-0 bottom-0 right-0 bg-white overflow-hidden"
         style={{ zIndex: 500 }}
@@ -226,6 +231,6 @@ export default function ModalUsersSetting({ opened, onClose }) {
           </div>
         </div>
       </div>
-    </Delayed>
+    // </Delayed>
   );
 }

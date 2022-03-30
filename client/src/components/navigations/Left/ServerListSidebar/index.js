@@ -9,7 +9,11 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
 } from "@modulz/radix-icons";
-import { MdExplore} from "react-icons/md";
+import { MdExplore } from "react-icons/md";
+import { ActionIcon } from "@mantine/core";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ModalCreateWorkspace from "../../../Modals/ModalCreateWorkspace";
 // import { AwesomeButton } from "react-awesome-button";
 // import "react-awesome-button/dist/styles.css";
 // import "react-awesome-button/dist/themes/theme-blue.css";
@@ -23,6 +27,7 @@ import { MdExplore} from "react-icons/md";
 
 export default function Sidebar() {
   const [opened, setOpened] = useState(false);
+  const [openedModalCreateWorkspace, setOpenedModalCreateWorkspace] = useState(false);
   const [position, setPosition] = useState("left");
   const [hostKeys, setHostKeys] = useState([]);
   useHotkeys([["ctrl+shift+Z", () => openDrawer()], ...hostKeys]);
@@ -54,85 +59,38 @@ export default function Sidebar() {
     setOpened(!opened);
   };
   return (
-    <>
-      <div
-        className="sidebar flex flex-col w-16 h-full flex-shrink-0 overflow-x-hidden overflow-y-auto"
-        style={{
-          backgroundColor: "#f3f4f6",
-          borderRight: "2px solid #e5e7eb",
-        }}
-      >
-        <img
-          src="/logo512.png"
-          alt="logo"
-          className="logo my-1 mx-2 w-12 cursor-pointer"
-        />
-        <div className="h-0 m-2 flex-shrink-0" style={{borderTop: "2px solid #e2e2e2"}}>
-        </div>
+    <div
+      className="flex flex-col w-16 h-full flex-shrink-0"
+      style={{
+        backgroundColor: "#f3f4f6",
+        borderRight: "2px solid #e5e7eb",
+      }}
+    >
+      <div className="sidebar flex flex-col overflow-x-hidden overflow-y-auto">
+        <Link to="/channel/@me">
+          <ActionIcon variant="transparent" className="w-auto h-auto">
+            <img
+              src="/logo512.png"
+              alt="logo"
+              className="logo my-1 mx-2 w-12 cursor-pointer"
+            />
+          </ActionIcon>
+        </Link>
+        <div
+          className="h-0 m-2 flex-shrink-0"
+          style={{ borderTop: "2px solid #e2e2e2" }}
+        ></div>
         {/* <FocusRing> */}
-          <SpaceAvatar
-            image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-            alt="avatar"
-          />
+        <SpaceAvatar
+          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
+          alt="avatar"
+        />
         {/* </FocusRing> */}
-        <MdExplore />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <SpaceAvatar
-          image="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-          alt="avatar"
-        />
-        <MdExplore />
+        <div className="w-16 h-16 flex justify-center items-center">
+          <ActionIcon radius="xl" size={48} variant="filled" className="space-avatar" onClick={()=>setOpenedModalCreateWorkspace(true)}>
+            <FontAwesomeIcon icon="fa-solid fa-plus" className="text-xl" />
+          </ActionIcon>
+        </div>
         {/* <div
           className="h-14 w-16 justify-center items-center flex fixed z-50 bottom-0 left-0 "
           style={{ backgroundColor: "#f7f6f3" }}
@@ -177,7 +135,7 @@ export default function Sidebar() {
             </div>
           </Tooltip>
         </div> */}
-      {/* <Drawer
+        {/* <Drawer
         opened={opened}
         onClose={openDrawer}
         styles={{
@@ -216,7 +174,7 @@ export default function Sidebar() {
                   DISCOVER
                 </li>
               </ul> */}
-              {/* <div className="font-bold text-5xl">Discover</div>
+        {/* <div className="font-bold text-5xl">Discover</div>
             </div>
             <div className="flex h-auto">
               <div className="flex items-end">
@@ -341,6 +299,14 @@ export default function Sidebar() {
         </div>
       </Drawer> */}
       </div>
-    </>
+      <div class="flex justify-center items-center w-16 h-16">
+        <Link to="/discover">
+          <ActionIcon radius="xl" size={48} variant="filled" className="space-avatar">
+            <MdExplore className="text-xl" />
+          </ActionIcon>
+        </Link>
+      </div>
+      <ModalCreateWorkspace opened={openedModalCreateWorkspace} onClose={()=>setOpenedModalCreateWorkspace(false)}/>
+    </div>
   );
 }

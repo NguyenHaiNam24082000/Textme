@@ -38,6 +38,7 @@ import {
   faCommentAlt as fasFaCommentAlt,
   faSignOutAlt as fasFaSignOutAlt,
   faChevronDown as fasFaChevronDown,
+  faChevronRight as fasFaChevronRight,
   faMagnifyingGlass as fasFaMagnifyingGlass,
   faCircleInfo as fasFaCircleInfo,
   faPen as fasFaPen,
@@ -90,7 +91,9 @@ import {
   faVideoSlash as fasFaVideoSlash,
   faPhone as fasFaPhone,
   faPodcast as fasFaPodcast,
-  faHouse as fasFaHouse
+  faHouse as fasFaHouse,
+  faKey as fasFaKey,
+  faPlus as fasFaPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -180,6 +183,9 @@ library.add(
   fasFaPhone,
   fasFaPodcast,
   fasFaHouse,
+  fasFaKey,
+  fasFaPlus,
+  fasFaChevronRight,
 );
 
 const client = new QueryClient({
@@ -292,6 +298,10 @@ function App() {
                               />
                               <Route
                                 path="/channel/@me/:channel"
+                                element={<Me />}
+                              />
+                              <Route
+                                path="/discover"
                                 element={<Me />}
                               />
                               <Route path="/friends" element={<Me />} />

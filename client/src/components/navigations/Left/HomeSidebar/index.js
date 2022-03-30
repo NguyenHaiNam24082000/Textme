@@ -26,6 +26,7 @@ import { Link } from "react-router-dom";
 import DMList from "./DMList";
 import { PendingRequests } from "../../../../reactQuery/friend";
 import { useSpotlight } from "@mantine/spotlight";
+import { useState } from "react";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -117,7 +118,7 @@ const useStyles = createStyles((theme) => ({
   collectionsHeader: {
     paddingLeft: theme.spacing.xs,
     paddingRight: theme.spacing.xs,
-    // marginBottom: 5,
+    marginBottom: 8,
   },
 
   collectionLink: {
@@ -159,7 +160,6 @@ export default function HomeSidebar() {
   const { classes } = useStyles();
   const spotlight = useSpotlight();
   const { data: pendingRequestsData } = PendingRequests();
-
   const links = [
     {
       icon: <FontAwesomeIcon icon="fa-solid fa-house" />,
@@ -175,13 +175,12 @@ export default function HomeSidebar() {
     },
     // { icon: User, label: "Contacts" },
   ];
+  const [active, setActive] = useState(links[0].label);
 
   return (
     <SidebarBase>
       <div>
-        <div
-          className="flex w-full h-12 flex-shrink-0 px-2 cursor-pointer"
-        >
+        <div className="flex w-full h-12 flex-shrink-0 px-2 cursor-pointer">
           <div
             className="flex w-full h-full items-center justify-center px-2"
             style={{ borderBottom: "2px solid #e5e7eb" }}
@@ -200,32 +199,42 @@ export default function HomeSidebar() {
             />
           </div>
         </div>
-        {links &&
-          links.map((link) => (
-            <Link to={link.to} key={link.label} className="no-underline">
-              <UnstyledButton className={classes.mainLink}>
-                <div className={classes.mainLinkInner}>
-                  {link.icon}
-                  <span>{link.label}</span>
+        <div className="flex flex-col px-2 mt-2">
+          {links &&
+            links.map((link) => (
+              <Link to={link.to} key={link.label} className="no-underline">
+                <div
+                  className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200 ${
+                    active === link.label && "bg-gray-200"
+                  }`}
+                  style={{ marginBottom: 2, borderRadius: 6 }}
+                  onClick={() => {
+                    setActive(link.label);
+                  }}
+                >
+                  <div className="flex items-center justify-center w-5 contrast-50">
+                    {link.icon}
+                  </div>
+                  <div>{link.label}</div>
+                  {link.notifications > 0 && (
+                    <Badge
+                      size="sm"
+                      variant="filled"
+                      color="red"
+                      className={classes.mainLinkBadge}
+                    >
+                      {link.notifications}
+                    </Badge>
+                  )}
                 </div>
-                {link.notifications > 0 && (
-                  <Badge
-                    size="sm"
-                    variant="filled"
-                    color="red"
-                    className={classes.mainLinkBadge}
-                  >
-                    {link.notifications}
-                  </Badge>
-                )}
-              </UnstyledButton>
-            </Link>
-          ))}
+              </Link>
+            ))}
+        </div>
         <Group className={classes.collectionsHeader} position="apart">
           <Text weight={500} color="dimmed">
             Direct Messages
           </Text>
-          <Group spacing="xs">
+          <Group spacing={8}>
             <Tooltip label="List options" withArrow position="right">
               <ActionIcon variant="hover">
                 <FontAwesomeIcon icon="fa-solid fa-ellipsis" />

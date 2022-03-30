@@ -16,12 +16,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { deafen, mute } from "../../../../store/uiSlice";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import { GetMe } from "../../../../store/userSlice";
+import ModalUserSettings from "../../../Modals/ModalUserSettings";
 const MENU_ID = "menu-id";
 
 export default function UserArea() {
   const [visible, setVisible] = useState(false);
   const [referenceElement, setReferenceElement] = useState(null);
   const me = GetMe();
+  const [openedModalUserSettings, setOpenedModalUserSettings] = useState(false);
   const isMute = useSelector((state) => state.ui.isMute);
   const isDeafen = useSelector((state) => state.ui.isDeafen);
   const dispatch = useDispatch();
@@ -367,7 +369,7 @@ export default function UserArea() {
           <ActionIcon
             variant="hover"
             size="lg"
-            // onClick={() => setOpenedModalUserSettings(true)}
+            onClick={() => setOpenedModalUserSettings(true)}
           >
             <FontAwesomeIcon icon="fa-solid fa-gear" />
           </ActionIcon>
@@ -379,6 +381,11 @@ export default function UserArea() {
         <MenuItem divider />
         <MenuItem>ContextMenu Item 3</MenuItem>
       </ContextMenu>
+      {openedModalUserSettings && (
+      <ModalUserSettings
+        opened={openedModalUserSettings}
+        onClose={() => setOpenedModalUserSettings(false)}
+      />)}
     </section>
   );
 }

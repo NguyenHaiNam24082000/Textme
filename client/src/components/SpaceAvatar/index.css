@@ -1,17 +1,17 @@
-.avatar {
+.space-avatar {
     @apply rounded-full my-1;
     background-color: #2e3136;
     background-repeat: no-repeat;
     cursor: pointer;
     position: relative;
   }
-  .avatar:not(.active) {
+  .space-avatar:not(.active) {
       -webkit-animation: avatar-hover-out 0.4s linear forwards;
               animation: avatar-hover-out 0.4s linear forwards;
     }
   
-  .avatar:not(.active):hover,
-  .avatar:not(.active):focus {
+  .space-avatar:not(.active):hover,
+  .space-avatar:not(.active):focus {
     -webkit-animation: avatar-hover-in 0.8s ease forwards;
     animation: avatar-hover-in 0.8s ease forwards;
   }

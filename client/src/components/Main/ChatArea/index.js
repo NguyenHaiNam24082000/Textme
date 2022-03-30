@@ -109,6 +109,7 @@ function ChatArea({ channel, user }) {
   const [members, setMembers] = useState([]);
   const [previousIdMember, setPreviousIdMember] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [currentEditMessageId, setCurrentEditMessageId] = useState(null);
   const [currentMessageSelected, setCurrentMessageSelected] = useState(null);
   const dispatch = useDispatch();
   console.log(channel, "aAaaaaa");
@@ -126,7 +127,7 @@ function ChatArea({ channel, user }) {
         },
       }
     );
-
+    const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
   useEffect(() => {
     const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
     setMessages(msg.reverse());
@@ -181,7 +182,7 @@ function ChatArea({ channel, user }) {
               style={{
                 display: "flex",
                 flexDirection: "column-reverse",
-                overflowX: "hidden",
+                overflow: "hidden",
               }} //To put endMessage and loader to the top.
               inverse={true} //
               hasMore={hasNextPage}
@@ -194,8 +195,8 @@ function ChatArea({ channel, user }) {
               scrollableTarget="chat-viewport"
             >
               <div className="mb-5">
-                {messages &&
-                  messages.reverse().map((message, index) => (
+                {msg &&
+                  msg.reverse().map((message, index) => (
                     // <InfinityGauntlet snap={true}>
                     // <AnimatePresence key={index}>
                     <Message
@@ -203,13 +204,16 @@ function ChatArea({ channel, user }) {
                       key={message.id}
                       user={user}
                       searchMessage={searchMessage}
-                      messages={messages}
+                      messages={msg}
+                      currentEditMessageId={currentEditMessageId}
+                      setCurrentEditMessageId={setCurrentEditMessageId}
                       currentMessageSelected={currentMessageSelected}
                       setCurrentMessageSelected={setCurrentMessageSelected}
                     />
                     // </AnimatePresence>
                     // </InfinityGauntlet>
                   ))}
+                  <div className="h-2 w-full"></div>
               </div>
             </InfiniteScroll>
             {/* </div> */}

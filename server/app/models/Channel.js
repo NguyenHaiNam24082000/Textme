@@ -52,10 +52,10 @@ const channelSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    workspace: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Workspace",
-    },
+    // workspace: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Workspace",
+    // },
     nsfw: {
       type: Boolean,
       default: false,

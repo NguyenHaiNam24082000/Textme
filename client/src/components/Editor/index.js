@@ -78,6 +78,10 @@ import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
 import { Progress } from "@douyinfe/semi-ui";
 import { useQueryClient } from "react-query";
 import { sendMessage } from "../../apis/messages";
+import getSocket from "../../apis/socket";
+import { GetMe } from "../../store/userSlice";
+import { CHANNEL_MESSAGES_KEY } from "../../configs/queryKeys";
+import { CHANNEL_SOCKET } from "../../configs/socketRoute";
 
 const INLINE_STYLES = [
   { label: "Bold", style: "BOLD" },
@@ -215,6 +219,7 @@ const decorator = new CompositeDecorator([
 ]);
 
 export default function EditorDraft({channel,user}) {
+  const me = GetMe()
   const ref = useRef(null);
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty("")
@@ -231,8 +236,17 @@ export default function EditorDraft({channel,user}) {
   const [suggestionsSlash, setSuggestionsSlash] = useState(mentions["/"]);
   const [openedEditor, setOpenedEditor] = useState(false);
   const [markdown, setMarkdown] = useState("");
+  const [isTyping, setTyping] = useState(false);
+  const [socket, setSocket] = useState(null);
   const notifications = useNotifications();
   const [selectedId, setSelectedId] = useState(null);
+
+  // connect to socket on component mount.
+  useEffect(() => {
+    const newSocket = getSocket(me?.tokens?.access?.token)
+    setSocket(newSocket)
+  }, [setSocket, me?.tokens?.access?.token])
+
   useHotkeys([
     ["R", () => setOpenedEditor(true)],
     ["ctrl+R", () => setOpenedEditor(true)],
@@ -248,17 +262,18 @@ export default function EditorDraft({channel,user}) {
 
       try{
         const result = await sendMessage(data);
-        // socket.emit(CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE, {
-        //   msg: result?.data,
-        //   receiverId: friendObject(
-        //     user,
-        //     room,
-        //     'sender.id',
-        //     'sender',
-        //     'receiver'
-        //   ).id,
-        // })
+        socket.emit(CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE, {
+          msg: result?.data,
+          receiverId: channel._id,
+        })
         setEditorState(EditorState.createEmpty(""));
+        cache.setQueryData(CHANNEL_MESSAGES_KEY(channel._id), (d) => {
+          if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
+            d?.pages[0]?.results.unshift(result?.data)
+          }
+
+          return d
+        })
       }
       catch(err){
         console.log(err);
@@ -1006,23 +1021,22 @@ export default function EditorDraft({channel,user}) {
         </>
       ) : (
         <div
-          className="mb-6 flex flex-1 overflow-hidden items-center justify-between cursor-pointer"
+          className="mb-6 flex w-full overflow-ellipsis truncate items-center justify-between cursor-pointer"
           style={{
             border: "2px solid #e5e7eb",
             backgroundColor: "#e5e7eb",
             borderRadius: 6,
             padding: 8,
-            width: "unset",
           }}
           onClick={() => setOpenedEditor(true)}
         >
-          <span className="text-gray-500 text-sm truncate overflow-ellipsis flex flex-1 gap-1">
+          <div className="text-gray-500 text-sm overflow-ellipsis truncate flex flex-1 gap-1">
             {/* Rely to #test */}
             <span style={{ color: "red" }}>Draft:</span>
-            <span className="flex flex-auto truncate overflow-ellipsis">
-              aaaaaaaaaaaaaa
+            <span className="flex overflow-ellipsis truncate">
+              aaaaaaaaaaaaaaaaaaaaaaaaaaa
             </span>
-          </span>
+          </div>
           <div>
             <Kbd>R</Kbd>
           </div>
