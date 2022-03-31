@@ -29,7 +29,7 @@ export default function UserArea() {
   const dispatch = useDispatch();
   return (
     <section
-      className="flex flex-col justify-between w-full h-auto items-center px-2"
+      className="flex flex-col justify-between w-full h-auto items-center px-2 z-10"
       style={{ flex: "0 0 auto", background: "#ebedef" }}
     >
       <div

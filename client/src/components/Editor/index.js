@@ -80,7 +80,7 @@ import { useQueryClient } from "react-query";
 import { sendMessage } from "../../apis/messages";
 import getSocket from "../../apis/socket";
 import { GetMe } from "../../store/userSlice";
-import { CHANNEL_MESSAGES_KEY } from "../../configs/queryKeys";
+import { CHANNEL_MESSAGES_KEY, OPEN_CHANNEL } from "../../configs/queryKeys";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
 
 const INLINE_STYLES = [
@@ -267,6 +267,7 @@ export default function EditorDraft({channel,user}) {
           receiverId: channel._id,
         })
         setEditorState(EditorState.createEmpty(""));
+        cache.invalidateQueries(OPEN_CHANNEL);
         cache.setQueryData(CHANNEL_MESSAGES_KEY(channel._id), (d) => {
           if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
             d?.pages[0]?.results.unshift(result?.data)

@@ -12,6 +12,7 @@ import {
 import { GetMe } from "../../store/userSlice";
 import "./index.css";
 import MessageInlineEditor from "./MessageInlineEditor";
+import { Link } from "react-scroll";
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,
@@ -33,6 +34,7 @@ const patterns = {
   bracket: /\[_(.*)_\]/gm,
   circle: /\(\(_(.*)_\)\)/gs,
   map: /\[map\:\{lat\:\"[0-9]+.[0-9]+",lng:"[0-9]+.[0-9]+\"\}\]/g,
+  all: /\B@all/gm,
 };
 
 const format = (content) =>
@@ -66,13 +68,74 @@ const format = (content) =>
     )
     .replace(patterns.kbd, '<kbd class="kbd">$1</kbd>')
     .replace(patterns.hashtag, '<span class="text-blue-300">$1</span>')
-    .replace(patterns.warning, '<span class="text-warning">$1</span>');
+    .replace(patterns.warning, '<span class="text-warning">$1</span>')
+    .replace(patterns.highlight, '<span class="text-primary">$1</span>')
+    .replace(
+      patterns.all,
+      '<span class="px-[2px] py-[1px] rounded-[3px] font-medium bg-red-300 text-red-400 hover:bg-red-500 cursor-pointer select-none">@all</span>'
+    );
 
 function checkSameTime(message1, message2) {
   if (message1.sender.id !== message2.sender.id) return false;
   // if (message1.createdAt === message2.createdAt) return false;
   return getTimeDifference(message1.createdAt, message2.createdAt) < 5;
 }
+
+const systemMessageTypes = {
+  JOIN: {
+    icon: "user-plus",
+    text: "joined the workspace",
+  },
+  LEAVE: {},
+  MEMBER_ADD: {},
+  MEMBER_REMOVE: {},
+  CALL: {
+    icon: <FontAwesomeIcon icon="fa-solid fa-phone" />,
+    text: (message)=>{
+      return (<div className="select-none">
+      <a className="text-black hover:underline text-sm font-medium cursor-pointer">
+        {message.sender.username}
+      </a>
+      {` started a call that lasted ${message.call.ended_timestamp}`}
+      . — {chatMainTime(message.createdAt)}
+    </div>);
+    },
+  },
+  CHANNEL_PINNED_MESSAGE: {
+    icon: <FontAwesomeIcon icon="fa-solid fa-thumbtack" />,
+    text: (message) => {
+      return (
+        <div className="select-none">
+          <a className="text-black hover:underline text-sm font-medium cursor-pointer">
+            {message.sender.username}
+          </a>
+          {" pinned "}
+          <Link
+            to={`chat-messages-${message.messageReference.message}`}
+            activeClass="active"
+            spy={true}
+            smooth={true}
+            // href="#62380034d4b2be0e54a64da8"
+            className="text-black hover:underline text-sm font-medium cursor-pointer"
+          >
+            a message
+          </Link>
+          {" to this channel. See all "}
+          <a
+            // href="#62380034d4b2be0e54a64da8"
+            className="text-black hover:underline text-sm font-medium cursor-pointer"
+          >
+            pinned messages
+          </a>
+          . — {chatMainTime(message.createdAt)}
+        </div>
+      );
+    },
+  },
+  CHANNEL_NAME_CHANGE: {},
+  GUILD_MEMBER_JOIN: {},
+  THREAD_CREATED: {},
+};
 
 export default function Message({
   message,
@@ -88,7 +151,7 @@ export default function Message({
   const isMyMessage = message.sender.id === me.user.id;
 
   const ShowEditedLabel = (message) => {
-    if (isSameTime(message.createdAt, message.updatedAt)) {
+    if (message.messagesEdited.length === 0) {
       return null;
     }
     return (
@@ -120,6 +183,12 @@ export default function Message({
     return (
       (checkSameTime(message, prev) && !hasNewDate()) || message.systemMessage
     );
+  };
+
+  const isMentioned = () => {
+    // message.mentions.find((m) => m.id === me.user.id);
+    const isMatch = message.content.match(patterns.all);
+    return isMatch;
   };
 
   // const isSameTimeNext = () => {
@@ -190,22 +259,33 @@ export default function Message({
       >
         <div
           className={`group w-full flex justify-between relative hover:bg-slate-50 ${
-            isSameTimePrev() ? "" : "mt-4"
+            isMentioned() ? "mentioned" : ""
+          } ${isSameTimePrev() ? "" : "mt-4"} ${
+            message.systemMessage ? "mt-4" : ""
           } ${currentEditMessageId === message.id ? "bg-slate-50" : ""} ${
             currentMessageSelected === message.id ? "message-selected" : ""
           }`}
+          // style={{
+          //   background: "rgba(88, 101, 242, 0)",
+          // }}
         >
           {isSameTimePrev() ? (
             <div className="w-full flex justify-start items-center px-4 py-1">
               <div className="flex w-full">
-                <Tooltip
-                  label={getMoreDetailsTime(message?.createdAt)}
-                  withArrow
-                >
-                  <p className="cursor-default w-12 flex flex-shrink-0 justify-center mt-1 text-gray-300 text-[10px] group-hover:visible invisible">
-                    {getTime(message?.createdAt)}
-                  </p>
-                </Tooltip>
+                {message.systemMessage ? (
+                  <div className="cursor-default w-12 flex flex-shrink-0 justify-center mt-1">
+                    {systemMessageTypes[message.systemMessageType]?.icon}
+                  </div>
+                ) : (
+                  <Tooltip
+                    label={getMoreDetailsTime(message?.createdAt)}
+                    withArrow
+                  >
+                    <p className="cursor-default w-12 flex flex-shrink-0 justify-center mt-1 text-gray-300 text-[10px] group-hover:visible invisible">
+                      {getTime(message?.createdAt)}
+                    </p>
+                  </Tooltip>
+                )}
                 {currentEditMessageId === message.id ? (
                   <MessageInlineEditor
                     message={message.content}
@@ -213,12 +293,20 @@ export default function Message({
                   />
                 ) : (
                   <pre className="text-discord-100 break-all text-sm font-light ml-2 text-left">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: `${format(message.content)}`,
-                      }}
-                    ></div>
-                    {ShowEditedLabel(message)}
+                    {message.systemMessage ? (
+                      systemMessageTypes[message.systemMessageType]?.text(
+                        message
+                      )
+                    ) : (
+                      <>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: `${format(message.content)}`,
+                          }}
+                        ></div>
+                        {ShowEditedLabel(message)}
+                      </>
+                    )}
                   </pre>
                 )}
               </div>

@@ -93,19 +93,18 @@ const queryMessages = async (filter, options, user) => {
 };
 
 const searchMessages = async (filter, options, user) => {
-  const sortBy= `createdAt:${options.sort_order}`;
-  const optionsClone={
+  const sortBy = `createdAt:${options.sort_order}`;
+  const optionsClone = {
     sortBy,
-    limit:options.limit,
-    page:options.page,
-    limit:options.limit,
-  }
-  if(options.sort_by.toLowerCase()==="relevance"){
-    const content=removeAccents(filter.content);
-    filter.content={$regex:`.*${content}.*`};
-  }
-  else{
-    filter.content={$regex:`.*${filter.content}.*`};
+    limit: options.limit,
+    page: options.page,
+    limit: options.limit,
+  };
+  if (options.sort_by.toLowerCase() === "relevance") {
+    const content = removeAccents(filter.content);
+    filter.content = { $regex: `.*${content}.*` };
+  } else {
+    filter.content = { $regex: `.*${filter.content}.*` };
   }
   const filterClone = { ...filter };
   const channel = await Channel.findOne({
@@ -198,10 +197,51 @@ const deleteMessage = async (user, messageId) => {
   return message;
 };
 
+const pinnedMessage = async (user, data) => {
+  const { messageId, channelId } = data;
+  // const oldChannel = await Channel.findOne({
+  //   $or: [{ owner: user._id }, { members: user._id }],
+  //   _id: channelId,
+  // });
+  const channel = await Channel.findOneAndUpdate(
+    {
+      _id: channelId,
+      $or: [{ owner: user._id }, { members: user._id }],
+    },
+    {
+      savedMessage: messageId,
+    },
+    { upsert: true, new: true }
+  );
+  if (!channel) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
+  }
+  const message = await Message.findOne({ _id: messageId, senderId: user._id });
+  console.log(messageId, user._id,"messageId, user._id");
+  if (!message) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a message!`);
+  }
+  message.pinned = !message.pinned;
+  await message.save();
+  const systemMessage = await Message.create({
+    content: "",
+    channel: channelId,
+    messageReference: {
+      channel: channelId,
+      message: messageId,
+    },
+    sender: user._id,
+    systemMessage: true,
+    systemMessageType: "CHANNEL_PINNED_MESSAGE",
+  });
+  return systemMessage;
+};
+
 module.exports = {
   createMessage,
   queryMessages,
   editMessage,
   deleteMessage,
   searchMessages,
+  pinnedMessage,
 };

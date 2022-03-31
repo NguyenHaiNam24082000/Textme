@@ -1,9 +1,10 @@
 import { Button } from "@douyinfe/semi-ui";
 import { ActionIcon, Avatar, Collapse, Text } from "@mantine/core";
 import { IconClose } from "@douyinfe/semi-icons";
-import React from "react";
+import React, { useState } from "react";
 
-export default function Info() {
+export default function Info({setActiveMenu}) {
+  const [tabKey, setTabKey] = useState(0);
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex w-full h-10 items-center justify-end p-2">

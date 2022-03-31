@@ -21,7 +21,7 @@ export default function FriendsNavbar() {
             <Text weight={500}>Friends</Text>
           </div>
           <div className="flex gap-2 items-center">
-            <FontAwesomeIcon icon="fa-solid fa-comments" />
+            <FontAwesomeIcon icon="fa-solid fa-comments" className="cursor-pointer" />
           </div>
         </div>
       </div>

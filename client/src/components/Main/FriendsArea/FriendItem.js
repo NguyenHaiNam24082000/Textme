@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ActionIcon, Group, Menu, Text } from "@mantine/core";
+import { Avatar, ActionIcon, Group, Menu, Text } from "@mantine/core";
 import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { useNavigate } from "react-router";
@@ -31,13 +31,13 @@ export default function FriendItem({ user, friend }) {
     e.stopPropagation();
     setIsLoading(true);
     try {
-      const {data} = await getOrCreateDMChannel(friendObject(user, friend).id);
-      if(data){
+      const { data } = await getOrCreateDMChannel(
+        friendObject(user, friend).id
+      );
+      if (data) {
         cache.invalidateQueries(OPEN_CHANNEL);
         history(`/channel/@me/${data._id}`);
-      }
-      else
-      {
+      } else {
         setIsLoading(false);
       }
     } catch (err) {
@@ -52,14 +52,14 @@ export default function FriendItem({ user, friend }) {
     try {
       await cancelPendingRequestApi(friend.id);
       cache.invalidateQueries(ALL_FRIENDS_KEY);
-      const receiverId = friend.sender.id===me.id? friend.receiver.id: friend.sender.id;
-      console.log(receiverId,"receiverId");
+      const receiverId =
+        friend.sender.id === me.id ? friend.receiver.id : friend.sender.id;
+      console.log(receiverId, "receiverId");
       socket.emit(ME_SOCKET.SEND_CANCEL_FRIEND_REQUEST, {
         receiverId: receiverId,
       });
       setIsLoading(false);
-    } catch
-    (err) {
+    } catch (err) {
       // const result = apiErrorHandler(err);
       setIsLoading(false);
     }
@@ -73,14 +73,17 @@ export default function FriendItem({ user, friend }) {
         onClick={() => setOpenedModalUserProfile(true)}
       >
         <Group spacing="sm">
-          {/* <Avatar size={40} src={item.avatar} radius={40} /> */}
+          <Avatar size="lg" radius="xl">
+            Ab
+          </Avatar>
           <div>
             <div className="flex items-center">
-              <Text size="sm" weight={500}>
+              <Text size="lg" weight={500}>
                 {pendingUsername(user, friend)}
               </Text>
               <Text
                 color="dimmed"
+                size="sm"
                 className="group-hover:opacity-100 opacity-0"
               >{`#${pendingDiscriminator(user, friend)}`}</Text>
             </div>

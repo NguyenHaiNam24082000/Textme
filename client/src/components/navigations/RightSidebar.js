@@ -1,6 +1,20 @@
-import React from "react";
-
+import {
+  ActionIcon,
+  Button,
+  Input,
+  SegmentedControl,
+  Text,
+} from "@mantine/core";
+import React, { useState } from "react";
+import { CSSTransition } from "react-transition-group";
+import SelectFriends from "./Right/SelectFriends";
+import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
+import { IconClose, IconChevronLeft } from "@douyinfe/semi-icons";
+import Info from "./Right/Info";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default function RightSidebar() {
+  const [activeMenu, setActiveMenu] = useState("selectFriends");
+  const [searchMember, setSearchMember] = useState("");
   return (
     <aside
       className="flex w-96 h-full flex-shrink-0 overflow-hidden relative"
@@ -15,15 +29,15 @@ export default function RightSidebar() {
         classNames="menu-primary"
         unmountOnExit
       >
-        <Info />
+        <div className="flex flex-col w-full h-full">
+          {/* <Info setActiveMenu={setActiveMenu} /> */}
+        </div>
       </CSSTransition>
-
       <CSSTransition
         in={activeMenu === "storages"}
         timeout={250}
         classNames="menu-secondary"
         unmountOnExit
-        onEnter={calcHeight}
       >
         <div className="flex flex-col w-full h-full">
           <div className="flex w-full h-10 items-center justify-between p-2 flex-shrink-0">
@@ -74,13 +88,11 @@ export default function RightSidebar() {
           </div>
         </div>
       </CSSTransition>
-
       <CSSTransition
         in={activeMenu === "members"}
         timeout={250}
         classNames="menu-secondary"
         unmountOnExit
-        onEnter={calcHeight}
       >
         <div className="flex flex-col w-full h-full">
           <div className="flex w-full h-10 p-2 flex-shrink-0">
@@ -100,15 +112,15 @@ export default function RightSidebar() {
                 placeholder="Your email"
                 className="w-full"
                 value={searchMember}
-                onChange={onSearchChangeMembers}
+                // onChange={onSearchChangeMembers}
               />
               <Button
-                onClick={() => {
-                  const mems = users.filter((user) =>
-                    user.name.toLowerCase().includes(searchMember.toLowerCase())
-                  );
-                  setMembers(mems);
-                }}
+              // onClick={() => {
+              //   const mems = users.filter((user) =>
+              //     user.name.toLowerCase().includes(searchMember.toLowerCase())
+              //   );
+              //   setMembers(mems);
+              // }}
               >
                 Search
               </Button>
@@ -119,7 +131,7 @@ export default function RightSidebar() {
                 className="flex flex-col w-full h-full flex-1 overflow-y-auto basis-0"
               >
                 <AnimatePresence>
-                  {members.map((user, index) => {
+                  {/* {members.map((user, index) => {
                     return (
                       <motion.div
                         key={user.id}
@@ -142,7 +154,7 @@ export default function RightSidebar() {
                         />
                       </motion.div>
                     );
-                  })}
+                  })} */}
                 </AnimatePresence>
               </motion.div>
             </AnimateSharedLayout>
@@ -165,7 +177,6 @@ export default function RightSidebar() {
         timeout={250}
         classNames="menu-secondary"
         unmountOnExit
-        onEnter={calcHeight}
       >
         <div className="flex flex-col w-full h-full">
           <div className="flex w-full h-10 items-center justify-between p-2 flex-shrink-0">
@@ -185,7 +196,7 @@ export default function RightSidebar() {
                   searchable
                   // value={searchMember}
                   // onChange={onSearchChangeMembers}
-                  ref={inputRef}
+                  // ref={inputRef}
                   placeholder="Pick all that you like"
                   clearable
                 />
@@ -205,6 +216,14 @@ export default function RightSidebar() {
             </div>
           </div>
         </div>
+      </CSSTransition>
+      <CSSTransition
+        in={activeMenu === "selectFriends"}
+        timeout={250}
+        classNames="menu-secondary"
+        unmountOnExit
+      >
+        <SelectFriends setActiveMenu={setActiveMenu} />
       </CSSTransition>
     </aside>
   );

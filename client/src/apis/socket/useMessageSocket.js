@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "react-query";
 import getSocket from "./index";
 import { GetMe } from "../../store/userSlice";
-import { CHANNEL_MESSAGES_KEY } from "../../configs/queryKeys";
+import { CHANNEL_MESSAGES_KEY, OPEN_CHANNEL } from "../../configs/queryKeys";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
 
 export default function useMessageSocket(channelId, key) {
@@ -19,6 +19,7 @@ export default function useMessageSocket(channelId, key) {
             userId: me?.user?.id,
           });
         socket.on(CHANNEL_SOCKET.CHANNEL_NEW_MESSAGE, (newMessage) => {
+          cache.invalidateQueries(OPEN_CHANNEL);
           cache.setQueryData(CHANNEL_MESSAGES_KEY(channelId), (d) => {
             if (d?.pages[0]?.results[0]?.id !== newMessage.id)
               d?.pages[0]?.results.unshift(newMessage);

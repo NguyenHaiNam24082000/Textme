@@ -287,7 +287,7 @@ export default function AccountDetail() {
                   mode="normal"
                   src="https://assets8.lottiefiles.com/packages/lf20_GxMZME.json"
                   style={{ width: 128, height: 128 }}
-                  class="bg-yellow-400 rounded-full"
+                  className="bg-yellow-400 rounded-full"
                 ></lottie-player>
 
                 <Text weight={500} size="md" className="text-inherit">
@@ -396,7 +396,7 @@ export default function AccountDetail() {
                     mode="normal"
                     src="https://assets3.lottiefiles.com/private_files/lf30_BQDoDk.json"
                     style={{ width: 128, height: 128 }}
-                    class="bg-yellow-400 rounded-full"
+                    className="bg-yellow-400 rounded-full"
                   ></lottie-player>
                 </div>
 

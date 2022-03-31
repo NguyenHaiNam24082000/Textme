@@ -5,12 +5,26 @@ const messageSchema = new mongoose.Schema(
   {
     content: {
       type: String,
-      required: [true, "Content must be required"],
+      // required: [true, "Content must be required"],
       trim: true,
     },
     systemMessage: {
       type: Boolean,
       default: false,
+    },
+    systemMessageType: {
+      type: String,
+      enum: [
+        "JOIN",
+        "LEAVE",
+        "MEMBER_ADD",
+        "MEMBER_REMOVE",
+        "CALL",
+        "CHANNEL_PINNED_MESSAGE",
+        "CHANNEL_NAME_CHANGE",
+        "GUILD_MEMBER_JOIN",
+        "THREAD_CREATED",
+      ],
     },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
@@ -22,7 +36,32 @@ const messageSchema = new mongoose.Schema(
       ref: "Channel",
       required: [true, "Channel must be required"],
     },
-    pinned:{
+    pinned: {
+      type: Boolean,
+      default: false,
+    },
+    messageReference: {
+      channel: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Channel",
+      },
+      message: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message",
+      },
+    },
+    call: {
+      participants: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
+      ended_timestamp: {
+        type: Date,
+      },
+    },
+    mention_everyone: {
       type: Boolean,
       default: false,
     },
@@ -90,7 +129,7 @@ const messageSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
+  }
 );
 
 // add plugin that converts mongoose to json

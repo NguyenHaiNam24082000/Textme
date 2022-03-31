@@ -9,9 +9,16 @@ import { GetOpenChannels } from "../../../../../reactQuery/channel";
 
 const ShowOpenDMChannel = ({ user, channels }) => {
   const match = useMatch("/channel/@me/:channelId");
-  return channels.map((channel, index) => (
-    <DMItem key={channel.id} user={user} channel={channel} match={match}/>
-  ));
+  return channels
+    .sort(function (a, b) {
+      const date1 = new Date(a.updatedAt);
+      const date2 = new Date(b.updatedAt);
+
+      return date2 - date1;
+    })
+    .map((channel, index) => (
+      <DMItem key={channel.id} user={user} channel={channel} match={match} />
+    ));
 };
 
 const EmptyDmList = () => {
@@ -23,7 +30,7 @@ const EmptyDmList = () => {
 };
 
 export default function DMList() {
-  const {isLoading,data:channelList} = GetOpenChannels();
+  const { isLoading, data: channelList } = GetOpenChannels();
   const { user } = useSelector((state) => state.user);
   const [channels, setChannels] = useState();
   useEffect(async () => {
@@ -32,9 +39,9 @@ export default function DMList() {
   console.log(channels, "channels");
   return (
     <>
-      {!isLoading && channels && channels?.length ? (
-        <Group className="flex flex-col">
-          <ShowOpenDMChannel user={user} channels={channels} />
+      {!isLoading && channelList && channelList?.length ? (
+        <Group spacing={4} className="flex flex-col">
+          <ShowOpenDMChannel user={user} channels={channelList} />
         </Group>
       ) : (
         <EmptyDmList />

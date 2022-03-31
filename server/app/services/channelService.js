@@ -1,5 +1,5 @@
 const httpStatus = require("http-status");
-const { Channel,Friend } = require("../models");
+const { Channel, Friend } = require("../models");
 const ApiError = require("../utils/ApiError");
 
 /**
@@ -43,27 +43,42 @@ const createDMChannel = async (user, body) => {
   const DMChannel = await createChannel({
     type: "DM",
     members: [user.id, friendId],
-  }).populate("members");
-  const friend = Friend.findOne({
-    $or: [
-      { sender: user.id, receiver: friendId },
-      { sender: friendId, receiver: user.id },
-    ],
   });
-  if (friend) {
-    friend.channel = DMChannel._id;
-    friend.save();
-  }
-  return DMChannel;
+  await Friend.findOneAndUpdate(
+    {
+      $or: [
+        { sender: user.id, receiver: friendId },
+        { sender: friendId, receiver: user.id },
+      ],
+    },
+    {
+      channel: DMChannel.id,
+    },
+    {
+      upsert: true,
+      new: true,
+    }
+  );
+  // if (friend) {
+  //   friend.channel = DMChannel._id;
+  //   friend.save();
+  // }
+  return DMChannel.populate("members");
 };
 
-const alreadyInDMChannel = async (user, friend) => {
+const alreadyInDMChannel = async (user, friendId) => {
   const channel = await Channel.findOne({
     $or: [
-      { owner: user._id, members: friend._id },
-      { owner: friend._id, members: user._id },
+      {
+        $and: [{ owner: user._id }, { members: friendId }],
+      },
+      {
+        $and: [{ owner: friendId }, { members: user._id }],
+      },
+      { members: [user._id, friendId] },
     ],
   }).populate("members");
+  console.log(channel, "channel");
   return channel;
 };
 
@@ -136,7 +151,9 @@ const queryChannels = async (filter, options) => {
 const getAllDMChannels = async (user) => {
   const query = Channel.find({
     $and: [{ members: user }, { type: "DM" }],
-  }).populate("members").populate("lastMessage");
+  })
+    .populate("members")
+    .populate("lastMessage");
 
   const channels = await query;
 
@@ -146,7 +163,9 @@ const getAllDMChannels = async (user) => {
 const getAllGroupChannels = async (user) => {
   const query = Channel.find({
     $and: [{ members: user }, { type: "GROUP" }],
-  }).populate("members").populate("lastMessage");
+  })
+    .populate("members")
+    .populate("lastMessage");
 
   const channels = await query;
 

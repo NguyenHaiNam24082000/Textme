@@ -202,7 +202,7 @@ export default function HomeSidebar() {
         <div className="flex flex-col px-2 mt-2">
           {links &&
             links.map((link) => (
-              <Link to={link.to} key={link.label} className="no-underline">
+              <Link to={link.to} key={link.label} className="no-underline text-black">
                 <div
                   className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200 ${
                     active === link.label && "bg-gray-200"
@@ -215,7 +215,7 @@ export default function HomeSidebar() {
                   <div className="flex items-center justify-center w-5 contrast-50">
                     {link.icon}
                   </div>
-                  <div>{link.label}</div>
+                  <div className="flex flex-auto">{link.label}</div>
                   {link.notifications > 0 && (
                     <Badge
                       size="sm"

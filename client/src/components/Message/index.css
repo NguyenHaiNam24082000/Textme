@@ -331,3 +331,21 @@ pre
   font-size: inherit;
   white-space: pre-wrap;
 }
+
+.mentioned {
+  --saturation-factor: 0.6;
+  position: relative;
+  background: hsla(38,calc(var(--saturation-factor, 1)*95.7%),54.1%,0.1);
+}
+
+.mentioned::before {
+  content: "";
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  width: 2px;
+  background: #cd9c47;
+}

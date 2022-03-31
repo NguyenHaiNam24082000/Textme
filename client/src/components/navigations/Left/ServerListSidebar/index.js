@@ -299,7 +299,7 @@ export default function Sidebar() {
         </div>
       </Drawer> */}
       </div>
-      <div class="flex justify-center items-center w-16 h-16">
+      <div className="flex justify-center items-center w-16 h-16">
         <Link to="/discover">
           <ActionIcon radius="xl" size={48} variant="filled" className="space-avatar">
             <MdExplore className="text-xl" />
