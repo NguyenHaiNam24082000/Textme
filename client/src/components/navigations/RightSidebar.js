@@ -8,12 +8,13 @@ import {
 import React, { useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import SelectFriends from "./Right/SelectFriends";
+import PinnedList from "./Right/PinnedList";
 import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
 import { IconClose, IconChevronLeft } from "@douyinfe/semi-icons";
 import Info from "./Right/Info";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-export default function RightSidebar() {
-  const [activeMenu, setActiveMenu] = useState("selectFriends");
+export default function RightSidebar({ channel = null }) {
+  const [activeMenu, setActiveMenu] = useState("pinnedList");
   const [searchMember, setSearchMember] = useState("");
   return (
     <aside
@@ -225,6 +226,16 @@ export default function RightSidebar() {
       >
         <SelectFriends setActiveMenu={setActiveMenu} />
       </CSSTransition>
+      {channel && (
+        <CSSTransition
+          in={activeMenu === "pinnedList"}
+          timeout={250}
+          classNames="menu-secondary"
+          unmountOnExit
+        >
+          <PinnedList channel={channel} />
+        </CSSTransition>
+      )}
     </aside>
   );
 }

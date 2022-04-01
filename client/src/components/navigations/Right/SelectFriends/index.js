@@ -17,21 +17,26 @@ import Checkbox from "../../../Checkbox";
 import { AllFriends } from "../../../../reactQuery/friend";
 import { GetMe } from "../../../../store/userSlice";
 import friendObject from "../../../../commons/friendObject";
+import ModalCreateNewGroup from "../../../Modals/ModalCreateNewGroup";
+import {
+  getOrCreateDMChannel,
+  createGroupChannel,
+} from "../../../../apis/channel";
+import { OPEN_CHANNEL } from "../../../../configs/queryKeys";
+import { GetOpenChannels } from "../../../../reactQuery/channel";
+import { useNavigate } from "react-router";
+import { useQueryClient } from "react-query";
 
-const countriesData = [
-  { label: "United States", value: "US" },
-  { label: "Great Britain", value: "GB" },
-  { label: "Finland", value: "FI" },
-  { label: "France", value: "FR" },
-  { label: "Russia", value: "RU" },
-];
-
-const Item = forwardRef(({ label, value, ...others }, ref) => {
+const Item = forwardRef(({ value, label, ...others }, ref) => {
   // const Flag = flags[value];
   return (
     <div ref={ref} {...others}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Box mr={10}>{/* <Flag /> */}</Box>
+        <Box mr={10}>
+          <Avatar radius="xl" size="sm">
+            XL
+          </Avatar>
+        </Box>
         <div>{label}</div>
       </Box>
     </div>
@@ -58,7 +63,11 @@ function Value({ value, label, onRemove, classNames, ...others }) {
           borderRadius: 4,
         })}
       >
-        <Box mr={10}>{/* <Flag /> */}</Box>
+        <Box mr={10}>
+          <Avatar radius="xl" size="xs">
+            XL
+          </Avatar>
+        </Box>
         <Box sx={{ lineHeight: 1, fontSize: 12 }}>{label}</Box>
         <CloseButton
           onMouseDown={onRemove}
@@ -75,14 +84,79 @@ function Value({ value, label, onRemove, classNames, ...others }) {
 export default function SelectFriends({ setActiveMenu }) {
   const me = GetMe();
   const { isLoading, data: allFriends } = AllFriends();
-  const [data, setData] = useState([]);
+  const { data: channels } = GetOpenChannels();
+  const [groupChannels, setGroupChannels] = useState([]);
+  const [openedModalCreateNewGroup, setOpenedModalCreateNewGroup] =
+    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [value, setValue] = useState([]);
+  const history = useNavigate();
+  const cache = useQueryClient();
+
+  const data = allFriends
+    ? allFriends.flatMap((friend) => {
+        const obj = friendObject(me, friend);
+        return {
+          value: obj.id,
+          label: obj.username,
+        };
+      })
+    : [];
+
+  const createGroup = async () => {
+    if (value.length === 0) {
+      return;
+    }
+    try {
+      if (value.length === 1) {
+        const { data: channel } = await getOrCreateDMChannel(value[0]);
+        if (channel) {
+          cache.invalidateQueries(OPEN_CHANNEL);
+          history(`/channel/@me/${channel._id}`);
+        } else {
+          setLoading(false);
+        }
+      } else if (value.length > 1) {
+        const data = channels.filter((channel) => {
+          if (channel.type === "GROUP") {
+            const members = [...value, me.id].filter(
+              (id) => channel.owner.id !== id
+            );
+            if (
+              channel.members.every((member) => members.includes(member.id))
+            ) {
+              return channel;
+            }
+          }
+        });
+        setGroupChannels(data);
+        if (data.length) {
+          setOpenedModalCreateNewGroup(true);
+        } else {
+          const { data: channel } = await createGroupChannel({
+            members: value,
+          });
+          if (channel) {
+            cache.invalidateQueries(OPEN_CHANNEL);
+            history(`/channel/@me/${channel._id}`);
+          } else {
+            setLoading(false);
+          }
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex w-full h-10 p-2 flex-shrink-0">
         <div className="flex w-full items-center justify-between">
-          <ActionIcon onClick={() => setActiveMenu("main")}>
+          {/* <ActionIcon onClick={() => setActiveMenu("main")}>
             <IconChevronLeft />
-          </ActionIcon>
+          </ActionIcon> */}
           <Text weight={500}>Select Friend</Text>
           <ActionIcon>
             <IconClose />
@@ -93,12 +167,14 @@ export default function SelectFriends({ setActiveMenu }) {
         <div className="flex w-full h-12 py-2 my-1">
           <MultiSelect
             data={data}
+            value={value}
+            onChange={setValue}
             valueComponent={Value}
             itemComponent={Item}
             className="w-full"
             searchable
             placeholder="Type the username of a friend"
-            label="You can add 9 more friends"
+            label={`You can add ${data.length - value.length} more friends`}
           />
         </div>
         <AnimateSharedLayout>
@@ -134,14 +210,14 @@ export default function SelectFriends({ setActiveMenu }) {
               {allFriends &&
                 allFriends.map((user, index) => (
                   <Checkbox
-                    isChecked={data.includes(friendObject(me, user).id)}
+                    isChecked={value.includes(friendObject(me, user).id)}
                     onClick={() => {
-                      if (data.includes(friendObject(me, user).id)) {
-                        setData(
-                          data.filter((id) => id !== friendObject(me, user).id)
+                      if (value.includes(friendObject(me, user).id)) {
+                        setValue(
+                          value.filter((id) => id !== friendObject(me, user).id)
                         );
                       } else {
-                        setData([...data, friendObject(me, user).id]);
+                        setValue([...value, friendObject(me, user).id]);
                       }
                     }}
                     className={`hover:bg-slate-200 flex w-full h-11 p-2 rounded-md justify-between items-center cursor-pointer`}
@@ -152,9 +228,11 @@ export default function SelectFriends({ setActiveMenu }) {
                         src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
                       />
                       <div className="select-none">
-                        <Text weight={600}>HaiNam</Text>
+                        <Text weight={600}>
+                          {friendObject(me, user).username}
+                        </Text>
                         <Text size="xs" color="dimmed">
-                          HaiNam
+                          #{friendObject(me, user).discriminator}
                         </Text>
                       </div>
                     </Group>
@@ -167,14 +245,19 @@ export default function SelectFriends({ setActiveMenu }) {
         <div className="flex w-full h-12 mt-1">
           <Button
             className="w-full bg-yellow-400"
-            onClick={() => {
-              setActiveMenu("members");
-            }}
+            onClick={createGroup}
+            loading={loading}
           >
             Create Group DM
           </Button>
         </div>
       </div>
+      <ModalCreateNewGroup
+        opened={openedModalCreateNewGroup}
+        onClose={() => setOpenedModalCreateNewGroup(false)}
+        channels={groupChannels}
+        members={value}
+      />
     </div>
   );
 }

@@ -13,6 +13,11 @@ import { GetMe } from "../../store/userSlice";
 import "./index.css";
 import MessageInlineEditor from "./MessageInlineEditor";
 import { Link } from "react-scroll";
+import { pinnedMessage } from "../../apis/channel";
+import getSocket from "../../apis/socket";
+import { useQueryClient } from "react-query";
+import { CHANNEL_SOCKET } from "../../configs/socketRoute";
+import { CHANNEL_MESSAGES_KEY } from "../../configs/queryKeys";
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,
@@ -91,14 +96,16 @@ const systemMessageTypes = {
   MEMBER_REMOVE: {},
   CALL: {
     icon: <FontAwesomeIcon icon="fa-solid fa-phone" />,
-    text: (message)=>{
-      return (<div className="select-none">
-      <a className="text-black hover:underline text-sm font-medium cursor-pointer">
-        {message.sender.username}
-      </a>
-      {` started a call that lasted ${message.call.ended_timestamp}`}
-      . — {chatMainTime(message.createdAt)}
-    </div>);
+    text: (message) => {
+      return (
+        <div className="select-none">
+          <a className="text-black hover:underline text-sm font-medium cursor-pointer">
+            {message.sender.username}
+          </a>
+          {` started a call that lasted ${message.call.ended_timestamp}`}. —{" "}
+          {chatMainTime(message.createdAt)}
+        </div>
+      );
     },
   },
   CHANNEL_PINNED_MESSAGE: {
@@ -132,6 +139,39 @@ const systemMessageTypes = {
       );
     },
   },
+  CHANNEL_UNPINNED_MESSAGE: {
+    icon: (
+      <FontAwesomeIcon icon="fa-solid fa-thumbtack" className="text-red-600" />
+    ),
+    text: (message) => {
+      return (
+        <div className="select-none">
+          <a className="text-black hover:underline text-sm font-medium cursor-pointer">
+            {message.sender.username}
+          </a>
+          {" unpinned "}
+          <Link
+            to={`chat-messages-${message.messageReference.message}`}
+            activeClass="active"
+            spy={true}
+            smooth={true}
+            // href="#62380034d4b2be0e54a64da8"
+            className="text-black hover:underline text-sm font-medium cursor-pointer"
+          >
+            a message
+          </Link>
+          {" on this channel. See all "}
+          <a
+            // href="#62380034d4b2be0e54a64da8"
+            className="text-black hover:underline text-sm font-medium cursor-pointer"
+          >
+            pinned messages
+          </a>
+          . — {chatMainTime(message.createdAt)}
+        </div>
+      );
+    },
+  },
   CHANNEL_NAME_CHANGE: {},
   GUILD_MEMBER_JOIN: {},
   THREAD_CREATED: {},
@@ -146,6 +186,7 @@ export default function Message({
   setCurrentMessageSelected,
 }) {
   const me = GetMe();
+  const cache = useQueryClient();
   const isUnread = false;
 
   const isMyMessage = message.sender.id === me.user.id;
@@ -181,7 +222,7 @@ export default function Message({
     const prev = messages[index - 1];
     if (!prev) return false;
     return (
-      (checkSameTime(message, prev) && !hasNewDate()) || message.systemMessage
+      (checkSameTime(message, prev) && !hasNewDate() && !prev.systemMessage) || message.systemMessage
     );
   };
 
@@ -189,6 +230,28 @@ export default function Message({
     // message.mentions.find((m) => m.id === me.user.id);
     const isMatch = message.content.match(patterns.all);
     return isMatch;
+  };
+
+  const pinMessage = async () => {
+    const messageId = message.id;
+    const channelId = message.channel;
+    try {
+      const result = await pinnedMessage(channelId, messageId);
+      const socket = getSocket(me?.tokens?.access?.token);
+      socket.emit(CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE, {
+        msg: result?.data,
+        receiverId: channelId,
+      })
+      cache.setQueryData(CHANNEL_MESSAGES_KEY(channelId), (d) => {
+        if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
+          d?.pages[0]?.results.unshift(result?.data)
+        }
+
+        return d
+      })
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // const isSameTimeNext = () => {
@@ -292,7 +355,7 @@ export default function Message({
                     finish={() => setCurrentEditMessageId(null)}
                   />
                 ) : (
-                  <pre className="text-discord-100 break-all text-sm font-light ml-2 text-left">
+                  <pre className="break-all text-sm ml-2 font-normal text-left">
                     {message.systemMessage ? (
                       systemMessageTypes[message.systemMessageType]?.text(
                         message
@@ -360,8 +423,8 @@ export default function Message({
                     finish={() => setCurrentEditMessageId(null)}
                   />
                 ) : (
-                  <div className="flex  w-full ">
-                    <pre className="break-all text-discord-100 text-sm font-light text-left">
+                  <div className="flex w-full">
+                    <pre className="break-all text-sm font-normal text-left">
                       <div
                         dangerouslySetInnerHTML={{
                           __html: `${format(message.content)}`,
@@ -412,9 +475,10 @@ export default function Message({
                     </Menu.Item>
                   )}
                   <Menu.Item
-                    icon={<FontAwesomeIcon icon="fa-solid fa-thumbtack" />}
+                    onClick={pinMessage}
+                    icon={<FontAwesomeIcon icon="fa-solid fa-thumbtack" className={`${message.pinned?"text-red-600":""}`} />}
                   >
-                    Ghim tin nhắn
+                    {message.pinned ? "Bỏ ghim" : "Ghim tin nhắn"}
                   </Menu.Item>
                   <Menu.Item
                     icon={<FontAwesomeIcon icon="fa-solid fa-reply" />}

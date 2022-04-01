@@ -55,7 +55,7 @@ const createMessage = async (user, body) => {
   channel.lastMessage = message._id;
   await channel.save();
 
-  return message;
+  return message.populate("sender");
 };
 
 /**
@@ -197,51 +197,10 @@ const deleteMessage = async (user, messageId) => {
   return message;
 };
 
-const pinnedMessage = async (user, data) => {
-  const { messageId, channelId } = data;
-  // const oldChannel = await Channel.findOne({
-  //   $or: [{ owner: user._id }, { members: user._id }],
-  //   _id: channelId,
-  // });
-  const channel = await Channel.findOneAndUpdate(
-    {
-      _id: channelId,
-      $or: [{ owner: user._id }, { members: user._id }],
-    },
-    {
-      savedMessage: messageId,
-    },
-    { upsert: true, new: true }
-  );
-  if (!channel) {
-    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
-  }
-  const message = await Message.findOne({ _id: messageId, senderId: user._id });
-  console.log(messageId, user._id,"messageId, user._id");
-  if (!message) {
-    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a message!`);
-  }
-  message.pinned = !message.pinned;
-  await message.save();
-  const systemMessage = await Message.create({
-    content: "",
-    channel: channelId,
-    messageReference: {
-      channel: channelId,
-      message: messageId,
-    },
-    sender: user._id,
-    systemMessage: true,
-    systemMessageType: "CHANNEL_PINNED_MESSAGE",
-  });
-  return systemMessage;
-};
-
 module.exports = {
   createMessage,
   queryMessages,
   editMessage,
   deleteMessage,
   searchMessages,
-  pinnedMessage,
 };

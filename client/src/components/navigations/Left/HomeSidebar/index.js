@@ -199,55 +199,61 @@ export default function HomeSidebar() {
             />
           </div>
         </div>
-        <div className="flex flex-col px-2 mt-2">
-          {links &&
-            links.map((link) => (
-              <Link to={link.to} key={link.label} className="no-underline text-black">
-                <div
-                  className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200 ${
-                    active === link.label && "bg-gray-200"
-                  }`}
-                  style={{ marginBottom: 2, borderRadius: 6 }}
-                  onClick={() => {
-                    setActive(link.label);
-                  }}
+        <div className="flex flex-col flex-auto">
+          <div className="flex flex-col px-2 mt-2">
+            {links &&
+              links.map((link) => (
+                <Link
+                  to={link.to}
+                  key={link.label}
+                  className="no-underline text-black"
                 >
-                  <div className="flex items-center justify-center w-5 contrast-50">
-                    {link.icon}
+                  <div
+                    className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200 ${
+                      active === link.label && "bg-gray-200"
+                    }`}
+                    style={{ marginBottom: 2, borderRadius: 6 }}
+                    onClick={() => {
+                      setActive(link.label);
+                    }}
+                  >
+                    <div className="flex items-center justify-center w-5 contrast-50">
+                      {link.icon}
+                    </div>
+                    <div className="flex flex-auto">{link.label}</div>
+                    {link.notifications > 0 && (
+                      <Badge
+                        size="sm"
+                        variant="filled"
+                        color="red"
+                        className={classes.mainLinkBadge}
+                      >
+                        {link.notifications}
+                      </Badge>
+                    )}
                   </div>
-                  <div className="flex flex-auto">{link.label}</div>
-                  {link.notifications > 0 && (
-                    <Badge
-                      size="sm"
-                      variant="filled"
-                      color="red"
-                      className={classes.mainLinkBadge}
-                    >
-                      {link.notifications}
-                    </Badge>
-                  )}
-                </div>
-              </Link>
-            ))}
-        </div>
-        <Group className={classes.collectionsHeader} position="apart">
-          <Text weight={500} color="dimmed">
-            Direct Messages
-          </Text>
-          <Group spacing={8}>
-            <Tooltip label="List options" withArrow position="right">
-              <ActionIcon variant="hover">
-                <FontAwesomeIcon icon="fa-solid fa-ellipsis" />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip label="Create collection" withArrow position="right">
-              <ActionIcon variant="hover">
-                <FontAwesomeIcon icon="fa-solid fa-plus" />
-              </ActionIcon>
-            </Tooltip>
+                </Link>
+              ))}
+          </div>
+          <Group className={classes.collectionsHeader} position="apart">
+            <Text weight={500} color="dimmed">
+              Direct Messages
+            </Text>
+            <Group spacing={8}>
+              <Tooltip label="List options" withArrow position="right">
+                <ActionIcon variant="hover">
+                  <FontAwesomeIcon icon="fa-solid fa-ellipsis" />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip label="Create collection" withArrow position="right">
+                <ActionIcon variant="hover">
+                  <FontAwesomeIcon icon="fa-solid fa-plus" />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
           </Group>
-        </Group>
-        <DMList />
+          <DMList />
+        </div>
       </div>
     </SidebarBase>
   );

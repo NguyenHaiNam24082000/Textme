@@ -11,5 +11,17 @@ router.get(
   auth(),
   channelController.getGroupChannels
 );
+router.get(
+  "/get-existing-group-channels",
+  auth(),
+  channelController.getExistingGroupChannels
+);
+router.post("/create-group-channel", auth(), channelController.createGroupChannel);
+router.get("/:channelId/pins", auth(), channelController.getPinnedMessage);
+router.put(
+  "/:channelId/pins/:messageId",
+  auth(),
+  channelController.pinnedMessage
+);
 
 module.exports = router;

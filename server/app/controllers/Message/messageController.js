@@ -55,16 +55,10 @@ const editMessage = catchAsync(async (req, res, next) => {
   res.status(httpStatus.CREATED).send(result);
 });
 
-const pinnedMessage = catchAsync(async (req, res, next) => {
-  const result = await messageService.pinnedMessage(req.user, req.params);
-  res.status(httpStatus.NO_CONTENT).send(result);
-})
-
 
 module.exports = {
   sendMessage,
   getMessages,
   editMessage,
   searchMessages,
-  pinnedMessage,
 };

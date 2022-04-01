@@ -16,8 +16,8 @@ import { MdScreenShare } from "react-icons/md";
 import VideoCall from "../../../VideoCall";
 import ModalUserProfile from "../../../Modals/ModalUserProfile";
 import { useDispatch, useSelector } from "react-redux";
-import { mute, deafen } from "../../../../store/uiSlice";
-export default function DMChannelNavbar() {
+import { mute, deafen, voiceConnected } from "../../../../store/uiSlice";
+export default function DMChannelNavbar({ channel, user }) {
   const [voiceCall, setVoiceCall] = useState(false);
   const [videoCall, setVideoCall] = useState(false);
   const [openedMenuReactions, setOpenedMenuReactions] = useState(false);
@@ -44,6 +44,7 @@ export default function DMChannelNavbar() {
     const ring = setTimeout(() => {
       setVoiceCall(false);
       setVideoCall(false);
+      dispatch(voiceConnected(false));
       clearInterval(ringSound);
     }, 30000);
     return () => {
@@ -52,6 +53,7 @@ export default function DMChannelNavbar() {
       clearTimeout(ring);
     };
   }, [voiceCall, videoCall]);
+
   return (
     <section
       className="h-auto w-full min-w-0 relative flex shadow-sm"
@@ -79,7 +81,17 @@ export default function DMChannelNavbar() {
               src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
             />
             <div className="flex flex-col">
-              <span className="font-bold">@HaiNam2000</span>
+              <span className="font-bold">
+                {channel?.type === "GROUP"
+                  ? channel?.name === null
+                    ? channel?.members
+                        .map((member) => member?.username)
+                        .join(", ")
+                    : channel?.name
+                  : channel?.members[0]._id !== user._id
+                  ? channel?.members[0].username
+                  : channel?.members[1].username}
+              </span>
               <span className="text-xs">Online</span>
             </div>
           </Group>
@@ -92,12 +104,17 @@ export default function DMChannelNavbar() {
                   onClick={() => {
                     setVoiceCall(true);
                     dispatch(mute(false));
+                    dispatch(voiceConnected(true));
                   }}
                 />
                 <FontAwesomeIcon
                   icon="fa-solid fa-video"
                   className="cursor-pointer"
-                  onClick={() => setVideoCall(true)}
+                  onClick={() => {
+                    setVideoCall(true);
+                    dispatch(mute(false));
+                    dispatch(voiceConnected(true));
+                  }}
                 />
               </>
             )}
@@ -107,7 +124,9 @@ export default function DMChannelNavbar() {
             />
             <FontAwesomeIcon
               icon="fa-solid fa-thumbtack"
-              className="cursor-pointer fa-bounce"
+              className={`cursor-pointer ${
+                channel?.savedMessages.length ? "fa-bounce" : ""
+              }`}
             />
             <FontAwesomeIcon
               icon="fa-solid fa-inbox"
@@ -270,7 +289,10 @@ export default function DMChannelNavbar() {
                 variant="filled"
                 onClick={() => playEnd()}
               >
-                <FontAwesomeIcon icon="fa-solid fa-phone" className="rotate-[135deg]"/>
+                <FontAwesomeIcon
+                  icon="fa-solid fa-phone"
+                  className="rotate-[135deg]"
+                />
               </ActionIcon>
             </div>
           </div>

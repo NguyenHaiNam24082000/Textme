@@ -40,7 +40,7 @@ export default function DMList() {
   return (
     <>
       {!isLoading && channelList && channelList?.length ? (
-        <Group spacing={4} className="flex flex-col">
+        <Group spacing={4} className="flex flex-col overflow-y-auto">
           <ShowOpenDMChannel user={user} channels={channelList} />
         </Group>
       ) : (

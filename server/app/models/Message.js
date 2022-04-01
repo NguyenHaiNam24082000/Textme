@@ -20,6 +20,7 @@ const messageSchema = new mongoose.Schema(
         "MEMBER_ADD",
         "MEMBER_REMOVE",
         "CALL",
+        "CHANNEL_UNPINNED_MESSAGE",
         "CHANNEL_PINNED_MESSAGE",
         "CHANNEL_NAME_CHANGE",
         "GUILD_MEMBER_JOIN",

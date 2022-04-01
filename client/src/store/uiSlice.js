@@ -10,6 +10,7 @@ const slice = createSlice({
       : false,
     isMute: get("mute") ?? false,
     isDeafen: get("deafen") ?? false,
+    isVoiceConnected: get("voiceConnected") ?? false,
     //isCallEnded: 
   },
   reducers: {
@@ -33,6 +34,9 @@ const slice = createSlice({
     closedModal: (state, action) => {
       state.openedModal = null;
     },
+    voiceConnected: (state, action) => {
+      state.isVoiceConnected = action.payload;
+    },
   },
 });
 
@@ -46,6 +50,7 @@ export const isVisibleChanel = (state) => state.ui.isVisibleChanel;
 export const isVisibleComplement = (state) => state.ui.isVisibleComplement;
 export const isMute = (state) => state.ui.isMute;
 export const isDeafen = (state) => state.ui.isDeafen;
+export const isVoiceConnectedSelector = (state) => state.ui.isVoiceConnected;
 
 // export const closeModal = (dispatch) => {
 //     dispatch(actions.closedModal());
@@ -62,4 +67,5 @@ export const {
   closedModal,
   mute,
   deafen,
+  voiceConnected,
 } = slice.actions;
