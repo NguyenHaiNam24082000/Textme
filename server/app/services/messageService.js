@@ -1,8 +1,17 @@
 const httpStatus = require("http-status");
 const { removeAccents } = require("../commons/removeAccents");
 const { FriendRequest, Channel, Message } = require("../models");
+const sizeOf = require("image-size");
+const url = require("url");
+const httpRequest = require("https");
+const { canPlay } = require("../configs/patterns");
 // const { FRIEND_STATUS } = require("../configs/friendStatus");
 const ApiError = require("../utils/ApiError");
+const ogs = require("open-graph-scraper");
+
+const http_regex =
+  /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/gm;
+const size_url = /(?:[-_]?[0-9]+x[0-9]+)+/g;
 
 function friendId(user, object) {
   if (user._id.toString() === object.sender.toString()) return object.receiver;
@@ -17,7 +26,7 @@ function friendId(user, object) {
  * @returns {Promise<User>}
  */
 const createMessage = async (user, body) => {
-  const { channelId } = body;
+  const { channelId, content } = body;
 
   const channel = await Channel.findOne({
     $or: [{ owner: user._id }, { members: user._id }],
@@ -30,6 +39,7 @@ const createMessage = async (user, body) => {
       `there is no room between you and your friend!`
     );
   }
+  let embedLink = await postLink(content);
 
   // const friendShip = await FriendRequest.findOne({
   //   $or: [
@@ -50,6 +60,7 @@ const createMessage = async (user, body) => {
     ...body,
     channel: channelId,
     sender: user._id,
+    embed: embedLink,
   });
 
   channel.lastMessage = message._id;
@@ -197,10 +208,146 @@ const deleteMessage = async (user, messageId) => {
   return message;
 };
 
+const embedType = (url) => {
+  let type = "link";
+  if (
+    canPlay.youtube(url) ||
+    canPlay.facebook(url) ||
+    canPlay.vimeo(url) ||
+    canPlay.twitch(url) ||
+    canPlay.streamable(url) ||
+    canPlay.wistia(url) ||
+    canPlay.dailymotion(url) ||
+    canPlay.vidyard(url) ||
+    canPlay.kaltura(url) ||
+    canPlay.soundcloud(url) ||
+    canPlay.mixcloud(url)
+  ) {
+    type = "media";
+  }
+  return type;
+};
+
+const postLink = async function (data) {
+  let embedLink = [];
+  if (data !== undefined) {
+    const http = data.match(http_regex);
+    if (http) {
+      const result = await Promise.all(
+        http.map((url) =>
+          ogs(
+            {
+              url,
+              customMetaTags: [
+                {
+                  multiple: false, // is there more than one of these tags on a page (normally this is false)
+                  property: "keywords", // meta tag name/property attribute
+                  fieldName: "keywords", // name of the result variable
+                },
+              ],
+            },
+            (error, results, response) => {
+              return {
+                ...results,
+                url,
+              };
+            }
+          )
+        )
+      ).then((results) => {
+        console.log("og", results);
+        return results;
+      });
+      embedLink = await result.map(async (og) => {
+        let thumbnail_url = null;
+        let thumbnail_size = null;
+        let thumbnail_width = null;
+        let thumbnail_height = null;
+        let dimensions = {};
+        if (!Array.isArray(og.ogImage)) {
+          thumbnail_url = og.ogImage?.url;
+        } else {
+          thumbnail_url = og.ogImage[0]?.url;
+        }
+        if (thumbnail_url && thumbnail_url.match(size_url)) {
+          thumbnail_size = thumbnail_url.match(size_url)[0];
+          thumbnail_width = Number.parseFloat(
+            thumbnail_size.split("x")[0].replace("-", "").replace("_", "")
+          );
+          thumbnail_height = Number.parseFloat(thumbnail_size.split("x")[1]);
+        }
+        if (thumbnail_url && (!thumbnail_width || !thumbnail_height)) {
+          const options = url.parse(thumbnail_url);
+          req = new Promise((resolve, reject) => {
+            const req = httpRequest.get(options, async function (response) {
+              const chunks = [];
+              await response
+                .on("data", function (chunk) {
+                  chunks.push(chunk);
+                })
+                .on("end", function () {
+                  const buffer = Buffer.concat(chunks);
+                  resolve(buffer);
+                });
+            });
+            req.on("error", (e) => {
+              reject(e.message);
+            });
+            // send the request
+            req.end();
+          }).then((data) => {
+            return sizeOf(data);
+          });
+          dimensions = await req.then((dimensions) => {
+            return dimensions;
+          });
+        } else {
+          dimensions = {
+            width: thumbnail_width,
+            height: thumbnail_height,
+          };
+        }
+        const type =
+          embedType(og.url) === "link" && dimensions.width >= 400
+            ? "article"
+            : embedType(og.url);
+        return {
+          title: og.ogTitle,
+          description: og.ogDescription,
+          url: og.url,
+          image: og.ogImage,
+          provider: {
+            name: og.ogSiteName,
+            url: og.ogSiteUrl,
+          },
+          thumbnail: {
+            url: !Array.isArray(og.ogImage)
+              ? og.ogImage?.url
+              : og.ogImage[0]?.url,
+            proxy_url: null,
+            height:
+              (!Array.isArray(og.ogImage)
+                ? og.ogImage?.height
+                : og.ogImage[0]?.height) ?? dimensions.height,
+            width:
+              (!Array.isArray(og.ogImage)
+                ? og.ogImage?.width
+                : og.ogImage[0]?.width) ?? dimensions.width,
+          },
+          media: og.ogVideo || (og.ogAudio ?? og.twitterPlayer),
+          type: type,
+        };
+      });
+    }
+  }
+  return await Promise.all(embedLink);
+};
+
 module.exports = {
   createMessage,
   queryMessages,
   editMessage,
   deleteMessage,
   searchMessages,
+  postLink,
 };

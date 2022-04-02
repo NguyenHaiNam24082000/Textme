@@ -113,6 +113,17 @@ const messageSchema = new mongoose.Schema(
           title: {
             type: String,
           },
+          type: {
+            type: String,
+            enum: [
+              "image",
+              "gifv",
+              "media",
+              "link",
+              "rich",
+              "article",
+            ],
+          },
           description: {
             type: String,
           },
@@ -121,6 +132,121 @@ const messageSchema = new mongoose.Schema(
           },
           imageURL: {
             type: String,
+          },
+          colors: [
+            {
+              type: Number,
+            },
+          ],
+          footer: {
+            type: Object,
+            properties: {
+              text: {
+                type: String,
+              },
+              icon_url: {
+                type: String,
+              },
+              proxy_icon_url: {
+                type: String,
+              },
+            },
+          },
+          image: {
+            type: Object,
+            properties: {
+              url: {
+                type: String,
+              },
+              proxy_url: {
+                type: String,
+              },
+              height: {
+                type: Number,
+              },
+              width: {
+                type: Number,
+              },
+            },
+          },
+          thumbnail: {
+            type: Object,
+            properties: {
+              url: {
+                type: String,
+              },
+              proxy_url: {
+                type: String,
+              },
+              height: {
+                type: Number,
+              },
+              width: {
+                type: Number,
+              },
+            },
+          },
+          media: {
+            type: Object,
+            properties: {
+              url: {
+                type: String,
+              },
+              proxy_url: {
+                type: String,
+              },
+              height: {
+                type: Number,
+              },
+              width: {
+                type: Number,
+              },
+            },
+          },
+          provider: {
+            type: Object,
+            properties: {
+              name: {
+                type: String,
+              },
+              url: {
+                type: String,
+              },
+            },
+          },
+          author: {
+            type: Object,
+            properties: {
+              name: {
+                type: String,
+              },
+              url: {
+                type: String,
+              },
+              icon_url: {
+                type: String,
+              },
+              proxy_icon_url: {
+                type: String,
+              },
+            },
+          },
+          fields: {
+            type: Array,
+            items: {
+              type: Object,
+              properties: {
+                name: {
+                  type: String,
+                },
+                value: {
+                  type: String,
+                },
+                inline: {
+                  type: Boolean,
+                },
+              },
+            },
           },
         },
       },

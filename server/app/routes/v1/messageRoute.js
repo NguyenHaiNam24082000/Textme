@@ -14,5 +14,6 @@ router.post(
 router.get("/:channelId", auth(), messageController.getMessages);
 router.get("/:channelId/search", auth(), messageController.searchMessages);
 router.put("/edit-message/:messageId", auth(), messageController.editMessage);
+router.post("/post-link",messageController.postLink);
 
 module.exports = router;

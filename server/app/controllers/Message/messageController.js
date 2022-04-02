@@ -55,10 +55,17 @@ const editMessage = catchAsync(async (req, res, next) => {
   res.status(httpStatus.CREATED).send(result);
 });
 
+const postLink = catchAsync(async (req, res, next) => {
+  const { content } = req.body;
+  const result =await messageService.postLink(content);
+  res.status(httpStatus.CREATED).send(result);
+})
+
 
 module.exports = {
   sendMessage,
   getMessages,
   editMessage,
   searchMessages,
+  postLink,
 };

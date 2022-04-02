@@ -14,7 +14,7 @@ import { IconClose, IconChevronLeft } from "@douyinfe/semi-icons";
 import Info from "./Right/Info";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default function RightSidebar({ channel = null }) {
-  const [activeMenu, setActiveMenu] = useState("pinnedList");
+  const [activeMenu, setActiveMenu] = useState("selectFriends");
   const [searchMember, setSearchMember] = useState("");
   return (
     <aside

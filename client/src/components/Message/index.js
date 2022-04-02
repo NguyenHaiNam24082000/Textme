@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ActionIcon, Divider, Menu, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Divider, Image, Menu, Text, Tooltip } from "@mantine/core";
 import React from "react";
 import {
   chatMainTime,
@@ -18,6 +18,7 @@ import getSocket from "../../apis/socket";
 import { useQueryClient } from "react-query";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
 import { CHANNEL_MESSAGES_KEY } from "../../configs/queryKeys";
+import ReactPlayer from "react-player/lazy";
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,
@@ -39,6 +40,7 @@ const patterns = {
   bracket: /\[_(.*)_\]/gm,
   circle: /\(\(_(.*)_\)\)/gs,
   map: /\[map\:\{lat\:\"[0-9]+.[0-9]+",lng:"[0-9]+.[0-9]+\"\}\]/g,
+  link: /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/gm,
   all: /\B@all/gm,
 };
 
@@ -75,6 +77,9 @@ const format = (content) =>
     .replace(patterns.hashtag, '<span class="text-blue-300">$1</span>')
     .replace(patterns.warning, '<span class="text-warning">$1</span>')
     .replace(patterns.highlight, '<span class="text-primary">$1</span>')
+    // .replace(patterns.link, content.match(patterns.link).map(link=>{
+    //   return `<a href="${link}" target="_blank">${link}</a>`
+    // }).join(' '))
     .replace(
       patterns.all,
       '<span class="px-[2px] py-[1px] rounded-[3px] font-medium bg-red-300 text-red-400 hover:bg-red-500 cursor-pointer select-none">@all</span>'
@@ -222,7 +227,8 @@ export default function Message({
     const prev = messages[index - 1];
     if (!prev) return false;
     return (
-      (checkSameTime(message, prev) && !hasNewDate() && !prev.systemMessage) || message.systemMessage
+      (checkSameTime(message, prev) && !hasNewDate() && !prev.systemMessage) ||
+      message.systemMessage
     );
   };
 
@@ -241,14 +247,24 @@ export default function Message({
       socket.emit(CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE, {
         msg: result?.data,
         receiverId: channelId,
-      })
+      });
       cache.setQueryData(CHANNEL_MESSAGES_KEY(channelId), (d) => {
+        if (result?.data?.messageReference) {
+          const index = d?.pages[0]?.results.findIndex(
+            (m) => m.id === result?.data?.messageReference?.message
+          );
+          if (index) {
+            result?.data?.systemMessageType === "CHANNEL_PINNED_MESSAGE"
+              ? (d.pages[0].results[index].pinned = true)
+              : (d.pages[0].results[index].pinned = false);
+          }
+        }
         if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
-          d?.pages[0]?.results.unshift(result?.data)
+          d?.pages[0]?.results.unshift(result?.data);
         }
 
-        return d
-      })
+        return d;
+      });
     } catch (error) {
       console.log(error);
     }
@@ -321,7 +337,7 @@ export default function Message({
         className="w-full flex flex-col justify-between"
       >
         <div
-          className={`group w-full flex justify-between relative hover:bg-slate-50 ${
+          className={`group w-full flex flex-col justify-between relative hover:bg-slate-50 ${
             isMentioned() ? "mentioned" : ""
           } ${isSameTimePrev() ? "" : "mt-4"} ${
             message.systemMessage ? "mt-4" : ""
@@ -333,7 +349,7 @@ export default function Message({
           // }}
         >
           {isSameTimePrev() ? (
-            <div className="w-full flex justify-start items-center px-4 py-1">
+            <div className="w-full flex justify-start items-start px-4 py-1">
               <div className="flex w-full">
                 {message.systemMessage ? (
                   <div className="cursor-default w-12 flex flex-shrink-0 justify-center mt-1">
@@ -349,29 +365,37 @@ export default function Message({
                     </p>
                   </Tooltip>
                 )}
-                {currentEditMessageId === message.id ? (
-                  <MessageInlineEditor
-                    message={message.content}
-                    finish={() => setCurrentEditMessageId(null)}
-                  />
-                ) : (
-                  <pre className="break-all text-sm ml-2 font-normal text-left">
-                    {message.systemMessage ? (
-                      systemMessageTypes[message.systemMessageType]?.text(
-                        message
-                      )
-                    ) : (
-                      <>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: `${format(message.content)}`,
-                          }}
-                        ></div>
-                        {ShowEditedLabel(message)}
-                      </>
-                    )}
-                  </pre>
-                )}
+                <div className="w-full flex flex-col">
+                  {currentEditMessageId === message.id ? (
+                    <MessageInlineEditor
+                      message={message.content}
+                      finish={() => setCurrentEditMessageId(null)}
+                    />
+                  ) : (
+                    <pre className="break-all text-sm ml-2 font-normal text-left">
+                      {message.systemMessage ? (
+                        systemMessageTypes[message.systemMessageType]?.text(
+                          message
+                        )
+                      ) : (
+                        <>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: `${format(message.content)}`,
+                            }}
+                          ></div>
+                          {ShowEditedLabel(message)}
+                        </>
+                      )}
+                    </pre>
+                  )}
+                  <div className="flex flex-col">
+                    {message.embed.length > 0 &&
+                      message.embed.map((embed, index) => (
+                        <EmbedLink embed={embed} key={index} />
+                      ))}
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
@@ -434,6 +458,12 @@ export default function Message({
                     </pre>
                   </div>
                 )}
+                <div className="flex flex-col">
+                  {message.embed.length > 0 &&
+                    message.embed.map((embed, index) => (
+                      <EmbedLink embed={embed} key={index} />
+                    ))}
+                </div>
               </div>
             </div>
           )}
@@ -476,7 +506,12 @@ export default function Message({
                   )}
                   <Menu.Item
                     onClick={pinMessage}
-                    icon={<FontAwesomeIcon icon="fa-solid fa-thumbtack" className={`${message.pinned?"text-red-600":""}`} />}
+                    icon={
+                      <FontAwesomeIcon
+                        icon="fa-solid fa-thumbtack"
+                        className={`${message.pinned ? "text-red-600" : ""}`}
+                      />
+                    }
                   >
                     {message.pinned ? "Bỏ ghim" : "Ghim tin nhắn"}
                   </Menu.Item>
@@ -508,3 +543,108 @@ export default function Message({
     </>
   );
 }
+
+const EmbedLink = ({ embed }) => {
+  return (
+    <div
+      className="grid grid-flow-row indent-0 min-h-0 min-w-0 py-[0.125rem] relative"
+      style={{
+        gridRowGap: "0.25rem",
+        gridTemplateColumns: "repeat(auto-fill,minmax(100%,1fr))",
+      }}
+    >
+      <article
+        className="grid max-w-[520px] rounded relative "
+        style={{
+          borderLeft: "4px solid #000",
+          backgroundColor: "rgba(128,128,128,0.8)",
+        }}
+      >
+        <div
+          className="overflow-hidden inline-grid"
+          style={{
+            gridTemplateColumns: "auto",
+            gridTemplateRows: "auto",
+            padding: "0.5rem 1rem 1rem 0.75rem",
+          }}
+        >
+          {embed.provider && (
+            <div
+              className="min-w-0 font-normal mt-2 text-left text-xs"
+              style={{ gridColumn: "1/1" }}
+            >
+              {embed.provider.name}
+            </div>
+          )}
+          {embed.title && (
+            <div
+              className="min-w-0 font-semibold text-base mt-2"
+              style={{ gridColumn: "1/1" }}
+            >
+              <a
+                href={embed.url}
+                target="_blank"
+                className="text-blue-500 hover:underline no-underline"
+              >
+                {embed.title}
+              </a>
+            </div>
+          )}
+          {embed.description && (
+            <div
+              className="mt-2 font-normal text-sm whitespace-pre-line text-left"
+              style={{ gridColumn: "1/1" }}
+            >
+              {embed.description}
+            </div>
+          )}
+          {embed.thumbnail?.url && (
+            <>
+              {embed.type === "link" ? (
+                <div
+                  className="w-20 h-20 ml-4 mt-2 flex-shrink-0 justify-self-end flex justify-center items-center object-fill"
+                  style={{ gridRow: "1/8", gridColumn: "2/2" }}
+                >
+                  <Image
+                    withPlaceholder
+                    width={80}
+                    height={80}
+                    radius={4}
+                    fit="contain"
+                    src={
+                      embed.thumbnail.url && !Array.isArray(embed.image)
+                        ? embed.image.url
+                        : embed.image[0].url
+                    }
+                  />
+                </div>
+              ) : (
+                <div
+                  className="mt-4 min-w-0 rounded object-fill flex justify-center items-center"
+                  style={{ gridColumn: "1/1", width: "100%", height: "auto" }}
+                >
+                  {embed.type === "article" ? (
+                    <Image
+                      withPlaceholder
+                      width="100%"
+                      height="auto"
+                      fit="contain"
+                      radius={4}
+                      src={
+                        embed.thumbnail.url && !Array.isArray(embed.image)
+                          ? embed.image.url
+                          : embed.image[0].url
+                      }
+                    />
+                  ) : (
+                    <ReactPlayer url={embed.url} controls={true} Ơ />
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </article>
+    </div>
+  );
+};

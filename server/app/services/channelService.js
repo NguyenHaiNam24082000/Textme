@@ -214,21 +214,21 @@ const pinnedMessage = async (user, data) => {
           savedMessages: [messageId],
         },
       },
-      { upsert: true, new: true }
+      // { upsert: true, new: true }
     );
   } else {
     channel = await Channel.findOneAndUpdate(
       {
         _id: channelId,
         $or: [{ owner: user._id }, { members: user._id }],
-        savedMessages: [messageId],
+        // savedMessages: [messageId],
       },
       {
         $pull: {
           savedMessages: messageId,
         },
       },
-      { upsert: true, new: true }
+      // { upsert: true, new: true }
     );
   }
   if (!channel) {
