@@ -84,7 +84,7 @@ import { GetMe } from "../../store/userSlice";
 import { CHANNEL_MESSAGES_KEY, OPEN_CHANNEL } from "../../configs/queryKeys";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
 import { useSelector, useDispatch } from "react-redux";
-import { repliesSelector } from "../../store/uiSlice";
+import { repliesSelector, replyMessages } from "../../store/uiSlice";
 
 const INLINE_STYLES = [
   { label: "Bold", style: "BOLD" },
@@ -237,6 +237,7 @@ export default function EditorDraft({ channel, user }) {
     mentions["in:"]
   );
   const replies = useSelector(repliesSelector);
+  const dispatch = useDispatch();
   const [suggestionsSlash, setSuggestionsSlash] = useState(mentions["/"]);
   const [openedShareLocation, setOpenedShareLocation] = useState(false);
   const [openedEditor, setOpenedEditor] = useState(false);
@@ -591,7 +592,7 @@ export default function EditorDraft({ channel, user }) {
     <div className="mx-4 relative flex-shrink-0 truncate overflow-ellipsis">
       {replies.map((reply) => (
         <div
-          className="flex h-8 px-3 select-none items-center bg-slate-300"
+          className="flex h-8 px-3 select-none items-center bg-slate-300 truncate overflow-ellipsis"
           style={{
             animation:
               "340ms cubic-bezier(0.2, 0.9, 0.5, 1.16) 0s 1 normal forwards running bottomBounce",
@@ -602,32 +603,45 @@ export default function EditorDraft({ channel, user }) {
               icon="fa-solid fa-reply"
               className="-scale-x-[1]"
             />
-            <div className="flex gap-1 items-center truncate overflow-ellipsis">
+            <div className="flex gap-1 items-center truncate overflow-ellipsis min-w-0 flex-grow-1">
               <div className="self-center flex-shrink-0 whitespace-nowrap truncate overflow-ellipsis overflow-hidden font-medium text-sm">
                 Replying to
               </div>
-              <Badge
-                sx={{ paddingLeft: 0 }}
-                className="normal-case"
-                radius="xl"
-                color="teal"
-                leftSection={
-                  <Avatar
-                    alt="Avatar for badge"
-                    size="xs"
-                    radius="xl"
-                    src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-                  />
-                }
-              >
-                Badge with Avatar
-              </Badge>
-              <div className="truncate overflow-ellipsis">
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+              <div className="py-[2px] overflow-hidden flex items-center gap-1 max-h-8 truncate">
+                <Badge
+                  sx={{ paddingLeft: 0 }}
+                  className="normal-case"
+                  radius="xl"
+                  color="teal"
+                  leftSection={
+                    <Avatar
+                      alt="Avatar for badge"
+                      size="xs"
+                      radius="xl"
+                      src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
+                    />
+                  }
+                >
+                  {reply.sender.username}
+                </Badge>
+                <div className="truncate overflow-ellipsis flex gap-1 max-h-7">
+                  <span className="truncate">
+                    <p className="truncate m-0">{reply.content}</p>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-          <CloseButton size="xs" radius="xl" />
+          <CloseButton
+            size="xs"
+            radius="xl"
+            onClick={() => {
+              const index = replies.indexOf(reply);
+              const repliesClone = replies.filter((r) => r.id !== reply.id);
+              // const repliesClone= replies.splice(replies.indexOf(reply), 1);
+              dispatch(replyMessages(repliesClone));
+            }}
+          />
         </div>
       ))}
 
@@ -1081,7 +1095,7 @@ export default function EditorDraft({ channel, user }) {
         </>
       ) : (
         <div
-          className="mb-6 flex w-full overflow-ellipsis truncate items-center justify-between cursor-pointer"
+          className="mb-6 flex flex-1 gap-1 text-sm overflow-hidden items-center justify-between cursor-pointer"
           style={{
             border: "2px solid #e5e7eb",
             backgroundColor: "#e5e7eb",
@@ -1091,11 +1105,13 @@ export default function EditorDraft({ channel, user }) {
           onClick={() => setOpenedEditor(true)}
         >
           <div className="text-gray-500 text-sm overflow-ellipsis truncate flex flex-1 gap-1">
-            {/* Rely to #test */}
-            <span style={{ color: "red" }}>Draft:</span>
-            <span className="flex overflow-ellipsis truncate">
-              aaaaaaaaaaaaaaaaaaaaaaaaaaa
-            </span>
+            <div style={{ color: "red" }}>Draft:</div>
+            <div
+              className="inline-block flex-1 min-w-0 overflow-ellipsis truncate"
+              style={{ maxWidth: 128 }}
+            >
+              aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+            </div>
           </div>
           <div>
             <Kbd>Ctrl+R</Kbd>

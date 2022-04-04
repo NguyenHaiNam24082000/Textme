@@ -2,9 +2,10 @@ const httpStatus = require("http-status");
 const { removeAccents } = require("../commons/removeAccents");
 const { FriendRequest, Channel, Message } = require("../models");
 const sizeOf = require("image-size");
-const url = require("url");
+const urlParser = require("url");
 const httpRequest = require("https");
 const tunnel = require("tunnel");
+const probe = require("probe-image-size");
 const request = require("request");
 const { canPlay } = require("../configs/patterns");
 // const { FRIEND_STATUS } = require("../configs/friendStatus");
@@ -220,18 +221,30 @@ const isImageLink = async (url, timeoutT) => {
     return true;
   else {
     const req = new Promise(function (resolve, reject) {
-      request.head(url, function (err, res, body) {
-        if (!err) {
-          resolve(res.headers["content-type"].match(/^image\//gim) !== null);
+      request.head(
+        {
+          url,
+          headers: {
+            "user-agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january) Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
+          },
+        },
+        function (err, res, body) {
+          console.log(res.headers["content-type"]);
+          if (!err) {
+            resolve(res.headers["content-type"].match(/^image\//gim) !== null);
 
-          //   console.log("content-type:", res.headers["content-type"]);
-          // console.log("content-length:", res.headers["content-length"]);
-        } else {
-          resolve(false);
+            //   console.log("content-type:", res.headers["content-type"]);
+            // console.log("content-length:", res.headers["content-length"]);
+          } else {
+            resolve(false);
+          }
         }
-      });
-    }).then((result) => result);
-    return await req.then((result) => result);
+      );
+    })
+      .then((result) => result)
+      .catch((err) => false);
+    return await req.then((result) => result).catch((err) => false);
   }
 };
 
@@ -258,161 +271,301 @@ const embedType = (url) => {
 const postLink = async function (data) {
   let embedLink = [];
   if (data !== undefined) {
-    const http = data.match(http_regex);
+    const http = [...new Set(data.match(http_regex))];
     if (http) {
-      console.log(await isImageLink(http[0]));
-      const result = await Promise.all(
-        http.map(async (url) =>
-          (await isImageLink(url, 1000))
-            ? {
-                type: "image",
-                url,
-                ogImage: {
-                  url: url,
-                  width: undefined,
-                  height: undefined,
-                },
-              }
-            : ogs(
-                {
-                  url: url,
-                  onlyGetOpenGraphInfo: true,
-                  downloadLimit: 2000000,
-                  headers: {
-                    "user-agent":
-                      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january)",
+      console.log("http", http);
+      // const result = await Promise.all(
+      //   httpClone.map(async (url) =>
+      //     (await isImageLink(url, 1000))
+      //       ? {
+      //           type: "image",
+      //           url,
+      //           ogImage: {
+      //             url: url,
+      //             width: undefined,
+      //             height: undefined,
+      //           },
+      //         }
+      //       : ogs(
+      //           {
+      //             url: url,
+      //             onlyGetOpenGraphInfo: true,
+      //             downloadLimit: 2000000,
+      //             headers: {
+      //               "user-agent":
+      //                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january)",
+      //             },
+      //             // agent: {
+      //             //   https: tunnel.httpsOverHttp({
+      //             //     proxy: {
+      //             //       host: '174.138.116.12',
+      //             //       port: 80,
+      //             //       rejectUnauthorized: false,
+      //             //     }
+      //             //   })
+      //             // }
+      //             // customMetaTags: [
+      //             //   {
+      //             //     multiple: false,
+      //             //     property: "keywords",
+      //             //     fieldName: "keywords",
+      //             //   },
+      //             // ],
+      //           },
+      //           (error, results, response) => {
+      //             return {
+      //               ...results,
+      //               url,
+      //             };
+      //           }
+      //         )
+      //   )
+      // ).then((results) => {
+      //   // console.log("og", results);
+      //   return results;
+      // });
+      // embedLink = await Promise.all(await result.map(async (og) => {
+      //   let thumbnail_url = !Array.isArray(og.ogImage)
+      //     ? og.ogImage?.url
+      //     : og.ogImage[0]?.url;
+      //   let thumbnail_size = null;
+      //   let thumbnail_width = og.ogImage.width;
+      //   let thumbnail_height = og.ogImage.height;
+      //   let dimensions = {};
+      //   if (
+      //     isNaN(Number.parseFloat(convertType(og.ogImage.width))) &&
+      //     isNaN(Number.parseFloat(convertType(og.ogImage.height)))
+      //   ) {
+      //     if (thumbnail_url && thumbnail_url.match(size_url)) {
+      //       thumbnail_size = thumbnail_url.match(size_url)[0];
+      //       thumbnail_width = Number.parseFloat(
+      //         thumbnail_size.split("x")[0].replace("-", "").replace("_", "")
+      //       );
+      //       thumbnail_height = Number.parseFloat(thumbnail_size.split("x")[1]);
+      //     }
+      //     if (
+      //       thumbnail_url &&
+      //       (isNaN(Number.parseFloat(convertType(thumbnail_width))) ||
+      //         isNaN(Number.parseFloat(convertType(thumbnail_height))))
+      //     ) {
+      //       const options = url.parse(thumbnail_url);
+      //       req = new Promise((resolve, reject) => {
+      //         const req = httpRequest.get(options, async function (response) {
+      //           const chunks = [];
+      //           // await response
+      //           //   .on("data", function (chunk) {
+      //           //     chunks.push(chunk);
+      //           //   })
+      //           //   .on("end", function () {
+      //           //     const buffer = Buffer.concat(chunks);
+      //           //     resolve(buffer);
+      //           //   });
+      //           for await (const chunk of response) {
+      //             chunks.push(chunk);
+      //             try {
+      //               resolve(Buffer.concat(chunks));
+      //             } catch (error) {
+      //               reject(error);
+      //             }
+      //           }
+      //         });
+      //         req.on("error", (e) => {
+      //           reject(e.message);
+      //         });
+      //         // send the request
+      //         req.end();
+      //       }).then((data) => {
+      //         return sizeOf(data);
+      //       });
+      //       dimensions = await req.then((dimensions) => {
+      //         return dimensions;
+      //       });
+      //       // dimensions = await probe(thumbnail_url, {
+      //       //   rejectUnauthorized: false,
+      //       // });
+      //       console.log("dimensions", dimensions);
+      //     } else {
+      //       dimensions = {
+      //         width: thumbnail_width,
+      //         height: thumbnail_height,
+      //       };
+      //     }
+      //   }
+      //   const type =
+      //     og?.type ??
+      //     (embedType(og.url) === "link" && dimensions.width >= 400
+      //       ? "article"
+      //       : embedType(og.url));
+      //   const thumbnail = {
+      //     height: thumbnail_height ?? dimensions.height,
+      //     width: thumbnail_width ?? dimensions.width,
+      //   };
+      //   console.log(og.url, thumbnail);
+      //   return {
+      //     title: og.ogTitle,
+      //     description: og.ogDescription,
+      //     url: og.url,
+      //     image: og.ogImage,
+      //     provider: {
+      //       name: og.ogSiteName,
+      //       url: og.ogSiteUrl,
+      //     },
+      //     thumbnail: {
+      //       url: thumbnail_url,
+      //       proxy_url: null,
+      //       height: thumbnail.height,
+      //       width: thumbnail.width,
+      //     },
+      //     media: og.ogVideo || (og.ogAudio ?? og.twitterPlayer),
+      //     type: type,
+      //   };
+      // }));
+
+      embedLink = await Promise.all(
+        http.map(async (url) => {
+          console.log("url", url);
+          let og = new Promise(async function (resolve, reject) {
+            console.log("url", await isImageLink(url, 1000));
+            (await isImageLink(url, 1000))
+              ? resolve({
+                  type: "image",
+                  url,
+                  ogImage: {
+                    url: url,
+                    width: undefined,
+                    height: undefined,
                   },
-                  // agent: {
-                  //   https: tunnel.httpsOverHttp({
-                  //     proxy: {
-                  //       host: '174.138.116.12',
-                  //       port: 80,
-                  //       rejectUnauthorized: false,
-                  //     }
-                  //   })
-                  // }
-                  // customMetaTags: [
-                  //   {
-                  //     multiple: false,
-                  //     property: "keywords",
-                  //     fieldName: "keywords",
-                  //   },
-                  // ],
-                },
-                (error, results, response) => {
-                  return {
-                    ...results,
-                    url,
-                  };
-                }
-              )
-        )
-      ).then((results) => {
-        console.log("og", results);
-        return results;
-      });
-      embedLink = await result.map(async (og) => {
-        let thumbnail_url = null;
-        let thumbnail_size = null;
-        let thumbnail_width = null;
-        let thumbnail_height = null;
-        let dimensions = {};
-        if (!Array.isArray(og.ogImage)) {
-          thumbnail_url = og.ogImage?.url;
-        } else {
-          thumbnail_url = og.ogImage[0]?.url;
-        }
-        if (thumbnail_url && thumbnail_url.match(size_url)) {
-          thumbnail_size = thumbnail_url.match(size_url)[0];
-          thumbnail_width = Number.parseFloat(
-            thumbnail_size.split("x")[0].replace("-", "").replace("_", "")
-          );
-          thumbnail_height = Number.parseFloat(thumbnail_size.split("x")[1]);
-        }
-        if (thumbnail_url && (!thumbnail_width || !thumbnail_height)) {
-          const options = url.parse(thumbnail_url);
-          req = new Promise((resolve, reject) => {
-            const req = httpRequest.get(options, async function (response) {
-              const chunks = [];
-              await response
-                .on("data", function (chunk) {
-                  chunks.push(chunk);
                 })
-                .on("end", function () {
-                  const buffer = Buffer.concat(chunks);
-                  resolve(buffer);
-                });
-            });
-            req.on("error", (e) => {
-              reject(e.message);
-            });
-            // send the request
-            req.end();
-          }).then((data) => {
-            return sizeOf(data);
-          });
-          dimensions = await req.then((dimensions) => {
-            return dimensions;
-          });
-        } else {
-          dimensions = {
-            width: thumbnail_width,
-            height: thumbnail_height,
+              : ogs(
+                  {
+                    url: url,
+                    onlyGetOpenGraphInfo: true,
+                    downloadLimit: 2000000,
+                    headers: {
+                      "user-agent":
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january)",
+                    },
+                  },
+                  (error, results, response) => {
+                    console.log("og", error);
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve({
+                        ...results,
+                        url,
+                      });
+                    }
+                  }
+                );
+          })
+            .then((results) => results)
+            .catch((error) => console.log("error", error));
+          og = await og
+            .then((results) => results)
+            .catch((error) => console.log(error));
+          let thumbnail_url = !Array.isArray(og.ogImage)
+            ? og.ogImage?.url
+            : og.ogImage[0]?.url;
+          let thumbnail_size = null;
+          let thumbnail_width = og.ogImage?.width;
+          let thumbnail_height = og.ogImage?.height;
+          let dimensions = {};
+          if (
+            isNaN(Number.parseFloat(convertType(thumbnail_width))) &&
+            isNaN(Number.parseFloat(convertType(thumbnail_height)))
+          ) {
+            if (thumbnail_url && thumbnail_url.match(size_url)) {
+              thumbnail_size = thumbnail_url.match(size_url)[0];
+              thumbnail_width = Number.parseFloat(
+                thumbnail_size.split("x")[0].replace("-", "").replace("_", "")
+              );
+              thumbnail_height = Number.parseFloat(
+                thumbnail_size.split("x")[1]
+              );
+            }
+            if (
+              thumbnail_url &&
+              (isNaN(Number.parseFloat(convertType(thumbnail_width))) ||
+                isNaN(Number.parseFloat(convertType(thumbnail_height))))
+            ) {
+              // const options = urlParser.parse(thumbnail_url);
+              // req = new Promise((resolve, reject) => {
+              //   const req = httpRequest.get(thumbnail_url, async function (response) {
+              //     const chunks = [];
+              //     // await response
+              //     //   .on("data", function (chunk) {
+              //     //     chunks.push(chunk);
+              //     //   })
+              //     //   .on("end", function () {
+              //     //     const buffer = Buffer.concat(chunks);
+              //     //     resolve(buffer);
+              //     //   });
+              //     for await (const chunk of response) {
+              //       chunks.push(chunk);
+              //       try {
+              //         resolve(Buffer.concat(chunks));
+              //       } catch (error) {
+              //         reject(error);
+              //       }
+              //     }
+              //   });
+              //   req.on("error", (e) => {
+              //     reject(e.message);
+              //   });
+              //   // send the request
+              //   req.end();
+              // }).then((data) => {
+              //   return sizeOf(data);
+              // });
+              // dimensions = await req.then((dimensions) => {
+              //   return dimensions;
+              // });
+              dimensions = await probe(thumbnail_url, {
+                rejectUnauthorized: false,
+              });
+            } else {
+              dimensions = {
+                width: thumbnail_width,
+                height: thumbnail_height,
+              };
+            }
+          }
+          const type =
+            og?.type ??
+            (embedType(og.url) === "link" &&
+            Number.parseFloat(dimensions.width) >= 400
+              ? "article"
+              : embedType(og.url));
+          const thumbnail = {
+            height: thumbnail_height ?? dimensions.height,
+            width: thumbnail_width ?? dimensions.width,
           };
-        }
-        const type =
-          og?.type ??
-          (embedType(og.url) === "link" && dimensions.width >= 400
-            ? "article"
-            : embedType(og.url));
-        const thumbnail = {
-          height: isNaN(
-            convertType(
-              !Array.isArray(og.ogImage)
-                ? og.ogImage?.height
-                : og.ogImage[0]?.height
-            )
-          )
-            ? dimensions.height
-            : !Array.isArray(og.ogImage)
-            ? og.ogImage?.height
-            : og.ogImage[0]?.height,
-          width: isNaN(
-            convertType(
-              !Array.isArray(og.ogImage)
-                ? og.ogImage?.width
-                : og.ogImage[0]?.width
-            )
-          )
-            ? dimensions.width
-            : !Array.isArray(og.ogImage)
-            ? og.ogImage?.width
-            : og.ogImage[0]?.width,
-        };
-        return {
-          title: og.ogTitle,
-          description: og.ogDescription,
-          url: og.url,
-          image: og.ogImage,
-          provider: {
-            name: og.ogSiteName,
-            url: og.ogSiteUrl,
-          },
-          thumbnail: {
-            url: !Array.isArray(og.ogImage)
-              ? og.ogImage?.url
-              : og.ogImage[0]?.url,
-            proxy_url: null,
-            height: thumbnail.height,
-            width: thumbnail.width,
-          },
-          media: og.ogVideo || (og.ogAudio ?? og.twitterPlayer),
-          type: type,
-        };
-      });
+          return {
+            title: og.ogTitle,
+            description: og.ogDescription,
+            url: og.url,
+            image: og.ogImage,
+            provider: {
+              name: og.ogSiteName,
+              url: og.ogSiteUrl,
+            },
+            thumbnail: {
+              url: thumbnail_url,
+              proxy_url: null,
+              height: thumbnail.height,
+              width: thumbnail.width,
+            },
+            media: og.ogVideo || (og.ogAudio ?? og.twitterPlayer),
+            type: type,
+          };
+        })
+      )
+        .then((results) => results)
+        .catch((error) => console.log("error", error));
     }
   }
-  return await Promise.all(embedLink);
+  return embedLink;
 };
 
 const convertType = (value) => {

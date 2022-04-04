@@ -22,6 +22,12 @@ import ReactPlayer from "react-player/lazy";
 import { AnimatePresence, motion, AnimateSharedLayout } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { replyMessages, repliesSelector } from "../../store/uiSlice";
+import { TikTok } from "react-tiktok";
+
+const patterns_embed_media_link = {
+  TikTok: /https:\/\/tiktok\.com\/[a-zA-Z0-9_]+/,
+  Spotify: /https:\/\/open\.spotify\.com\/[a-zA-Z0-9_]+/,
+};
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,
@@ -196,17 +202,24 @@ export default function Message({
   const me = GetMe();
   const cache = useQueryClient();
   const isUnread = false;
-  const [isReply, setIsReply] = useState(false);
+  // const [isReply, setIsReply] = useState(false);
   const dispatch = useDispatch();
   const replies = useSelector(repliesSelector);
-  useEffect(() => {
-    const reply = replies.find((reply) => reply.message === message.id);
-    if (reply) {
-      setIsReply(true);
-    } else {
-      setIsReply(false);
-    }
-  }, [dispatch]);
+  const isReply = () =>{
+    const reply = replies.find(reply=>reply.id === message.id);
+    if(reply){
+      return true;
+    } 
+    return false;
+  }
+  // useEffect(() => {
+  //   const reply = replies.find((reply) => reply.id === message.id);
+  //   if (reply) {
+  //     setIsReply(true);
+  //   } else {
+  //     setIsReply(false);
+  //   }
+  // }, [dispatch]);
 
   const isMyMessage = message.sender.id === me.user.id;
 
@@ -352,7 +365,7 @@ export default function Message({
       >
         <div
           className={`group w-full flex flex-col justify-between relative hover:bg-slate-50 ${
-            isMentioned() || isReply ? "mentioned" : ""
+            isMentioned() || isReply() ? "mentioned" : ""
           } ${isSameTimePrev() ? "" : "mt-4"} ${
             message.systemMessage ? "mt-4" : ""
           } ${currentEditMessageId === message.id ? "bg-slate-50" : ""} ${
@@ -498,7 +511,9 @@ export default function Message({
                   <ActionIcon
                     size={32}
                     onClick={() => {
-                      dispatch(replyMessages([...replies, message]));
+                      dispatch(
+                        replyMessages([...new Set([...replies, message])])
+                      );
                     }}
                   >
                     <FontAwesomeIcon icon="fa-solid fa-reply" />
@@ -807,6 +822,9 @@ const EmbedLink = ({ embed }) => {
                     className="mt-4 min-w-0 rounded object-fill flex justify-center items-center"
                     style={{ gridColumn: "1/1", width: "100%", height: "auto" }}
                   >
+                    {/* {embed?.url && (
+                      <TikTok url={embed.url} />
+                    )} */}
                     {embed.type === "article" ? (
                       <AnimateSharedLayout type="crossfade">
                         {/* <Image
@@ -888,7 +906,13 @@ const EmbedLink = ({ embed }) => {
                         </AnimatePresence>
                       </AnimateSharedLayout>
                     ) : (
-                      <ReactPlayer url={embed.url} controls={true} />
+                      <>
+                        {/* {embed.url.toLowerCase().includes("tiktok") ? (
+                          <TikTok url={embed.url} />
+                        ) : ( */}
+                          <ReactPlayer url={embed.url} controls={true} />
+                        {/* )} */}
+                      </>
                     )}
                   </div>
                 )}
