@@ -36,6 +36,7 @@ import {
   Avatar,
   Image,
   Center,
+  CloseButton,
 } from "@mantine/core";
 import createInlineToolbarPlugin from "@draft-js-plugins/inline-toolbar";
 import {
@@ -82,6 +83,8 @@ import getSocket from "../../apis/socket";
 import { GetMe } from "../../store/userSlice";
 import { CHANNEL_MESSAGES_KEY, OPEN_CHANNEL } from "../../configs/queryKeys";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
+import { useSelector, useDispatch } from "react-redux";
+import { repliesSelector } from "../../store/uiSlice";
 
 const INLINE_STYLES = [
   { label: "Bold", style: "BOLD" },
@@ -218,8 +221,8 @@ const decorator = new CompositeDecorator([
   { strategy: findCodeInlineStyleRanges, component: Code },
 ]);
 
-export default function EditorDraft({channel,user}) {
-  const me = GetMe()
+export default function EditorDraft({ channel, user }) {
+  const me = GetMe();
   const ref = useRef(null);
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty("")
@@ -233,7 +236,9 @@ export default function EditorDraft({channel,user}) {
   const [suggestionsChannels, setSuggestionsChannels] = useState(
     mentions["in:"]
   );
+  const replies = useSelector(repliesSelector);
   const [suggestionsSlash, setSuggestionsSlash] = useState(mentions["/"]);
+  const [openedShareLocation, setOpenedShareLocation] = useState(false);
   const [openedEditor, setOpenedEditor] = useState(false);
   const [markdown, setMarkdown] = useState("");
   const [isTyping, setTyping] = useState(false);
@@ -243,12 +248,12 @@ export default function EditorDraft({channel,user}) {
 
   // connect to socket on component mount.
   useEffect(() => {
-    const newSocket = getSocket(me?.tokens?.access?.token)
-    setSocket(newSocket)
-  }, [setSocket, me?.tokens?.access?.token])
+    const newSocket = getSocket(me?.tokens?.access?.token);
+    setSocket(newSocket);
+  }, [setSocket, me?.tokens?.access?.token]);
 
   useHotkeys([
-    ["R", () => setOpenedEditor(true)],
+    // ["R", () => setOpenedEditor(true)],
     ["ctrl+R", () => setOpenedEditor(true)],
   ]);
   const handleSendMessage = async () => {
@@ -256,29 +261,28 @@ export default function EditorDraft({channel,user}) {
     const contentState = editorState.getCurrentContent();
     const rawContent = convertToRaw(contentState);
     const markdownString = draftToMarkdown(rawContent);
-    const data = new FormData()
-      data.append('channelId', channel._id);
-      data.append('content', markdownString);
+    const data = new FormData();
+    data.append("channelId", channel._id);
+    data.append("content", markdownString);
 
-      try{
-        const result = await sendMessage(data);
-        socket.emit(CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE, {
-          msg: result?.data,
-          receiverId: channel._id,
-        })
-        setEditorState(EditorState.createEmpty(""));
-        cache.invalidateQueries(OPEN_CHANNEL);
-        cache.setQueryData(CHANNEL_MESSAGES_KEY(channel._id), (d) => {
-          if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
-            d?.pages[0]?.results.unshift(result?.data)
-          }
+    try {
+      const result = await sendMessage(data);
+      socket.emit(CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE, {
+        msg: result?.data,
+        receiverId: channel._id,
+      });
+      setEditorState(EditorState.createEmpty(""));
+      cache.invalidateQueries(OPEN_CHANNEL);
+      cache.setQueryData(CHANNEL_MESSAGES_KEY(channel._id), (d) => {
+        if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
+          d?.pages[0]?.results.unshift(result?.data);
+        }
 
-          return d
-        })
-      }
-      catch(err){
-        console.log(err);
-      }
+        return d;
+      });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   // async function handleInputSubmit(e) {
@@ -584,32 +588,48 @@ export default function EditorDraft({channel,user}) {
   };
 
   return (
-    <div className="mx-4 relative flex-shrink-0">
-      {/* <div className="flex">
-        <FontAwesomeIcon icon="fa-solid fa-reply" />
-        <div className="flex">
-          Replying to
-          <Badge
-            sx={{ paddingLeft: 0 }}
-            className="normal-case"
-            size="lg"
-            radius="xl"
-            color="teal"
-            leftSection={
-              <Avatar
-                alt="Avatar for badge"
-                size={24}
-                mr={5}
+    <div className="mx-4 relative flex-shrink-0 truncate overflow-ellipsis">
+      {replies.map((reply) => (
+        <div
+          className="flex h-8 px-3 select-none items-center bg-slate-300"
+          style={{
+            animation:
+              "340ms cubic-bezier(0.2, 0.9, 0.5, 1.16) 0s 1 normal forwards running bottomBounce",
+          }}
+        >
+          <div className="gap-2 flex flex-auto min-w-0 items-center">
+            <FontAwesomeIcon
+              icon="fa-solid fa-reply"
+              className="-scale-x-[1]"
+            />
+            <div className="flex gap-1 items-center truncate overflow-ellipsis">
+              <div className="self-center flex-shrink-0 whitespace-nowrap truncate overflow-ellipsis overflow-hidden font-medium text-sm">
+                Replying to
+              </div>
+              <Badge
+                sx={{ paddingLeft: 0 }}
+                className="normal-case"
                 radius="xl"
-                src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-              />
-            }
-          >
-            Badge with Avatar
-          </Badge>
-          :aaaa
+                color="teal"
+                leftSection={
+                  <Avatar
+                    alt="Avatar for badge"
+                    size="xs"
+                    radius="xl"
+                    src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
+                  />
+                }
+              >
+                Badge with Avatar
+              </Badge>
+              <div className="truncate overflow-ellipsis">
+                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+              </div>
+            </div>
+          </div>
+          <CloseButton size="xs" radius="xl" />
         </div>
-      </div> */}
+      ))}
 
       {/* <div className="flex overflow-x-auto pt-5 pb-1 px-3">
         <div className="flex w-fit gap-6">
@@ -738,6 +758,11 @@ export default function EditorDraft({channel,user}) {
             // onClose={() => setOpened(false)}
             className="w-full overflow-hidden"
             target={ */}
+          {openedShareLocation && (
+            <MapBox
+              setOpenedShareLocation={() => setOpenedShareLocation(false)}
+            />
+          )}
           <div
             style={{
               border: "2px solid #e5e7eb",
@@ -936,17 +961,50 @@ export default function EditorDraft({channel,user}) {
                 <Menu
                   control={
                     <ActionIcon>
-                      <IconPlus />
+                      <FontAwesomeIcon icon="fa-solid fa-bolt" />
                     </ActionIcon>
                   }
                 >
-                  <Menu.Item>Send photo</Menu.Item>
-                  <Menu.Item>Attach File</Menu.Item>
-                  <Menu.Item>Priority Message</Menu.Item>
-                  <Menu.Item>Location</Menu.Item>
-                  <Menu.Item>Voice</Menu.Item>
-                  <Menu.Item>Video</Menu.Item>
-                  <Menu.Item>Create Polls</Menu.Item>
+                  <Menu.Item
+                    icon={<FontAwesomeIcon icon="fa-solid fa-photo-film" />}
+                  >
+                    Send photo
+                  </Menu.Item>
+                  <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-file" />}>
+                    Attach File
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={
+                      <FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />
+                    }
+                  >
+                    Priority Message
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={
+                      <FontAwesomeIcon icon="fa-solid fa-map-location-dot" />
+                    }
+                    onClick={() => setOpenedShareLocation(!openedShareLocation)}
+                  >
+                    Location
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={<FontAwesomeIcon icon="fa-solid fa-microphone" />}
+                  >
+                    Voice
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={<FontAwesomeIcon icon="fa-solid fa-video" />}
+                  >
+                    Video
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={
+                      <FontAwesomeIcon icon="fa-solid fa-square-poll-vertical" />
+                    }
+                  >
+                    Create Polls
+                  </Menu.Item>
                 </Menu>
                 <div
                   style={{
@@ -963,7 +1021,6 @@ export default function EditorDraft({channel,user}) {
                 </ActionIcon>
               </Group>
               <Group spacing="xs">
-                <Switch label="Preview" size="xs" />
                 <Button
                   variant="subtle"
                   size="xs"
@@ -1006,14 +1063,16 @@ export default function EditorDraft({channel,user}) {
             {/* <div style={{ display: "flex" }}>
               aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
             </div> */}
-          {/* <MapBox /> */}
           {/* </Popover> */}
           <div
-            className="flex w-full h-6 justify-end items-center pl-3 pr-2"
+            className="flex w-full h-6 justify-end items-center pl-3 pr-2 gap-3"
             style={{
               fontSize: 10,
             }}
           >
+            <div>
+              <span className="font-semibold">Enter</span> to send
+            </div>
             <div>
               <span className="font-semibold">Shift + Enter</span> to add a new
               line
@@ -1039,7 +1098,7 @@ export default function EditorDraft({channel,user}) {
             </span>
           </div>
           <div>
-            <Kbd>R</Kbd>
+            <Kbd>Ctrl+R</Kbd>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ActionIcon, Divider, Image, Menu, Text, Tooltip } from "@mantine/core";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   chatMainTime,
   getMoreDetailsTime,
@@ -19,6 +19,9 @@ import { useQueryClient } from "react-query";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
 import { CHANNEL_MESSAGES_KEY } from "../../configs/queryKeys";
 import ReactPlayer from "react-player/lazy";
+import { AnimatePresence, motion, AnimateSharedLayout } from "framer-motion";
+import { useDispatch, useSelector } from "react-redux";
+import { replyMessages, repliesSelector } from "../../store/uiSlice";
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,
@@ -74,7 +77,7 @@ const format = (content) =>
       '<div class="border-l-4 border-primary pl-1">$1</div>'
     )
     .replace(patterns.kbd, '<kbd class="kbd">$1</kbd>')
-    .replace(patterns.hashtag, '<span class="text-blue-300">$1</span>')
+    .replace(patterns.hashtag, '<span class="text-blue-500">$1</span>')
     .replace(patterns.warning, '<span class="text-warning">$1</span>')
     .replace(patterns.highlight, '<span class="text-primary">$1</span>')
     // .replace(patterns.link, content.match(patterns.link).map(link=>{
@@ -193,6 +196,17 @@ export default function Message({
   const me = GetMe();
   const cache = useQueryClient();
   const isUnread = false;
+  const [isReply, setIsReply] = useState(false);
+  const dispatch = useDispatch();
+  const replies = useSelector(repliesSelector);
+  useEffect(() => {
+    const reply = replies.find((reply) => reply.message === message.id);
+    if (reply) {
+      setIsReply(true);
+    } else {
+      setIsReply(false);
+    }
+  }, [dispatch]);
 
   const isMyMessage = message.sender.id === me.user.id;
 
@@ -338,7 +352,7 @@ export default function Message({
       >
         <div
           className={`group w-full flex flex-col justify-between relative hover:bg-slate-50 ${
-            isMentioned() ? "mentioned" : ""
+            isMentioned() || isReply ? "mentioned" : ""
           } ${isSameTimePrev() ? "" : "mt-4"} ${
             message.systemMessage ? "mt-4" : ""
           } ${currentEditMessageId === message.id ? "bg-slate-50" : ""} ${
@@ -467,6 +481,7 @@ export default function Message({
               </div>
             </div>
           )}
+          {/* <iframe src="https://maps.google.com/maps?q=@9.779349,105.6189045,11z&output=embed" width={600} height={450} style={{border: 0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" /> */}
           <div className="group-hover:visible invisible absolute right-0 top-0">
             <div className="absolute right-0 -top-6 pr-4 pl-8 z-10">
               <div
@@ -479,7 +494,17 @@ export default function Message({
                 <ActionIcon size={32}>
                   <FontAwesomeIcon icon="fa-solid fa-face-laugh" />
                 </ActionIcon>
-                {(!message.systemMessage || isMyMessage) && (
+                {!message.systemMessage && (
+                  <ActionIcon
+                    size={32}
+                    onClick={() => {
+                      dispatch(replyMessages([...replies, message]));
+                    }}
+                  >
+                    <FontAwesomeIcon icon="fa-solid fa-reply" />
+                  </ActionIcon>
+                )}
+                {!message.systemMessage && isMyMessage && (
                   <ActionIcon
                     size={32}
                     onClick={() => setCurrentEditMessageId(message.id)}
@@ -496,7 +521,7 @@ export default function Message({
                     </ActionIcon>
                   }
                 >
-                  {(!message.systemMessage || isMyMessage) && (
+                  {!message.systemMessage && isMyMessage && (
                     <Menu.Item
                       icon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                       onClick={() => setCurrentEditMessageId(message.id)}
@@ -515,18 +540,20 @@ export default function Message({
                   >
                     {message.pinned ? "Bỏ ghim" : "Ghim tin nhắn"}
                   </Menu.Item>
-                  <Menu.Item
-                    icon={<FontAwesomeIcon icon="fa-solid fa-reply" />}
-                  >
-                    Trả lời
-                  </Menu.Item>
+                  {!message.systemMessage && (
+                    <Menu.Item
+                      icon={<FontAwesomeIcon icon="fa-solid fa-reply" />}
+                    >
+                      Trả lời
+                    </Menu.Item>
+                  )}
                   <Menu.Item>Tạo chủ đề</Menu.Item>
                   <Menu.Item>Đánh dấu chưa đọc</Menu.Item>
                   <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-link" />}>
                     Sao chép đường dẫn tin nhắn
                   </Menu.Item>
                   <Menu.Item>Sao chép ID</Menu.Item>
-                  {(!message.systemMessage || isMyMessage) && (
+                  {!message.systemMessage && isMyMessage && (
                     <Menu.Item
                       color="red"
                       icon={<FontAwesomeIcon icon="fa-solid fa-trash-can" />}
@@ -545,6 +572,7 @@ export default function Message({
 }
 
 const EmbedLink = ({ embed }) => {
+  const [openedImagePreview, setOpenedImagePreview] = useState(false);
   return (
     <div
       className="grid grid-flow-row indent-0 min-h-0 min-w-0 py-[0.125rem] relative"
@@ -553,98 +581,322 @@ const EmbedLink = ({ embed }) => {
         gridTemplateColumns: "repeat(auto-fill,minmax(100%,1fr))",
       }}
     >
-      <article
-        className="grid max-w-[520px] rounded relative "
-        style={{
-          borderLeft: "4px solid #000",
-          backgroundColor: "rgba(128,128,128,0.8)",
-        }}
-      >
-        <div
-          className="overflow-hidden inline-grid"
+      {embed.type === "image" ? (
+        <div className="justify-self-start self-start relative grid max-w-[520px] rounded">
+          <div
+            className="min-w-0 rounded object-fill flex justify-center items-center"
+            style={{ gridColumn: "1/1", width: "100%", height: "auto" }}
+          >
+            <AnimateSharedLayout type="crossfade">
+              {/* <Image
+                        withPlaceholder
+                        width="100%"
+                        height="auto"
+                        fit="contain"
+                        radius={4}
+                        src={
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        }
+                      /> */}
+              <motion.img
+                className="w-full h-auto rounded object-contain"
+                onClick={() => setOpenedImagePreview(true)}
+                layoutId={
+                  embed.thumbnail.url && !Array.isArray(embed.image)
+                    ? embed.image.url
+                    : embed.image[0].url
+                }
+                src={
+                  embed.thumbnail.url && !Array.isArray(embed.image)
+                    ? embed.image.url
+                    : embed.image[0].url
+                }
+              />
+              <AnimatePresence>
+                {openedImagePreview && (
+                  <div className="fixed inset-0 z-50">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.6 }}
+                      exit={{ opacity: 0 }}
+                      key="overlay"
+                      className="overlay inset-0 z-50"
+                      style={{
+                        backgroundImage: `url(${
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        })`,
+                        inset: "-80px -80px -80px -80px",
+                        backgroundColor: "rgba(0,0,0)",
+                        backgroundSize: "cover",
+                        backgroundPosition: "50%",
+                        backgroundRepeat: "no-repeat",
+                        filter: "blur(7px) brightness(.7)",
+                      }}
+                      onClick={() => setOpenedImagePreview(false)}
+                    />
+                    <div
+                      className="single-image-container"
+                      // onClick={() => setSelectedId(null)}
+                    >
+                      <motion.img
+                        key="image"
+                        // index={images[selectedId].id}
+                        className="single-image"
+                        style={{ height: "auto" }}
+                        layoutId={
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        }
+                        src={
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
+              </AnimatePresence>
+            </AnimateSharedLayout>
+          </div>
+        </div>
+      ) : (
+        <article
+          className="grid max-w-[520px] rounded relative "
           style={{
-            gridTemplateColumns: "auto",
-            gridTemplateRows: "auto",
-            padding: "0.5rem 1rem 1rem 0.75rem",
+            borderLeft: "4px solid #000",
+            backgroundColor: "rgba(128,128,128,0.8)",
           }}
         >
-          {embed.provider && (
-            <div
-              className="min-w-0 font-normal mt-2 text-left text-xs"
-              style={{ gridColumn: "1/1" }}
-            >
-              {embed.provider.name}
-            </div>
-          )}
-          {embed.title && (
-            <div
-              className="min-w-0 font-semibold text-base mt-2"
-              style={{ gridColumn: "1/1" }}
-            >
-              <a
-                href={embed.url}
-                target="_blank"
-                className="text-blue-500 hover:underline no-underline"
+          <div
+            className="overflow-hidden inline-grid"
+            style={{
+              gridTemplateColumns: "auto",
+              gridTemplateRows: "auto",
+              padding: "0.5rem 1rem 1rem 0.75rem",
+            }}
+          >
+            {embed.provider && (
+              <div
+                className="min-w-0 font-normal mt-2 text-left text-xs"
+                style={{ gridColumn: "1/1" }}
               >
-                {embed.title}
-              </a>
-            </div>
-          )}
-          {embed.description && (
-            <div
-              className="mt-2 font-normal text-sm whitespace-pre-line text-left"
-              style={{ gridColumn: "1/1" }}
-            >
-              {embed.description}
-            </div>
-          )}
-          {embed.thumbnail?.url && (
-            <>
-              {embed.type === "link" ? (
-                <div
-                  className="w-20 h-20 ml-4 mt-2 flex-shrink-0 justify-self-end flex justify-center items-center object-fill"
-                  style={{ gridRow: "1/8", gridColumn: "2/2" }}
+                {embed.provider.name}
+              </div>
+            )}
+            {embed.title && (
+              <div
+                className="min-w-0 font-semibold text-base mt-2"
+                style={{ gridColumn: "1/1" }}
+              >
+                <a
+                  href={embed.url}
+                  target="_blank"
+                  className="text-blue-500 hover:underline no-underline"
                 >
-                  <Image
-                    withPlaceholder
-                    width={80}
-                    height={80}
-                    radius={4}
-                    fit="contain"
-                    src={
-                      embed.thumbnail.url && !Array.isArray(embed.image)
-                        ? embed.image.url
-                        : embed.image[0].url
-                    }
-                  />
-                </div>
-              ) : (
+                  {embed.title}
+                </a>
+              </div>
+            )}
+            {embed.description && (
+              <div
+                className="mt-2 font-normal text-sm whitespace-pre-line text-left"
+                style={{ gridColumn: "1/1" }}
+              >
                 <div
-                  className="mt-4 min-w-0 rounded object-fill flex justify-center items-center"
-                  style={{ gridColumn: "1/1", width: "100%", height: "auto" }}
-                >
-                  {embed.type === "article" ? (
-                    <Image
-                      withPlaceholder
-                      width="100%"
-                      height="auto"
-                      fit="contain"
-                      radius={4}
-                      src={
-                        embed.thumbnail.url && !Array.isArray(embed.image)
-                          ? embed.image.url
-                          : embed.image[0].url
-                      }
-                    />
-                  ) : (
-                    <ReactPlayer url={embed.url} controls={true} Ơ />
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </article>
+                  dangerouslySetInnerHTML={{
+                    __html: `${format(embed.description)}`,
+                  }}
+                ></div>
+              </div>
+            )}
+            {embed.thumbnail?.url && (
+              <>
+                {embed.type === "link" ? (
+                  <div
+                    className="w-20 h-20 ml-4 mt-2 flex-shrink-0 justify-self-end flex justify-center items-center object-fill"
+                    style={{ gridRow: "1/8", gridColumn: "2/2" }}
+                  >
+                    <AnimateSharedLayout type="crossfade">
+                      {/* <Image
+                        withPlaceholder
+                        width="80px"
+                        height="80px"
+                        fit="contain"
+                        radius={4}
+                        src={
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        }
+                      /> */}
+                      <motion.img
+                        className="w-20 h-20 rounded object-contain"
+                        onClick={() => setOpenedImagePreview(true)}
+                        layoutId={
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        }
+                        src={
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        }
+                      />
+                      <AnimatePresence>
+                        {openedImagePreview && (
+                          <div className="fixed inset-0 z-50">
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 0.6 }}
+                              exit={{ opacity: 0 }}
+                              key="overlay"
+                              className="overlay -inset-20 z-50"
+                              style={{
+                                backgroundImage: `url(${
+                                  embed.thumbnail.url &&
+                                  !Array.isArray(embed.image)
+                                    ? embed.image.url
+                                    : embed.image[0].url
+                                })`,
+                                inset: "-80px -80px -80px -80px",
+                                backgroundColor: "rgba(0,0,0)",
+                                backgroundSize: "cover",
+                                backgroundPosition: "50%",
+                                backgroundRepeat: "no-repeat",
+                                filter: "blur(7px) brightness(.7)",
+                              }}
+                              onClick={() => setOpenedImagePreview(false)}
+                            />
+                            <div
+                              className="single-image-container"
+                              // onClick={() => setSelectedId(null)}
+                            >
+                              <motion.img
+                                key="image"
+                                // index={images[selectedId].id}
+                                className="single-image"
+                                style={{ height: "auto" }}
+                                layoutId={
+                                  embed.thumbnail.url &&
+                                  !Array.isArray(embed.image)
+                                    ? embed.image.url
+                                    : embed.image[0].url
+                                }
+                                src={
+                                  embed.thumbnail.url &&
+                                  !Array.isArray(embed.image)
+                                    ? embed.image.url
+                                    : embed.image[0].url
+                                }
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </AnimatePresence>
+                    </AnimateSharedLayout>
+                  </div>
+                ) : (
+                  <div
+                    className="mt-4 min-w-0 rounded object-fill flex justify-center items-center"
+                    style={{ gridColumn: "1/1", width: "100%", height: "auto" }}
+                  >
+                    {embed.type === "article" ? (
+                      <AnimateSharedLayout type="crossfade">
+                        {/* <Image
+                        withPlaceholder
+                        width="100%"
+                        height="auto"
+                        fit="contain"
+                        radius={4}
+                        src={
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        }
+                      /> */}
+                        <motion.img
+                          className="w-full h-auto rounded object-contain"
+                          onClick={() => setOpenedImagePreview(true)}
+                          layoutId={
+                            embed.thumbnail.url && !Array.isArray(embed.image)
+                              ? embed.image.url
+                              : embed.image[0].url
+                          }
+                          src={
+                            embed.thumbnail.url && !Array.isArray(embed.image)
+                              ? embed.image.url
+                              : embed.image[0].url
+                          }
+                        />
+                        <AnimatePresence>
+                          {openedImagePreview && (
+                            <div className="fixed inset-0 z-50">
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 0.6 }}
+                                exit={{ opacity: 0 }}
+                                key="overlay"
+                                className="overlay inset-0 z-50"
+                                style={{
+                                  backgroundImage: `url(${
+                                    embed.thumbnail.url &&
+                                    !Array.isArray(embed.image)
+                                      ? embed.image.url
+                                      : embed.image[0].url
+                                  })`,
+                                  inset: "-80px -80px -80px -80px",
+                                  backgroundColor: "rgba(0,0,0)",
+                                  backgroundSize: "100% 100%",
+                                  backgroundPosition: "50%",
+                                  backgroundRepeat: "no-repeat",
+                                  filter: "blur(7px) brightness(.7)",
+                                }}
+                                onClick={() => setOpenedImagePreview(false)}
+                              />
+                              <div
+                                className="single-image-container"
+                                // onClick={() => setSelectedId(null)}
+                              >
+                                <motion.img
+                                  key="image"
+                                  // index={images[selectedId].id}
+                                  className="single-image"
+                                  style={{ height: "auto" }}
+                                  layoutId={
+                                    embed.thumbnail.url &&
+                                    !Array.isArray(embed.image)
+                                      ? embed.image.url
+                                      : embed.image[0].url
+                                  }
+                                  src={
+                                    embed.thumbnail.url &&
+                                    !Array.isArray(embed.image)
+                                      ? embed.image.url
+                                      : embed.image[0].url
+                                  }
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </AnimatePresence>
+                      </AnimateSharedLayout>
+                    ) : (
+                      <ReactPlayer url={embed.url} controls={true} />
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </article>
+      )}
     </div>
   );
 };

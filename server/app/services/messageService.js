@@ -4,13 +4,15 @@ const { FriendRequest, Channel, Message } = require("../models");
 const sizeOf = require("image-size");
 const url = require("url");
 const httpRequest = require("https");
+const tunnel = require("tunnel");
+const request = require("request");
 const { canPlay } = require("../configs/patterns");
 // const { FRIEND_STATUS } = require("../configs/friendStatus");
 const ApiError = require("../utils/ApiError");
 const ogs = require("open-graph-scraper");
 
 const http_regex =
-  /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/gm;
+  /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_,\+.~#?&\/=]*)/gm;
 const size_url = /(?:[-_]?[0-9]+x[0-9]+)+/g;
 
 function friendId(user, object) {
@@ -208,6 +210,31 @@ const deleteMessage = async (user, messageId) => {
   return message;
 };
 
+const isImageLink = async (url, timeoutT) => {
+  if (typeof url !== "string") return false;
+  if (
+    url.match(/^http[^\?]*.(jpg|jpeg|gif|png|tiff|bmp)(\?(.*))?$/gim) !==
+    // return url.match(/^http[^\?]*|[image]|.(jpg|jpeg|gif|png|tiff|bmp)(\?(.*))?$/gim) !==
+    null
+  )
+    return true;
+  else {
+    const req = new Promise(function (resolve, reject) {
+      request.head(url, function (err, res, body) {
+        if (!err) {
+          resolve(res.headers["content-type"].match(/^image\//gim) !== null);
+
+          //   console.log("content-type:", res.headers["content-type"]);
+          // console.log("content-length:", res.headers["content-length"]);
+        } else {
+          resolve(false);
+        }
+      });
+    }).then((result) => result);
+    return await req.then((result) => result);
+  }
+};
+
 const embedType = (url) => {
   let type = "link";
   if (
@@ -233,26 +260,52 @@ const postLink = async function (data) {
   if (data !== undefined) {
     const http = data.match(http_regex);
     if (http) {
+      console.log(await isImageLink(http[0]));
       const result = await Promise.all(
-        http.map((url) =>
-          ogs(
-            {
-              url,
-              customMetaTags: [
-                {
-                  multiple: false, // is there more than one of these tags on a page (normally this is false)
-                  property: "keywords", // meta tag name/property attribute
-                  fieldName: "keywords", // name of the result variable
-                },
-              ],
-            },
-            (error, results, response) => {
-              return {
-                ...results,
+        http.map(async (url) =>
+          (await isImageLink(url, 1000))
+            ? {
+                type: "image",
                 url,
-              };
-            }
-          )
+                ogImage: {
+                  url: url,
+                  width: undefined,
+                  height: undefined,
+                },
+              }
+            : ogs(
+                {
+                  url: url,
+                  onlyGetOpenGraphInfo: true,
+                  downloadLimit: 2000000,
+                  headers: {
+                    "user-agent":
+                      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january)",
+                  },
+                  // agent: {
+                  //   https: tunnel.httpsOverHttp({
+                  //     proxy: {
+                  //       host: '174.138.116.12',
+                  //       port: 80,
+                  //       rejectUnauthorized: false,
+                  //     }
+                  //   })
+                  // }
+                  // customMetaTags: [
+                  //   {
+                  //     multiple: false,
+                  //     property: "keywords",
+                  //     fieldName: "keywords",
+                  //   },
+                  // ],
+                },
+                (error, results, response) => {
+                  return {
+                    ...results,
+                    url,
+                  };
+                }
+              )
         )
       ).then((results) => {
         console.log("og", results);
@@ -308,9 +361,34 @@ const postLink = async function (data) {
           };
         }
         const type =
-          embedType(og.url) === "link" && dimensions.width >= 400
+          og?.type ??
+          (embedType(og.url) === "link" && dimensions.width >= 400
             ? "article"
-            : embedType(og.url);
+            : embedType(og.url));
+        const thumbnail = {
+          height: isNaN(
+            convertType(
+              !Array.isArray(og.ogImage)
+                ? og.ogImage?.height
+                : og.ogImage[0]?.height
+            )
+          )
+            ? dimensions.height
+            : !Array.isArray(og.ogImage)
+            ? og.ogImage?.height
+            : og.ogImage[0]?.height,
+          width: isNaN(
+            convertType(
+              !Array.isArray(og.ogImage)
+                ? og.ogImage?.width
+                : og.ogImage[0]?.width
+            )
+          )
+            ? dimensions.width
+            : !Array.isArray(og.ogImage)
+            ? og.ogImage?.width
+            : og.ogImage[0]?.width,
+        };
         return {
           title: og.ogTitle,
           description: og.ogDescription,
@@ -325,14 +403,8 @@ const postLink = async function (data) {
               ? og.ogImage?.url
               : og.ogImage[0]?.url,
             proxy_url: null,
-            height:
-              (!Array.isArray(og.ogImage)
-                ? og.ogImage?.height
-                : og.ogImage[0]?.height) ?? dimensions.height,
-            width:
-              (!Array.isArray(og.ogImage)
-                ? og.ogImage?.width
-                : og.ogImage[0]?.width) ?? dimensions.width,
+            height: thumbnail.height,
+            width: thumbnail.width,
           },
           media: og.ogVideo || (og.ogAudio ?? og.twitterPlayer),
           type: type,
@@ -341,6 +413,12 @@ const postLink = async function (data) {
     }
   }
   return await Promise.all(embedLink);
+};
+
+const convertType = (value) => {
+  var values = { undefined: undefined, null: null, true: true, false: false },
+    isNumber = !isNaN(+value);
+  return (isNumber && +value) || (!(value in values) && value) || values[value];
 };
 
 module.exports = {

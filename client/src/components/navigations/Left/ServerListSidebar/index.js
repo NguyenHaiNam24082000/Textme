@@ -27,7 +27,8 @@ import ModalCreateWorkspace from "../../../Modals/ModalCreateWorkspace";
 
 export default function Sidebar() {
   const [opened, setOpened] = useState(false);
-  const [openedModalCreateWorkspace, setOpenedModalCreateWorkspace] = useState(false);
+  const [openedModalCreateWorkspace, setOpenedModalCreateWorkspace] =
+    useState(false);
   const [position, setPosition] = useState("left");
   const [hostKeys, setHostKeys] = useState([]);
   useHotkeys([["ctrl+shift+Z", () => openDrawer()], ...hostKeys]);
@@ -87,7 +88,13 @@ export default function Sidebar() {
         />
         {/* </FocusRing> */}
         <div className="w-16 h-16 flex justify-center items-center">
-          <ActionIcon radius="xl" size={48} variant="filled" className="space-avatar" onClick={()=>setOpenedModalCreateWorkspace(true)}>
+          <ActionIcon
+            radius="xl"
+            size={48}
+            variant="filled"
+            className="space-avatar"
+            onClick={() => setOpenedModalCreateWorkspace(true)}
+          >
             <FontAwesomeIcon icon="fa-solid fa-plus" className="text-xl" />
           </ActionIcon>
         </div>
@@ -301,12 +308,20 @@ export default function Sidebar() {
       </div>
       <div className="flex justify-center items-center w-16 h-16">
         <Link to="/discover">
-          <ActionIcon radius="xl" size={48} variant="filled" className="space-avatar">
-            <MdExplore className="text-xl" />
+          <ActionIcon
+            radius="xl"
+            size={48}
+            variant="filled"
+            className="space-avatar"
+          >
+            <FontAwesomeIcon icon="fa-solid fa-compass" className="text-xl" />
           </ActionIcon>
         </Link>
       </div>
-      <ModalCreateWorkspace opened={openedModalCreateWorkspace} onClose={()=>setOpenedModalCreateWorkspace(false)}/>
+      <ModalCreateWorkspace
+        opened={openedModalCreateWorkspace}
+        onClose={() => setOpenedModalCreateWorkspace(false)}
+      />
     </div>
   );
 }

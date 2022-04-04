@@ -11,9 +11,15 @@ const slice = createSlice({
     isMute: get("mute") ?? false,
     isDeafen: get("deafen") ?? false,
     isVoiceConnected: get("voiceConnected") ?? false,
+    replies: get("replies") ?? [],
     //isCallEnded: 
   },
   reducers: {
+    replyMessages: (state, action) => {
+      const { payload } = action;
+      // set("replies", payload);
+      state.replies = payload;
+    },
     expandedChannel: (state, action) => {
       const value = !state.isVisibleChanel;
       set("channelToggled", value);
@@ -46,6 +52,7 @@ export const isVisibleModal = (type) =>
     (name) => name === type.name
   );
 
+export const repliesSelector = (state) => state.ui.replies;
 export const isVisibleChanel = (state) => state.ui.isVisibleChanel;
 export const isVisibleComplement = (state) => state.ui.isVisibleComplement;
 export const isMute = (state) => state.ui.isMute;
@@ -61,6 +68,7 @@ export const isVisibleChanelSelector = (state) => state.ui.isVisibleChanel;
 
 export default slice.reducer;
 export const {
+  replyMessages,
   expandedChannel,
   expandedComplement,
   openedModal,

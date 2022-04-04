@@ -94,6 +94,12 @@ import {
   faHouse as fasFaHouse,
   faKey as fasFaKey,
   faPlus as fasFaPlus,
+  faCompass as fasFaCompass,
+  faMapLocationDot as fasFaMapLocationDot,
+  faSquarePollVertical as fasFaSquarePollVertical,
+  faPhotoFilm as fasFaPhotoFilm,
+  faFile as fasFaFile,
+  faBolt as fasFaBolt,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -108,6 +114,12 @@ import Friends from "./pages/Me/Friends";
 import Me from "./pages/Me";
 
 library.add(
+  fasFaBolt,
+  fasFaFile,
+  fasFaSquarePollVertical,
+  fasFaPhotoFilm,
+  fasFaCompass,
+  fasFaMapLocationDot,
   fasFaUser,
   farFaUser,
   fasFaIdCard,

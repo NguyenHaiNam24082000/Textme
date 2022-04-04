@@ -43,10 +43,12 @@
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
     "path": "^0.12.7",
+    "probe-image-size": "^7.2.3",
     "redis": "^4.0.4",
     "redis-om": "^0.1.7",
     "short-unique-id": "^4.4.4",
     "socket.io": "^4.4.1",
+    "tunnel": "^0.0.6",
     "validator": "^13.7.0",
     "xss-clean": "^0.1.1"
   }

@@ -72,10 +72,12 @@ const messageSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    reply: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Message",
-    },
+    replies: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message",
+      },
+    ],
     messagesEdited: [
       {
         content: {
@@ -115,14 +117,7 @@ const messageSchema = new mongoose.Schema(
           },
           type: {
             type: String,
-            enum: [
-              "image",
-              "gifv",
-              "media",
-              "link",
-              "rich",
-              "article",
-            ],
+            enum: ["image", "gifv", "media", "link", "rich", "article"],
           },
           description: {
             type: String,
@@ -150,6 +145,14 @@ const messageSchema = new mongoose.Schema(
               proxy_icon_url: {
                 type: String,
               },
+            },
+          },
+          map: {
+            type: Object,
+            properties: {
+              latitude: { type: Number },
+              longitude: { type: Number },
+              zoom: { type: Number },
             },
           },
           image: {
