@@ -1,0 +1,129 @@
+#mock-chat-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  flex: auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.chat {
+  position: fixed;
+  bottom: 60px;
+  width: 500px;
+  display: inline-block;
+}
+
+.line-container {
+  overflow: hidden;
+  border-radius: 6px;
+  max-height: 0px;
+  opacity: 0;
+  transform: translateX(-300px) scale(0.2);
+  transition: margin-bottom 200ms, max-height 500ms, opacity 100ms,
+    transform 250ms;
+  transition-timing-function: ease-out;
+}
+.line-container:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.line {
+  padding: 10px;
+  background-color: #242424;
+}
+.line > div {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.profile-img {
+  cursor: pointer;
+  border-radius: 6px;
+  width: 60px;
+  height: 60px;
+  background-color: #383838;
+  margin-right: 10px;
+}
+
+.body .name,
+.body .text {
+  border-radius: 2px;
+  background-color: #474747;
+  height: 16px;
+}
+
+.name {
+  width: 100px;
+  margin-bottom: 10px;
+  position: relative;
+  cursor: pointer;
+}
+.name:after {
+  content: "";
+  display: block;
+  border-radius: 2px;
+  background-color: rgba(56, 56, 56, 0.4);
+  height: 16px;
+  width: 50px;
+  position: absolute;
+  right: -60px;
+  transition: 100ms;
+}
+
+.profile-img:hover + .body .name:after,
+.name:hover:after {
+  background-color: #383838;
+  width: 100px;
+  right: -110px;
+}
+
+.text:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.rich-body {
+  margin-left: 14px;
+  margin-top: 36px;
+  position: relative;
+}
+.rich-body:before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -26px;
+  left: -14px;
+  bottom: 0;
+  width: 4px;
+  background-color: inherit;
+}
+.rich-body:after {
+  content: "";
+  display: block;
+  position: absolute;
+  height: 16px;
+  width: 200px;
+  top: -26px;
+  background-color: inherit;
+  border-radius: 2px;
+}
+
+.img,
+.rich-body {
+  width: 300px;
+  height: 300px;
+  cursor: pointer;
+  border-radius: 6px;
+  background-color: #333333;
+}
+
+.profile-img,
+.name,
+.text,
+.img,
+.rich-body {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 200ms;
+}

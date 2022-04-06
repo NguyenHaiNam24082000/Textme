@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useIdle } from "@mantine/hooks";
 import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "react-bubble-ui/dist/index.css";
 import { useDispatch } from "react-redux";
 import { CSSTransition } from "react-transition-group";
@@ -23,6 +23,8 @@ import { useInfiniteQuery } from "react-query";
 import { getMessages } from "../../../apis/messages";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "./index.css";
+import { scroller, Element } from "react-scroll";
+import MockChat from "../../MockChat";
 
 const users = [
   {
@@ -112,6 +114,8 @@ function ChatArea({ channel, user }) {
   const [currentEditMessageId, setCurrentEditMessageId] = useState(null);
   const [currentMessageSelected, setCurrentMessageSelected] = useState(null);
   const dispatch = useDispatch();
+  const messagesEndRef = useRef(null);
+  const observer = useRef();
   console.log(channel, "aAaaaaa");
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery(
@@ -123,21 +127,57 @@ function ChatArea({ channel, user }) {
       {
         getNextPageParam: (lastPage) => {
           const { page, totalPages } = lastPage;
+          console.log(lastPage);
           return page < totalPages ? page + 1 : undefined;
         },
       }
     );
-    const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
+  const lastMessageRef = useCallback(
+    (node) => {
+      if (isLoading) return;
+
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, hasNextPage, fetchNextPage]
+  );
+  const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
   useEffect(() => {
-    const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
-    setMessages(msg.reverse());
+    // const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
+    // setMessages(msg.reverse());
+    scrollToBottom();
   }, [data]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    const resetCurrentMessages = setTimeout(() => {
-      setCurrentMessageSelected(null);
-    }, 3000);
-    return () => clearTimeout(resetCurrentMessages);
+    document
+      .getElementById(`chat-messages-${currentMessageSelected}`)
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+    // scroller.scrollTo(`chat-messages-${currentMessageSelected}`, {
+    //   duration: 1500,
+    //   delay: 0,
+    //   containerId: "chat-viewport",
+    //   smooth: true,
+    // });
+    // const resetCurrentMessages = setTimeout(() => {
+    //   setCurrentMessageSelected(null);
+    // }, 3000);
+    // console.log("aaaaaaazzzzz");
+    // return () => clearTimeout(resetCurrentMessages);
   }, [currentMessageSelected]);
 
   useEffect(() => {
@@ -156,8 +196,8 @@ function ChatArea({ channel, user }) {
     setMenuHeight(height);
   }
 
-  const scrollToBottom = () =>
-    viewportRef.current.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  // const scrollToBottom = () =>
+  //   viewportRef.current.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
   const onSearchChangeMembers = (e) => {
     setSearchMember(e.target.value);
@@ -176,46 +216,59 @@ function ChatArea({ channel, user }) {
             id="chat-viewport"
             className="flex flex-col flex-auto min-h-0 absolute top-0 left-0 right-0 bottom-0  overflow-y-scroll overflow-x-hidden justify-end"
           >
-            <InfiniteScroll
-              dataLength={messages.length}
-              next={fetchNextPage}
-              style={{
-                display: "flex",
-                flexDirection: "column-reverse",
-                overflow: "hidden",
-              }} //To put endMessage and loader to the top.
-              inverse={true} //
-              hasMore={hasNextPage}
-              loader={
-                <div className="flex w-full h-auto justify-center items-center my-2">
-                  Loading...
-                </div>
-              }
-              endMessage={hasNextPage}
-              scrollableTarget="chat-viewport"
-            >
-              <div className="mb-5">
+            {isLoading ? (
+              <MockChat />
+             ) : (
+              <InfiniteScroll
+                dataLength={msg.length}
+                next={fetchNextPage}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                }} //To put endMessage and loader to the top.
+                inverse={true} //
+                hasMore={hasNextPage}
+                loader={
+                  <div className="flex w-full h-auto justify-center items-center my-2">
+                    Loading...
+                  </div>
+                }
+                endMessage={hasNextPage}
+                scrollableTarget="chat-viewport"
+              >
                 {msg &&
                   msg.reverse().map((message, index) => (
                     // <InfinityGauntlet snap={true}>
                     // <AnimatePresence key={index}>
-                    <Message
-                      message={message}
+                    // <Element
+                    //   key={message.id}
+                    //   name={`chat-messages-${message.id}`}
+                    // >
+                    <div
                       key={message.id}
-                      user={user}
-                      searchMessage={searchMessage}
-                      messages={msg}
-                      currentEditMessageId={currentEditMessageId}
-                      setCurrentEditMessageId={setCurrentEditMessageId}
-                      currentMessageSelected={currentMessageSelected}
-                      setCurrentMessageSelected={setCurrentMessageSelected}
-                    />
+                      id={`chat-messages-${message.id}`}
+                      ref={lastMessageRef}
+                    >
+                      <Message
+                        message={message}
+                        key={message.id}
+                        user={user}
+                        searchMessage={searchMessage}
+                        messages={msg}
+                        currentEditMessageId={currentEditMessageId}
+                        setCurrentEditMessageId={setCurrentEditMessageId}
+                        currentMessageSelected={currentMessageSelected}
+                        setCurrentMessageSelected={setCurrentMessageSelected}
+                      />
+                    </div>
+                    // </Element>
                     // </AnimatePresence>
                     // </InfinityGauntlet>
                   ))}
-                  <div className="h-2 w-full"></div>
-              </div>
-            </InfiniteScroll>
+                <div ref={messagesEndRef} className="h-8 w-full"></div>
+              </InfiniteScroll>
+            )}
             {/* </div> */}
           </div>
           {/* <div className="m-4 relative flex-shrink-0">

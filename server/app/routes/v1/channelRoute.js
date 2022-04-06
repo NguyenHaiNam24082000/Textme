@@ -23,5 +23,10 @@ router.put(
   auth(),
   channelController.pinnedMessage
 );
+router.put(
+  "/:channelId/reactions/:messageId",
+  auth(),
+  channelController.reactionMessage
+);
 
 module.exports = router;

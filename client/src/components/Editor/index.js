@@ -263,8 +263,13 @@ export default function EditorDraft({ channel, user }) {
     const rawContent = convertToRaw(contentState);
     const markdownString = draftToMarkdown(rawContent);
     const data = new FormData();
+    const replyMsg =
+      channel && replies[channel._id] && replies[channel._id].length
+        ? replies[channel._id].map((reply) => reply.id)
+        : [];
     data.append("channelId", channel._id);
     data.append("content", markdownString);
+    data.append("replies", replyMsg);
 
     try {
       const result = await sendMessage(data);
@@ -273,6 +278,18 @@ export default function EditorDraft({ channel, user }) {
         receiverId: channel._id,
       });
       setEditorState(EditorState.createEmpty(""));
+      console.log(
+        replies[channel._id] && {
+          id: channel._id,
+          messages: [],
+        }
+      );
+      replies[channel._id] && dispatch(
+        replyMessages({
+          id: channel._id,
+          messages: [],
+        })
+      );
       cache.invalidateQueries(OPEN_CHANNEL);
       cache.setQueryData(CHANNEL_MESSAGES_KEY(channel._id), (d) => {
         if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
@@ -590,60 +607,76 @@ export default function EditorDraft({ channel, user }) {
 
   return (
     <div className="mx-4 relative flex-shrink-0 truncate overflow-ellipsis">
-      {replies.map((reply) => (
-        <div
-          className="flex h-8 px-3 select-none items-center bg-slate-300 truncate overflow-ellipsis"
-          style={{
-            animation:
-              "340ms cubic-bezier(0.2, 0.9, 0.5, 1.16) 0s 1 normal forwards running bottomBounce",
-          }}
-        >
-          <div className="gap-2 flex flex-auto min-w-0 items-center">
-            <FontAwesomeIcon
-              icon="fa-solid fa-reply"
-              className="-scale-x-[1]"
-            />
-            <div className="flex gap-1 items-center truncate overflow-ellipsis min-w-0 flex-grow-1">
-              <div className="self-center flex-shrink-0 whitespace-nowrap truncate overflow-ellipsis overflow-hidden font-medium text-sm">
-                Replying to
-              </div>
-              <div className="py-[2px] overflow-hidden flex items-center gap-1 max-h-8 truncate">
-                <Badge
-                  sx={{ paddingLeft: 0 }}
-                  className="normal-case"
-                  radius="xl"
-                  color="teal"
-                  leftSection={
-                    <Avatar
-                      alt="Avatar for badge"
-                      size="xs"
-                      radius="xl"
-                      src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-                    />
-                  }
+      {channel &&
+        replies[channel._id] &&
+        replies[channel._id].map((reply, index) => (
+          <div
+            key={reply.id}
+            className="flex h-8 px-3 select-none items-center bg-slate-300 truncate overflow-ellipsis"
+            style={{
+              // borderRadius: `${replies.findIndex((r)=>r.id===reply.id)===0?"6px 6px":"0px 0px"} 0px 0px`,
+              borderRadius: `${index === 0 ? "6px 6px" : "0px 0px"} 0px 0px`,
+              animation:
+                "340ms cubic-bezier(0.2, 0.9, 0.5, 1.16) 0s 1 normal forwards running bottomBounce",
+            }}
+          >
+            <div className="gap-2 flex flex-auto min-w-0 items-center">
+              <FontAwesomeIcon
+                icon="fa-solid fa-reply"
+                className="-scale-x-[1]"
+              />
+              <div className="flex gap-1 items-center truncate overflow-ellipsis min-w-0">
+                <div className="self-center flex-shrink-0 whitespace-nowrap truncate overflow-ellipsis overflow-hidden font-medium text-sm">
+                  Replying to
+                </div>
+                <div
+                  className="py-[2px] flex items-center gap-1 max-h-8 truncate"
+                  style={{ flex: "1 1 0%" }}
                 >
-                  {reply.sender.username}
-                </Badge>
-                <div className="truncate overflow-ellipsis flex gap-1 max-h-7">
-                  <span className="truncate">
-                    <p className="truncate m-0">{reply.content}</p>
-                  </span>
+                  <Badge
+                    sx={{ paddingLeft: 0 }}
+                    className="normal-case"
+                    radius="xl"
+                    color="teal"
+                    leftSection={
+                      <Avatar
+                        alt="Avatar for badge"
+                        size="xs"
+                        radius="xl"
+                        src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
+                      />
+                    }
+                  >
+                    {reply.sender.username}
+                  </Badge>
+                  <div
+                    className="truncate overflow-ellipsis max-h-7"
+                    style={{ maxWidth: 320 }}
+                  >
+                    {reply.content}
+                  </div>
                 </div>
               </div>
             </div>
+            <CloseButton
+              size="xs"
+              radius="xl"
+              onClick={() => {
+                // const index = replies[channel.id].indexOf(reply);
+                const repliesClone = replies[channel._id].filter(
+                  (r) => r.id !== reply.id
+                );
+                // const repliesClone= replies.splice(replies.indexOf(reply), 1);
+                dispatch(
+                  replyMessages({
+                    id: channel._id,
+                    messages: repliesClone,
+                  })
+                );
+              }}
+            />
           </div>
-          <CloseButton
-            size="xs"
-            radius="xl"
-            onClick={() => {
-              const index = replies.indexOf(reply);
-              const repliesClone = replies.filter((r) => r.id !== reply.id);
-              // const repliesClone= replies.splice(replies.indexOf(reply), 1);
-              dispatch(replyMessages(repliesClone));
-            }}
-          />
-        </div>
-      ))}
+        ))}
 
       {/* <div className="flex overflow-x-auto pt-5 pb-1 px-3">
         <div className="flex w-fit gap-6">
@@ -780,7 +813,11 @@ export default function EditorDraft({ channel, user }) {
           <div
             style={{
               border: "2px solid #e5e7eb",
-              borderRadius: 6,
+              borderRadius: `${
+                channel && replies[channel._id] && replies[channel._id].length
+                  ? "0px 0px"
+                  : "6px 6px"
+              } 6px 6px`,
               padding: 8,
               backgroundColor: "#f3f4f6",
             }}
@@ -1099,7 +1136,11 @@ export default function EditorDraft({ channel, user }) {
           style={{
             border: "2px solid #e5e7eb",
             backgroundColor: "#e5e7eb",
-            borderRadius: 6,
+            borderRadius: `${
+              channel && replies[channel._id] && replies[channel._id].length
+                ? "0px 0px"
+                : "6px 6px"
+            } 6px 6px`,
             padding: 8,
           }}
           onClick={() => setOpenedEditor(true)}

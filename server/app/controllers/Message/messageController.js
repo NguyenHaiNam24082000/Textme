@@ -16,7 +16,7 @@ const getMessages = catchAsync(async (req, res, next) => {
   const options = {
     sortBy: "createdAt:desc",
     page,
-    populate: "sender",
+    populate: "sender,replies,replies.sender",
     limit,
   };
   const messages = await messageService.queryMessages(
@@ -50,6 +50,7 @@ const searchMessages = catchAsync(async (req, res, next) => {
 const editMessage = catchAsync(async (req, res, next) => {
   const { message } = req.body;
   const { messageId } = req.params;
+  console.log(message,messageId);
 
   const result = await messageService.editMessage(req.user, { message, messageId });
   res.status(httpStatus.CREATED).send(result);
@@ -61,6 +62,17 @@ const postLink = catchAsync(async (req, res, next) => {
   res.status(httpStatus.CREATED).send(result);
 })
 
+const deleteMessage = catchAsync(async (req, res, next) => {
+  const { messageId } = req.params;
+  const result = await messageService.deleteMessage(req.user, messageId);
+  res.status(httpStatus.OK).send(result);
+})
+
+const translateMessage = catchAsync(async (req, res, next) => {
+  const { messageId } = req.params;
+  const result = await messageService.translateMessage(req.user, messageId,"vi");
+  res.status(httpStatus.OK).send(result);
+});
 
 module.exports = {
   sendMessage,
@@ -68,4 +80,6 @@ module.exports = {
   editMessage,
   searchMessages,
   postLink,
+  deleteMessage,
+  translateMessage,
 };

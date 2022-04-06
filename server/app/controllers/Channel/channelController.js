@@ -29,7 +29,10 @@ const createGroupChannel = catchAsync(async (req, res) => {
 // })
 
 const getExistingGroupChannels = catchAsync(async (req, res) => {
-  const channels = await channelService.alreadyInGroupChannel(req.user, req.body);
+  const channels = await channelService.alreadyInGroupChannel(
+    req.user,
+    req.body
+  );
   res.status(httpStatus.OK).send(channels);
 });
 
@@ -37,12 +40,17 @@ const getPinnedMessage = catchAsync(async (req, res, next) => {
   const { channelId } = req.params;
   const messages = await channelService.getPinnedMessage(req.user, channelId);
   res.status(httpStatus.OK).send(messages);
-})
+});
 
 const pinnedMessage = catchAsync(async (req, res, next) => {
   const result = await channelService.pinnedMessage(req.user, req.params);
   res.status(httpStatus.OK).send(result);
-})
+});
+
+const reactionMessage = catchAsync(async (req, res, next) => {
+  const result = await channelService.reactionMessage(req.user, req.params);
+  res.status(httpStatus.OK).send(result);
+});
 
 module.exports = {
   getOrCreateDMChannel,
@@ -52,4 +60,5 @@ module.exports = {
   createGroupChannel,
   getPinnedMessage,
   pinnedMessage,
+  reactionMessage,
 };

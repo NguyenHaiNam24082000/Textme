@@ -321,7 +321,7 @@
     background: #3a12ff;
   }
   100% {
-    background: transparent;
+    background: inherit;
   }
 }
 

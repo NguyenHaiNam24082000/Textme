@@ -100,6 +100,10 @@ import {
   faPhotoFilm as fasFaPhotoFilm,
   faFile as fasFaFile,
   faBolt as fasFaBolt,
+  faLanguage as fasFaLanguage,
+  faMapPin as fasFaMapPin,
+  faClipboard as fasFaClipboard,
+  faTrashCanArrowUp as fasFaTrashCanArrowUp,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -114,6 +118,9 @@ import Friends from "./pages/Me/Friends";
 import Me from "./pages/Me";
 
 library.add(
+  fasFaTrashCanArrowUp,
+  fasFaClipboard,
+  fasFaMapPin,
   fasFaBolt,
   fasFaFile,
   fasFaSquarePollVertical,
@@ -198,6 +205,7 @@ library.add(
   fasFaKey,
   fasFaPlus,
   fasFaChevronRight,
+  fasFaLanguage
 );
 
 const client = new QueryClient({
@@ -312,10 +320,7 @@ function App() {
                                 path="/channel/@me/:channel"
                                 element={<Me />}
                               />
-                              <Route
-                                path="/discover"
-                                element={<Me />}
-                              />
+                              <Route path="/discover" element={<Me />} />
                               <Route path="/friends" element={<Me />} />
                               {/* <Route path="/app" element={<Workspace />} />
                             <Route path="/app" element={<Workspace />} />

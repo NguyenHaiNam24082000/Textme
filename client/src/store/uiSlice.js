@@ -11,14 +11,14 @@ const slice = createSlice({
     isMute: get("mute") ?? false,
     isDeafen: get("deafen") ?? false,
     isVoiceConnected: get("voiceConnected") ?? false,
-    replies: get("replies") ?? [],
+    replies: get("replies") ?? {},
     //isCallEnded: 
   },
   reducers: {
     replyMessages: (state, action) => {
       const { payload } = action;
       // set("replies", payload);
-      state.replies = payload;
+      state.replies[payload.id] = payload.messages;
     },
     expandedChannel: (state, action) => {
       const value = !state.isVisibleChanel;

@@ -202,7 +202,7 @@ const pinnedMessage = async (user, data) => {
   }
   const pinned = !message.pinned;
   message.pinned = pinned;
-  let channel=null;
+  let channel = null;
   if (pinned) {
     channel = await Channel.findOneAndUpdate(
       {
@@ -213,7 +213,7 @@ const pinnedMessage = async (user, data) => {
         $push: {
           savedMessages: [messageId],
         },
-      },
+      }
       // { upsert: true, new: true }
     );
   } else {
@@ -227,7 +227,7 @@ const pinnedMessage = async (user, data) => {
         $pull: {
           savedMessages: messageId,
         },
-      },
+      }
       // { upsert: true, new: true }
     );
   }
@@ -244,7 +244,9 @@ const pinnedMessage = async (user, data) => {
     },
     sender: user._id,
     systemMessage: true,
-    systemMessageType: pinned?"CHANNEL_PINNED_MESSAGE":"CHANNEL_UNPINNED_MESSAGE",
+    systemMessageType: pinned
+      ? "CHANNEL_PINNED_MESSAGE"
+      : "CHANNEL_UNPINNED_MESSAGE",
   });
   return systemMessage.populate("sender");
 };
@@ -265,6 +267,43 @@ const getPinnedMessage = async (user, channelId) => {
   return messages;
 };
 
+const reactionMessage = async (user, body) => {
+  const { messageId, channelId, reaction } = body;
+  const channel = await Channel.findOne({
+    _id: channelId,
+    $or: [{ owner: user._id }, { members: user._id }],
+  });
+  if (!channel) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
+  }
+  const message = await Message.findOne({
+    _id: messageId,
+    channel: channelId,
+  });
+  if (!message) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a message!`);
+  }
+  if (
+    reaction.id &&
+    message.reactions.find((r) => r._id === reaction.id && user.id === r.user)
+  ) {
+    message.reactions.pull(reaction.id);
+  } else {
+    message.reactions.push(reaction);
+  }
+  await message.save();
+  return message.populate([
+    "sender",
+    "replies",
+    {
+      path: "replies",
+      populate: {
+        path: "sender",
+      },
+    },
+  ]);
+};
+
 module.exports = {
   createDMChannel,
   createTextChannel,
@@ -277,4 +316,5 @@ module.exports = {
   createGroupChannel,
   getPinnedMessage,
   pinnedMessage,
+  reactionMessage,
 };

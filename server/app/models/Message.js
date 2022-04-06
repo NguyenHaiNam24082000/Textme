@@ -25,6 +25,7 @@ const messageSchema = new mongoose.Schema(
         "CHANNEL_NAME_CHANGE",
         "GUILD_MEMBER_JOIN",
         "THREAD_CREATED",
+        "MESSAGE_DELETED",
       ],
     },
     sender: {
@@ -92,13 +93,24 @@ const messageSchema = new mongoose.Schema(
     ],
     reactions: [
       {
+        _id: mongoose.Schema.Types.ObjectId,
         user: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
         },
         emoji: {
-          type: String,
-          trim: true,
+          type: Object,
+          property: {
+            name: {
+              type: String,
+            },
+            id: {
+              type: String,
+            },
+            skin: {
+              type: Number,
+            },
+          },
         },
         createdAt: {
           type: Date,
@@ -254,6 +266,10 @@ const messageSchema = new mongoose.Schema(
         },
       },
     },
+    messageDeleted: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true },
   {

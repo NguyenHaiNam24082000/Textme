@@ -8,6 +8,8 @@ const tunnel = require("tunnel");
 const probe = require("probe-image-size");
 const request = require("request");
 const { canPlay } = require("../configs/patterns");
+const translate = require("@vitalets/google-translate-api");
+// const { translate } = require("free-translate");
 // const { FRIEND_STATUS } = require("../configs/friendStatus");
 const ApiError = require("../utils/ApiError");
 const ogs = require("open-graph-scraper");
@@ -43,6 +45,16 @@ const createMessage = async (user, body) => {
     );
   }
   let embedLink = await postLink(content);
+  const replies = body.replies
+    ? (() => {
+        if (typeof body.replies === "string") {
+          return body.replies.split(",");
+        }
+        return body.replies;
+      })()
+    : [];
+
+  // console.log("replies", replies);
 
   // const friendShip = await FriendRequest.findOne({
   //   $or: [
@@ -64,12 +76,29 @@ const createMessage = async (user, body) => {
     channel: channelId,
     sender: user._id,
     embed: embedLink,
+    replies: replies,
   });
 
   channel.lastMessage = message._id;
   await channel.save();
 
-  return message.populate("sender");
+  return message.populate([
+    "sender",
+    "replies",
+    {
+      path: "replies",
+      populate: {
+        path: "sender",
+      },
+    },
+  ]);
+  // {
+  //   path: "replies",
+  //   populate: {
+  //     path: "sender",
+  //     // select: "name avatar",
+  //   },
+  // }
 };
 
 /**
@@ -172,7 +201,16 @@ const editMessage = async (user, data) => {
     { upsert: true, new: true }
   );
 
-  return result;
+  return result.populate([
+    "sender",
+    "replies",
+    {
+      path: "replies",
+      populate: {
+        path: "sender",
+      },
+    },
+  ]);
 };
 
 /**
@@ -204,11 +242,42 @@ const deleteMessage = async (user, messageId) => {
   //   }
   // }
 
-  message.messageDeletedBySender = true;
-  message.messageDeletedByReceiver = true;
+  // message.messageDeletedBySender = true;
+  // message.messageDeletedByReceiver = true;
+  message.systemMessage = true;
+  message.systemMessageType = "MESSAGE_DELETED";
+  message.messageDeleted = true;
 
   await message.save();
   return message;
+};
+
+const translateMessage = async (user, messageId, language) => {
+  const message = await Message.findOne({ _id: messageId });
+
+  if (!message) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a message!`);
+  }
+
+  let messageTranslated = message.content;
+  // translate(message.content, { to: language })
+  //   .then((response) => {
+  //     messageTranslated = response.text;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+  // messageTranslated = await translate(message.content, { to: language });
+  // messageTranslated = await translate("This is cool!", { to: language });
+  messageTranslated= translate(message.content, { to: language })
+    .then((res) => {
+      return res.text;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+
+  return messageTranslated;
 };
 
 const isImageLink = async (url, timeoutT) => {
@@ -581,4 +650,5 @@ module.exports = {
   deleteMessage,
   searchMessages,
   postLink,
+  translateMessage,
 };
