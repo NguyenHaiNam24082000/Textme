@@ -31,3 +31,7 @@ export const deleteMessage = (messageId) => {
 export const restoreMessage = (messageId) => {
   return patchRequest(`/api/v1/messages/restore-message/${messageId}`);
 };
+
+export const translateMessage = (messageId) => {
+  return getRequest(`/api/v1/messages/translate/${messageId}`);
+};

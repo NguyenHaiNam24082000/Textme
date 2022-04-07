@@ -277,7 +277,7 @@ function GridGif({ query }) {
   return <Grid fetchGifs={fetchGifs} width={340} columns={2} gutter={6} />;
 }
 
-export default function index() {
+export default function Giphy() {
   return (
     <SimpleGrid
       cols={2}

@@ -37,6 +37,7 @@ import {
   Image,
   Center,
   CloseButton,
+  Text,
 } from "@mantine/core";
 import createInlineToolbarPlugin from "@draft-js-plugins/inline-toolbar";
 import {
@@ -85,6 +86,16 @@ import { CHANNEL_MESSAGES_KEY, OPEN_CHANNEL } from "../../configs/queryKeys";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
 import { useSelector, useDispatch } from "react-redux";
 import { repliesSelector, replyMessages } from "../../store/uiSlice";
+import { v4 as uuid } from "uuid";
+import {
+  IMAGE_MIME_TYPE,
+  PDF_MIME_TYPE,
+  MS_WORD_MIME_TYPE,
+  MS_EXCEL_MIME_TYPE,
+  MS_POWERPOINT_MIME_TYPE,
+  MIME_TYPES,
+} from "@mantine/dropzone";
+import IconGif from "../UI/IconGif";
 
 const INLINE_STYLES = [
   { label: "Bold", style: "BOLD" },
@@ -221,6 +232,22 @@ const decorator = new CompositeDecorator([
   { strategy: findCodeInlineStyleRanges, component: Code },
 ]);
 
+const handleFileChosen = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.onerror = reject;
+    if (IMAGE_MIME_TYPE.includes(file.type)) {
+      reader.readAsDataURL(file);
+    } else {
+      // reader.readAsArrayBuffer(file);
+      reader.readAsText(file);
+    }
+  });
+};
+
 export default function EditorDraft({ channel, user }) {
   const me = GetMe();
   const ref = useRef(null);
@@ -246,6 +273,11 @@ export default function EditorDraft({ channel, user }) {
   const [socket, setSocket] = useState(null);
   const notifications = useNotifications();
   const [selectedId, setSelectedId] = useState(null);
+  const [images, setImages] = useState([]);
+  const inputRef = useRef(null);
+  const [indexFileReplace, setIndexFileReplace] = useState(-1);
+  const [isMultiSelect, setIsMultiSelect] = useState(true);
+  // const [isNSFW, setIsNSFW] = useState(false);
 
   // connect to socket on component mount.
   useEffect(() => {
@@ -284,12 +316,13 @@ export default function EditorDraft({ channel, user }) {
           messages: [],
         }
       );
-      replies[channel._id] && dispatch(
-        replyMessages({
-          id: channel._id,
-          messages: [],
-        })
-      );
+      replies[channel._id] &&
+        dispatch(
+          replyMessages({
+            id: channel._id,
+            messages: [],
+          })
+        );
       cache.invalidateQueries(OPEN_CHANNEL);
       cache.setQueryData(CHANNEL_MESSAGES_KEY(channel._id), (d) => {
         if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
@@ -349,15 +382,15 @@ export default function EditorDraft({ channel, user }) {
   //   }
   // }
 
-  const images = [
-    {
-      albumId: 1,
-      id: 1,
-      title: "accusamus beatae ad facilis cum similique qui sunt",
-      url: "https://pagepro.co/blog/wp-content/uploads/2020/03/framercover.png",
-      thumbnailUrl: "https://via.placeholder.com/150/92c952",
-    },
-  ];
+  // const images = [
+  //   {
+  //     albumId: 1,
+  //     id: 1,
+  //     title: "accusamus beatae ad facilis cum similique qui sunt",
+  //     url: "https://pagepro.co/blog/wp-content/uploads/2020/03/framercover.png",
+  //     thumbnailUrl: "https://via.placeholder.com/150/92c952",
+  //   },
+  // ];
 
   useEffect(() => {
     const elements = document.querySelectorAll('[data-contents="true"]');
@@ -677,29 +710,34 @@ export default function EditorDraft({ channel, user }) {
             />
           </div>
         ))}
-
-      {/* <div className="flex overflow-x-auto pt-5 pb-1 px-3">
-        <div className="flex w-fit gap-6">
-          <AnimateSharedLayout type="crossfade">
-            {images.map((img, index) => (
-              <div
-                key={index}
-                className="flex flex-col w-52 truncate overflow-ellipsis text-center"
-              >
-                <div
-                  onClick={() => {
-                    setSelectedId(index);
-                    console.log(index);
-                  }}
-                  style={{ border: "2px solid red" }}
-                  className="upload-image overflow-hidden relative w-52 h-52 p-2 rounded-md cursor-pointer bg-slate-300 flex justify-center items-center"
-                >
-                  <motion.img
-                    className="w-full h-auto rounded"
-                    layoutId={img.id}
-                    src={img.url}
-                  />
-                  <Center className="absolute inset-0">
+      {images.length > 0 && (
+        <div className="flex overflow-x-auto pt-5 pb-1 px-3">
+          <div className="flex w-fit gap-6">
+            <AnimateSharedLayout type="crossfade">
+              {images
+                .sort((a, b) => a.createdAt - b.createdAt)
+                .map((img, index) => (
+                  <div
+                    key={index}
+                    className="group flex flex-col w-52 truncate overflow-ellipsis text-center"
+                  >
+                    <div
+                      onClick={() => {
+                        setSelectedId(index);
+                        console.log(index);
+                      }}
+                      style={{ border: "2px solid red" }}
+                      className="upload-image overflow-hidden relative w-52 h-52 p-2 rounded-md cursor-pointer bg-slate-300 flex justify-center items-center"
+                    >
+                      <motion.img
+                        className="w-full h-auto rounded"
+                        layoutId={img.id}
+                        src={img.url}
+                        style={{
+                          filter: img.nsfw ? "blur(30px)" : "blur(0px)",
+                        }}
+                      />
+                      {/* <Center className="absolute inset-0">
                     <Progress
                       percent={50}
                       type="circle"
@@ -709,91 +747,187 @@ export default function EditorDraft({ channel, user }) {
                       strokeWidth={8}
                       aria-label="Upload progress"
                     />
-                  </Center>
-                  <div className="flex absolute bottom-2 right-2 gap-2">
-                    <FontAwesomeIcon icon="fa-solid fa-circle-exclamation" className="w-5 h-5" style={{color:"red"}}/>
+                  </Center> */}
+                      {/* <div className="flex absolute bottom-2 right-2 gap-2">
+                    <FontAwesomeIcon
+                      icon="fa-solid fa-circle-exclamation"
+                      className="w-5 h-5"
+                      style={{ color: "red" }}
+                    />
+                  </div> */}
+                      <div className="group-hover:visible invisible flex absolute top-2 right-2 gap-2">
+                        <ActionIcon
+                          variant="light"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const imagesClone = [
+                              ...images.filter((image) => image.id !== img.id),
+                              {
+                                ...img,
+                                nsfw: !img.nsfw,
+                              },
+                            ].sort((a, b) => a.createdAt - b.createdAt);
+                            setImages(imagesClone);
+                          }}
+                        >
+                          {img.nsfw ? (
+                            <FontAwesomeIcon icon="fa-solid fa-eye-slash" />
+                          ) : (
+                            <FontAwesomeIcon icon="fa-solid fa-eye" />
+                          )}
+                        </ActionIcon>
+                        <ActionIcon
+                          variant="light"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsMultiSelect(false);
+                            setIndexFileReplace(index);
+                            inputRef.current.click();
+                          }}
+                        >
+                          <FontAwesomeIcon icon="fa-solid fa-rotate" />
+                        </ActionIcon>
+                        <ActionIcon variant="light">
+                          <FontAwesomeIcon icon="fa-solid fa-pen" />
+                        </ActionIcon>
+                        <ActionIcon
+                          variant="light"
+                          color="red"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setImages(
+                              images.filter((image) => image.id !== img.id)
+                            );
+                          }}
+                        >
+                          <FontAwesomeIcon icon="fa-solid fa-trash-can" />
+                        </ActionIcon>
+                      </div>
+                    </div>
+
+                    <span className="text-xs font-medium truncate overflow-ellipsis">
+                      {img.name}
+                    </span>
+                    <span
+                      className="truncate overflow-ellipsis"
+                      style={{ fontSize: 10 }}
+                    >
+                      {`${img.size}`.length < 7
+                        ? `${Math.round(+img.size / 1024).toFixed(2)} KB`
+                        : `${Math.round(+img.size / 1024 / 1024).toFixed(
+                            2
+                          )} MB`}
+                    </span>
                   </div>
-                  <div className="flex absolute top-2 right-2 gap-2">
-                    <ActionIcon variant="light">
-                      <FontAwesomeIcon icon="fa-solid fa-eye" />
-                      {/* <FontAwesomeIcon icon="fa-solid fa-eye-slash" /> */}
-      {/* </ActionIcon>
-                    <ActionIcon variant="light">
-                      <FontAwesomeIcon icon="fa-solid fa-pen" />
-                    </ActionIcon>
-                    <ActionIcon variant="light" color="red">
-                      <FontAwesomeIcon icon="fa-solid fa-trash-can" />
-                    </ActionIcon>
+
+                  // {/* <div className="flex flex-col w-24 truncate overflow-ellipsis text-center">
+                  //         //   <Image
+                  //         //     radius="sm"
+                  //         //     width={96}
+                  //         //     height={96}
+                  //         //     src={null}
+                  //         //     className="cursor-pointer"
+                  //         //     style={{ border: "2px solid rgba(255,255,255,0.8)" }}
+                  //         //     alt="Click to upload"
+                  //         //     withPlaceholder
+                  //         //   />
+                  //         //   <span className="text-xs truncate overflow-ellipsis">
+                  //         //     Click to upload
+                  //         //   </span>
+                  //         //   <span className="truncate overflow-ellipsis" style={{ fontSize: 10 }}>
+                  //         //     max 5 MB
+                  //         //   </span>
+                  //         // </div> */}
+                ))}
+              <AnimatePresence>
+                {selectedId !== null && (
+                  <div className="fixed inset-0 z-50">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.6 }}
+                      exit={{ opacity: 0 }}
+                      key="overlay"
+                      className="overlay inset-0 z-50"
+                      style={{
+                        backgroundImage: `url(${images[selectedId].url})`,
+                        backgroundSize: "100% 100%",
+                        backgroundPosition: "50%",
+                        backgroundRepeat: "no-repeat",
+                        filter: "blur(7px) brightness(.7)",
+                      }}
+                      onClick={() => setSelectedId(null)}
+                    />
+                    <div
+                      className="single-image-container"
+                      // onClick={() => setSelectedId(null)}
+                    >
+                      <motion.img
+                        key="image"
+                        index={images[selectedId].id}
+                        className="single-image"
+                        style={{ height: "auto" }}
+                        layoutId={images[selectedId].id}
+                        src={images[selectedId].url}
+                      />
+                    </div>
                   </div>
-                </div>
-
-                <span className="text-xs font-medium truncate overflow-ellipsis">
-                  YeuDuongKhoQuaThiChayVeKhocVoiAnh-ERIK-7128950.mp3
-                </span>
-                <span
-                  className="truncate overflow-ellipsis"
-                  style={{ fontSize: 10 }}
-                >
-                  50.5 MB
-                </span>
-              </div> */}
-
-      {/* <div className="flex flex-col w-24 truncate overflow-ellipsis text-center">
-              //   <Image
-              //     radius="sm"
-              //     width={96}
-              //     height={96}
-              //     src={null}
-              //     className="cursor-pointer"
-              //     style={{ border: "2px solid rgba(255,255,255,0.8)" }}
-              //     alt="Click to upload"
-              //     withPlaceholder
-              //   />
-              //   <span className="text-xs truncate overflow-ellipsis">
-              //     Click to upload
-              //   </span>
-              //   <span className="truncate overflow-ellipsis" style={{ fontSize: 10 }}>
-              //     max 5 MB
-              //   </span>
-              // </div> */}
-
-      {/* //       ))}
-      //       <AnimatePresence>
-      //         {selectedId !== null && (
-      //           <div className="fixed inset-0 z-50">
-      //             <motion.div
-      //               initial={{ opacity: 0 }}
-      //               animate={{ opacity: 0.6 }}
-      //               exit={{ opacity: 0 }}
-      //               key="overlay"
-      //               className="overlay inset-0 z-50"
-      //               style={{
-      //                 backgroundImage: `url(${images[selectedId].url})`,
-      //                 backgroundSize: "100% 100%",
-      //                 backgroundPosition: "50%",
-      //                 backgroundRepeat: "no-repeat",
-      //                 filter: "blur(7px) brightness(.7)",
-      //               }}
-      //               onClick={() => setSelectedId(null)}
-      //             />
-      //             <div
-      //               className="single-image-container"
-      //               // onClick={() => setSelectedId(null)}
-      //             >
-      //               <motion.img
-      //                 key="image"
-      //                 index={images[selectedId].id}
-      //                 className="single-image"
-      //                 layoutId={images[selectedId].id}
-      //                 src={images[selectedId].url}
-      //               />
-      //             </div>
-      //           </div>
-      //         )}
-      //       </AnimatePresence>
-      //     </AnimateSharedLayout>
+                )}
+              </AnimatePresence>
+            </AnimateSharedLayout>
+          </div>
         </div>
-      // </div> */}
+      )}
+      <input
+        ref={inputRef}
+        accept="*"
+        type="file"
+        multiple={isMultiSelect}
+        autocomplete="off"
+        style={{ display: "none", pointerEvents: "none" }}
+        onChange={async (e) => {
+          const files = e.target.files;
+          if (files && files.length > 0) {
+            const results = await Promise.all(
+              Array.from(files, async (file) => {
+                const fileContents = await handleFileChosen(file);
+                let result = null;
+                if (isMultiSelect) {
+                  result = {
+                    id: uuid(),
+                    url: fileContents,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    nsfw: false,
+                    createdAt: new Date(),
+                  };
+                } else {
+                  result = {
+                    id: images[indexFileReplace].id,
+                    url: fileContents,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    nsfw: images[indexFileReplace].nsfw,
+                    createdAt: images[indexFileReplace].createdAt,
+                  };
+                }
+                return result;
+              })
+            );
+            if (isMultiSelect) {
+              setImages([...images, ...results]);
+            } else {
+              setImages([
+                ...images.filter(
+                  (image) => image.id !== images[indexFileReplace].id
+                ),
+                ...results,
+              ]);
+            }
+          }
+        }}
+      />
       {openedEditor ? (
         <>
           {/* <Popover
@@ -908,6 +1042,31 @@ export default function EditorDraft({ channel, user }) {
                 placeholder="test"
                 plugins={plugins}
                 handleKeyCommand={handleKeyCommand}
+                handlePastedFiles={async (files) => {
+                  // const fileLength = im;
+                  if (files && files.length) {
+                    // const file = files[0];
+                    const results = await Promise.all(
+                      files.map(async (file) => {
+                        const fileContents = await handleFileChosen(file);
+                        console.log(file, fileContents);
+                        return {
+                          id: uuid(),
+                          url: fileContents,
+                          name: file.name,
+                          size: file.size,
+                          type: file.type,
+                          nsfw: false,
+                          createdAt: new Date(),
+                        };
+                      })
+                    );
+                    setImages([...images, ...results]);
+                  }
+                }}
+                handlePastedText={(text, html) => {
+                  console.log(text, html);
+                }}
                 blockRenderMap={blockRenderMap}
                 keyBindingFn={(e) => {
                   if (e.keyCode === 13) {
@@ -1017,12 +1176,13 @@ export default function EditorDraft({ channel, user }) {
                   }
                 >
                   <Menu.Item
-                    icon={<FontAwesomeIcon icon="fa-solid fa-photo-film" />}
+                    icon={<FontAwesomeIcon icon="fa-solid fa-upload" />}
+                    onClick={() => {
+                      setIsMultiSelect(true);
+                      inputRef.current.click();
+                    }}
                   >
-                    Send photo
-                  </Menu.Item>
-                  <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-file" />}>
-                    Attach File
+                    Upload files
                   </Menu.Item>
                   <Menu.Item
                     icon={
@@ -1069,6 +1229,16 @@ export default function EditorDraft({ channel, user }) {
                 </ActionIcon>
                 <ActionIcon>
                   <BsMarkdown size={20} />
+                </ActionIcon>
+                <ActionIcon>
+                  <IconGif className="w-5 h-5" />
+                </ActionIcon>
+                <ActionIcon>
+                  <Image
+                    width={20}
+                    height={20}
+                    src="https://images.blush.design/8734e011be717f718be002d4e9c08b15?w=920&auto=compress&cs=srgb"
+                  />
                 </ActionIcon>
               </Group>
               <Group spacing="xs">
@@ -1151,7 +1321,9 @@ export default function EditorDraft({ channel, user }) {
               className="inline-block flex-1 min-w-0 overflow-ellipsis truncate"
               style={{ maxWidth: 128 }}
             >
+              {/* <Text size="sm" lineClamp={1}> */}
               aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+              {/* </Text> */}
             </div>
           </div>
           <div>

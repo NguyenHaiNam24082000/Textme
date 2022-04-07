@@ -349,3 +349,12 @@ pre
   width: 2px;
   background: #cd9c47;
 }
+
+.message-badge{
+  transition: transform .1s linear;
+}
+
+.message-container:hover .message-badge
+{
+  transition: transform .1s linear,z-index .075s step-end;
+}

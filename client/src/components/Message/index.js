@@ -11,6 +11,9 @@ import {
   Popover,
   Timeline,
   Avatar,
+  Portal,
+  Collapse,
+  Loader,
 } from "@mantine/core";
 import React, { useState, useEffect, useCallback } from "react";
 import {
@@ -26,7 +29,7 @@ import "./index.css";
 import MessageInlineEditor from "./MessageInlineEditor";
 import { Link } from "react-scroll";
 import { pinnedMessage } from "../../apis/channel";
-import { deleteMessage } from "../../apis/messages";
+import { deleteMessage, translateMessage } from "../../apis/messages";
 import getSocket from "../../apis/socket";
 import { useQueryClient } from "react-query";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
@@ -45,6 +48,8 @@ import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
 import { useClipboard } from "@mantine/hooks";
 import useSpeechSynthesis from "../../hooks/useSpeechSynthesis";
+import { Empty } from "@douyinfe/semi-ui";
+import { IllustrationFailure } from "@douyinfe/semi-illustrations";
 
 // const synth = window.speechSynthesis;
 // const voices = synth.getVoices();
@@ -203,7 +208,7 @@ const systemMessageTypes = {
     icon: (
       <FontAwesomeIcon icon="fa-solid fa-thumbtack" className="text-red-600" />
     ),
-    text: (message,setCurrentMessageSelected) => {
+    text: (message, setCurrentMessageSelected) => {
       return (
         <div className="select-none">
           <a className="text-black hover:underline text-sm font-medium cursor-pointer">
@@ -278,6 +283,9 @@ export default function Message({
   const [voiceIndex, setVoiceIndex] = useState(null);
   const [pitch, setPitch] = useState(1);
   const [rate, setRate] = useState(1);
+  const [showTranslations, setShowTranslations] = useState(false);
+  const [messageTranslated, setMessageTranslated] = useState(null);
+  const [isLoadingTranslate, setIsLoadingTranslate] = useState(false);
   const onEnd = () => {
     // You could do something here after speaking has finished
   };
@@ -434,6 +442,23 @@ export default function Message({
     }
   };
 
+  const translate = async () => {
+    setIsLoadingTranslate(true);
+    setShowTranslations(false);
+    try {
+      const { data } = await translateMessage(message.id);
+      if (data) {
+        setMessageTranslated(data);
+        setShowTranslations(true);
+      }
+      setIsLoadingTranslate(false);
+    } catch (error) {
+      setMessageTranslated(null);
+      setIsLoadingTranslate(false);
+      console.log(error);
+    }
+  };
+
   // const isSameTimeNext = () => {
   //   if (messages.length === 0) {
   //     return false;
@@ -500,13 +525,14 @@ export default function Message({
       )}
       <div className="w-full flex flex-col justify-between">
         <div
-          className={`group w-full flex flex-col justify-between relative bg-white hover:bg-slate-50 ${
+          className={`message-container group w-full flex flex-col justify-between relative bg-white hover:bg-slate-50 ${
             isMentioned() || isReply() ? "mentioned" : "bg-white"
-          } ${isSameTimePrev() ? "" : "mt-4"} ${
-            message.systemMessage ? "mt-4" : ""
-          } ${message.pinned ? "mt-5" : ""} ${
+          } ${isSameTimePrev() ? "" : "mt-4"}
+            ${isSameTimePrev() && message.pinned ? "mt-2" : ""}
+          ${message.systemMessage ? "mt-4" : ""} ${
             currentEditMessageId === message.id ? "bg-slate-50" : ""
           } ${currentMessageSelected === message.id ? "message-selected" : ""}`}
+          // ${message.pinned ? "mt-5" : ""}
           // style={{
           //   background: "white",
           // }}
@@ -583,7 +609,7 @@ export default function Message({
           </Timeline> */}
           {isSameTimePrev() && message.replies.length === 0 ? (
             <div
-              className="w-full flex justify-start items-start pr-4 pl-3 py-1 z-[1] bg-inherit"
+              className="w-full flex justify-start items-start pr-4 pl-4 py-1 z-[1] bg-inherit"
               // style={{ background: "white" }}
             >
               <div className="flex w-full">
@@ -611,7 +637,8 @@ export default function Message({
                     <pre className="break-all text-sm ml-2 font-normal text-left">
                       {message.systemMessage ? (
                         systemMessageTypes[message.systemMessageType]?.text(
-                          message,setCurrentMessageSelected
+                          message,
+                          setCurrentMessageSelected
                         )
                       ) : (
                         <>
@@ -625,12 +652,44 @@ export default function Message({
                       )}
                     </pre>
                   )}
-                  <div className="flex flex-col">
-                    {message.embed.length > 0 &&
-                      message.embed.map((embed, index) => (
+                  {messageTranslated && (
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        {isLoadingTranslate && <Loader size="xs" />}
+                        <Text
+                          size="xs"
+                          variant="link"
+                          component="a"
+                          className="cursor-pointer select-none"
+                          onClick={() => {
+                            if (isLoadingTranslate) return;
+                            setShowTranslations(!showTranslations);
+                          }}
+                        >
+                          {showTranslations
+                            ? "Hide Translate"
+                            : isLoadingTranslate
+                            ? "Loading Translate..."
+                            : "Show Translate"}
+                        </Text>
+                      </div>
+                      <Collapse in={showTranslations}>
+                        <div className="flex">
+                          <div className="w-1 rounded bg-slate-500"></div>
+                          <blockquote className="pr-2 pl-3 indent-0">
+                            {messageTranslated}
+                          </blockquote>
+                        </div>
+                      </Collapse>
+                    </div>
+                  )}
+                  {message.embed.length > 0 && (
+                    <div className="flex flex-col ml-2">
+                      {message.embed.map((embed, index) => (
                         <EmbedLink embed={embed} key={index} />
                       ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -646,7 +705,8 @@ export default function Message({
                   </div>
                   <pre className="break-all text-sm font-normal text-left">
                     {systemMessageTypes[message.systemMessageType]?.text(
-                      message,setCurrentMessageSelected
+                      message,
+                      setCurrentMessageSelected
                     )}
                   </pre>
                 </div>
@@ -831,12 +891,44 @@ export default function Message({
                               </pre>
                             </div>
                           )}
-                          <div className="flex flex-col">
-                            {message.embed.length > 0 &&
-                              message.embed.map((embed, index) => (
+                          {messageTranslated && (
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                {isLoadingTranslate && <Loader size="xs" />}
+                                <Text
+                                  size="xs"
+                                  variant="link"
+                                  component="a"
+                                  className="cursor-pointer select-none"
+                                  onClick={() => {
+                                    if (isLoadingTranslate) return;
+                                    setShowTranslations(!showTranslations);
+                                  }}
+                                >
+                                  {showTranslations
+                                    ? "Hide Translate"
+                                    : isLoadingTranslate
+                                    ? "Loading Translate..."
+                                    : "Show Translate"}
+                                </Text>
+                              </div>
+                              <Collapse in={showTranslations}>
+                                <div className="flex">
+                                  <div className="w-1 rounded bg-slate-500"></div>
+                                  <blockquote className="pr-2 pl-3 indent-0">
+                                    {messageTranslated}
+                                  </blockquote>
+                                </div>
+                              </Collapse>
+                            </div>
+                          )}
+                          {message.embed.length > 0 && (
+                            <div className="flex flex-col">
+                              {message.embed.map((embed, index) => (
                                 <EmbedLink embed={embed} key={index} />
                               ))}
-                          </div>
+                            </div>
+                          )}
                           {/* <div className="flex my-1 gap-1 flex-wrap">
                         {Array.from({ length: 20 }, (_, index) => (
                           <Button
@@ -935,6 +1027,37 @@ export default function Message({
                             </pre>
                           </div>
                         )}
+                        {messageTranslated && (
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                              {isLoadingTranslate && <Loader size="xs" />}
+                              <Text
+                                size="xs"
+                                variant="link"
+                                component="a"
+                                className="cursor-pointer select-none"
+                                onClick={() => {
+                                  if (isLoadingTranslate) return;
+                                  setShowTranslations(!showTranslations);
+                                }}
+                              >
+                                {showTranslations
+                                  ? "Hide Translate"
+                                  : isLoadingTranslate
+                                  ? "Loading Translate..."
+                                  : "Show Translate"}
+                              </Text>
+                            </div>
+                            <Collapse in={showTranslations}>
+                              <div className="flex">
+                                <div className="w-1 rounded bg-slate-500"></div>
+                                <blockquote className="pr-2 pl-3 indent-0">
+                                  {messageTranslated}
+                                </blockquote>
+                              </div>
+                            </Collapse>
+                          </div>
+                        )}
                         <div className="flex flex-col">
                           {message.embed.length > 0 &&
                             message.embed.map((embed, index) => (
@@ -986,8 +1109,8 @@ export default function Message({
           {message.pinned && (
             <div className="absolute flex items-start left-0 bottom-full ml-4 h-5">
               <div
-                className="py-1 flex items-center bg-red-600 text-white will-change-transform w-10 h-full flex-col z-0 group-hover:-translate-y-0 translate-y-4 rounded-t"
-                style={{ transition: "transform .1s linear" }}
+                className="message-badge py-1 flex items-center bg-red-600 text-white will-change-transform w-10 h-full flex-col z-0 group-hover:z-[2] group-hover:transform-none group-hover:-translate-y-0 translate-y-4 rounded-t"
+                // style={{ transition: "transform .1s linear" }}
               >
                 <span className="font-bold uppercase text-[10px] hover:underline cursor-pointer select-none">
                   Pinned
@@ -1097,11 +1220,25 @@ export default function Message({
                   >
                     Đánh dấu chưa đọc
                   </Menu.Item>
+                  <Menu.Item
+                    onClick={() => clipboard.copy(message.content)}
+                    icon={<FontAwesomeIcon icon="fa-solid fa-link" />}
+                  >
+                    Sao chép nội dung tin nhắn
+                  </Menu.Item>
                   <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-link" />}>
                     Sao chép đường dẫn tin nhắn
                   </Menu.Item>
                   <Menu.Item
-                    icon={<FontAwesomeIcon icon="fa-solid fa-language" />}
+                    icon={
+                      isLoadingTranslate ? (
+                        <Loader size="xs" />
+                      ) : (
+                        <FontAwesomeIcon icon="fa-solid fa-language" />
+                      )
+                    }
+                    disabled={isLoadingTranslate}
+                    onClick={translate}
                   >
                     Dịch đoạn văn bản
                   </Menu.Item>
@@ -1164,6 +1301,18 @@ export default function Message({
 
 const EmbedLink = ({ embed }) => {
   const [openedImagePreview, setOpenedImagePreview] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(() => {
+    // if (embed.thumbnail) {
+    //   return !(embed.thumbnail.url && !Array.isArray(embed.image)
+    //     ? embed.image.url
+    //     : embed.image[0].url);
+    // } else {
+    //   return false;
+    // }
+    return false;
+  });
+  const isPlaceholder = !loaded || error;
   return (
     <div
       className="grid grid-flow-row indent-0 min-h-0 min-w-0 py-[0.125rem] relative"
@@ -1191,67 +1340,90 @@ const EmbedLink = ({ embed }) => {
                             : embed.image[0].url
                         }
                       /> */}
-              <motion.img
-                className="w-full h-auto rounded object-contain"
-                onClick={() => setOpenedImagePreview(true)}
-                layoutId={
-                  embed.thumbnail.url && !Array.isArray(embed.image)
-                    ? embed.image.url
-                    : embed.image[0].url
-                }
-                src={
-                  embed.thumbnail.url && !Array.isArray(embed.image)
-                    ? embed.image.url
-                    : embed.image[0].url
-                }
-              />
-              <AnimatePresence>
-                {openedImagePreview && (
-                  <div className="fixed inset-0 z-50">
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.6 }}
-                      exit={{ opacity: 0 }}
-                      key="overlay"
-                      className="overlay inset-0 z-50"
-                      style={{
-                        backgroundImage: `url(${
-                          embed.thumbnail.url && !Array.isArray(embed.image)
-                            ? embed.image.url
-                            : embed.image[0].url
-                        })`,
-                        inset: "-80px -80px -80px -80px",
-                        backgroundColor: "rgba(0,0,0)",
-                        backgroundSize: "cover",
-                        backgroundPosition: "50%",
-                        backgroundRepeat: "no-repeat",
-                        filter: "blur(7px) brightness(.7)",
-                      }}
-                      onClick={() => setOpenedImagePreview(false)}
+              <div className={`relative ${isPlaceholder ? "h-64" : ""}`}>
+                <motion.img
+                  className="w-full h-auto rounded object-contain"
+                  onClick={() => setOpenedImagePreview(true)}
+                  layoutId={
+                    embed.thumbnail.url && !Array.isArray(embed.image)
+                      ? embed.image.url
+                      : embed.image[0].url
+                  }
+                  src={
+                    embed.thumbnail.url && !Array.isArray(embed.image)
+                      ? embed.image.url
+                      : embed.image[0].url
+                  }
+                  onLoad={(event) => {
+                    setLoaded(true);
+                  }}
+                  onError={(event) => {
+                    setError(true);
+                  }}
+                />
+                {isPlaceholder && (
+                  <div className="w-96 h-full bg-slate-200 absolute inset-0 rounded flex justify-center items-center pointer-events-none user-select-none">
+                    <Empty
+                      className="mt-6"
+                      image={
+                        <IllustrationFailure
+                          style={{ width: 200, height: 200 }}
+                        />
+                      }
+                      // description={"Failed to load"}
                     />
-                    <div
-                      className="single-image-container"
-                      // onClick={() => setSelectedId(null)}
-                    >
-                      <motion.img
-                        key="image"
-                        // index={images[selectedId].id}
-                        className="single-image"
-                        style={{ height: "auto",zIndex: 200 }}
-                        layoutId={
-                          embed.thumbnail.url && !Array.isArray(embed.image)
-                            ? embed.image.url
-                            : embed.image[0].url
-                        }
-                        src={
-                          embed.thumbnail.url && !Array.isArray(embed.image)
-                            ? embed.image.url
-                            : embed.image[0].url
-                        }
-                      />
-                    </div>
                   </div>
                 )}
+              </div>
+              <AnimatePresence>
+                <Portal zIndex={100}>
+                  {openedImagePreview && (
+                    <div className="fixed inset-0 z-50">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.6 }}
+                        exit={{ opacity: 0 }}
+                        key="overlay"
+                        className="overlay inset-0 z-50"
+                        style={{
+                          backgroundImage: `url(${
+                            embed.thumbnail.url && !Array.isArray(embed.image)
+                              ? embed.image.url
+                              : embed.image[0].url
+                          })`,
+                          inset: "-80px -80px -80px -80px",
+                          backgroundColor: "rgba(0,0,0)",
+                          backgroundSize: "cover",
+                          backgroundPosition: "50%",
+                          backgroundRepeat: "no-repeat",
+                          filter: "blur(7px) brightness(.7)",
+                        }}
+                        onClick={() => setOpenedImagePreview(false)}
+                      />
+                      <div
+                        className="single-image-container"
+                        // onClick={() => setSelectedId(null)}
+                      >
+                        <motion.img
+                          key="image"
+                          // index={images[selectedId].id}
+                          className="single-image"
+                          style={{ height: "auto", zIndex: 200 }}
+                          layoutId={
+                            embed.thumbnail.url && !Array.isArray(embed.image)
+                              ? embed.image.url
+                              : embed.image[0].url
+                          }
+                          src={
+                            embed.thumbnail.url && !Array.isArray(embed.image)
+                              ? embed.image.url
+                              : embed.image[0].url
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
+                </Portal>
               </AnimatePresence>
             </AnimateSharedLayout>
           </div>
@@ -1326,7 +1498,8 @@ const EmbedLink = ({ embed }) => {
                             : embed.image[0].url
                         }
                       /> */}
-                      <motion.img
+                      <Image
+                        component="motion.img"
                         className="w-20 h-20 rounded object-contain"
                         onClick={() => setOpenedImagePreview(true)}
                         layoutId={
@@ -1341,55 +1514,57 @@ const EmbedLink = ({ embed }) => {
                         }
                       />
                       <AnimatePresence>
-                        {openedImagePreview && (
-                          <div className="fixed inset-0 z-50">
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 0.6 }}
-                              exit={{ opacity: 0 }}
-                              key="overlay"
-                              className="overlay -inset-20 z-50"
-                              style={{
-                                // backgroundImage: `url(${
-                                //   embed.thumbnail.url &&
-                                //   !Array.isArray(embed.image)
-                                //     ? embed.image.url
-                                //     : embed.image[0].url
-                                // })`,
-                                inset: "-80px -80px -80px -80px",
-                                backgroundColor: "rgba(0,0,0)",
-                                backgroundSize: "cover",
-                                backgroundPosition: "50%",
-                                backgroundRepeat: "no-repeat",
-                                filter: "blur(7px) brightness(.7)",
-                              }}
-                              onClick={() => setOpenedImagePreview(false)}
-                            />
-                            <div
-                              className="single-image-container"
-                              // onClick={() => setSelectedId(null)}
-                            >
-                              <motion.img
-                                key="image"
-                                // index={images[selectedId].id}
-                                className="single-image"
-                                style={{ height: "auto" }}
-                                layoutId={
-                                  embed.thumbnail.url &&
-                                  !Array.isArray(embed.image)
-                                    ? embed.image.url
-                                    : embed.image[0].url
-                                }
-                                src={
-                                  embed.thumbnail.url &&
-                                  !Array.isArray(embed.image)
-                                    ? embed.image.url
-                                    : embed.image[0].url
-                                }
+                        <Portal zIndex={100}>
+                          {openedImagePreview && (
+                            <div className="fixed inset-0 z-50">
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 0.6 }}
+                                exit={{ opacity: 0 }}
+                                key="overlay"
+                                className="overlay -inset-20 z-50"
+                                style={{
+                                  // backgroundImage: `url(${
+                                  //   embed.thumbnail.url &&
+                                  //   !Array.isArray(embed.image)
+                                  //     ? embed.image.url
+                                  //     : embed.image[0].url
+                                  // })`,
+                                  inset: "-80px -80px -80px -80px",
+                                  backgroundColor: "rgba(0,0,0)",
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "50%",
+                                  backgroundRepeat: "no-repeat",
+                                  filter: "blur(7px) brightness(.7)",
+                                }}
+                                onClick={() => setOpenedImagePreview(false)}
                               />
+                              <div
+                                className="single-image-container"
+                                // onClick={() => setSelectedId(null)}
+                              >
+                                <motion.img
+                                  key="image"
+                                  // index={images[selectedId].id}
+                                  className="single-image"
+                                  style={{ height: "auto" }}
+                                  layoutId={
+                                    embed.thumbnail.url &&
+                                    !Array.isArray(embed.image)
+                                      ? embed.image.url
+                                      : embed.image[0].url
+                                  }
+                                  src={
+                                    embed.thumbnail.url &&
+                                    !Array.isArray(embed.image)
+                                      ? embed.image.url
+                                      : embed.image[0].url
+                                  }
+                                />
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </Portal>
                       </AnimatePresence>
                     </AnimateSharedLayout>
                   </div>
@@ -1415,7 +1590,8 @@ const EmbedLink = ({ embed }) => {
                             : embed.image[0].url
                         }
                       /> */}
-                        <motion.img
+                        <Image
+                          component="motion.img"
                           className="w-full h-auto rounded object-contain"
                           onClick={() => setOpenedImagePreview(true)}
                           layoutId={
@@ -1430,55 +1606,57 @@ const EmbedLink = ({ embed }) => {
                           }
                         />
                         <AnimatePresence>
-                          {openedImagePreview && (
-                            <div className="fixed inset-0 z-50">
-                              <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.6 }}
-                                exit={{ opacity: 0 }}
-                                key="overlay"
-                                className="overlay inset-0 z-50"
-                                style={{
-                                  // backgroundImage: `url(${
-                                  //   embed.thumbnail.url &&
-                                  //   !Array.isArray(embed.image)
-                                  //     ? embed.image.url
-                                  //     : embed.image[0].url
-                                  // })`,
-                                  inset: "-80px -80px -80px -80px",
-                                  backgroundColor: "rgba(0,0,0)",
-                                  backgroundSize: "100% 100%",
-                                  backgroundPosition: "50%",
-                                  backgroundRepeat: "no-repeat",
-                                  filter: "blur(7px) brightness(.7)",
-                                }}
-                                onClick={() => setOpenedImagePreview(false)}
-                              />
-                              <div
-                                className="single-image-container"
-                                // onClick={() => setSelectedId(null)}
-                              >
-                                <motion.img
-                                  key="image"
-                                  // index={images[selectedId].id}
-                                  className="single-image"
-                                  style={{ height: "auto",zIndex: 200 }}
-                                  layoutId={
-                                    embed.thumbnail.url &&
-                                    !Array.isArray(embed.image)
-                                      ? embed.image.url
-                                      : embed.image[0].url
-                                  }
-                                  src={
-                                    embed.thumbnail.url &&
-                                    !Array.isArray(embed.image)
-                                      ? embed.image.url
-                                      : embed.image[0].url
-                                  }
+                          <Portal zIndex={100}>
+                            {openedImagePreview && (
+                              <div className="fixed inset-0 z-50">
+                                <motion.div
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 0.6 }}
+                                  exit={{ opacity: 0 }}
+                                  key="overlay"
+                                  className="overlay inset-0 z-50"
+                                  style={{
+                                    // backgroundImage: `url(${
+                                    //   embed.thumbnail.url &&
+                                    //   !Array.isArray(embed.image)
+                                    //     ? embed.image.url
+                                    //     : embed.image[0].url
+                                    // })`,
+                                    inset: "-80px -80px -80px -80px",
+                                    backgroundColor: "rgba(0,0,0)",
+                                    backgroundSize: "100% 100%",
+                                    backgroundPosition: "50%",
+                                    backgroundRepeat: "no-repeat",
+                                    filter: "blur(7px) brightness(.7)",
+                                  }}
+                                  onClick={() => setOpenedImagePreview(false)}
                                 />
+                                <div
+                                  className="single-image-container"
+                                  // onClick={() => setSelectedId(null)}
+                                >
+                                  <motion.img
+                                    key="image"
+                                    // index={images[selectedId].id}
+                                    className="single-image"
+                                    style={{ height: "auto", zIndex: 200 }}
+                                    layoutId={
+                                      embed.thumbnail.url &&
+                                      !Array.isArray(embed.image)
+                                        ? embed.image.url
+                                        : embed.image[0].url
+                                    }
+                                    src={
+                                      embed.thumbnail.url &&
+                                      !Array.isArray(embed.image)
+                                        ? embed.image.url
+                                        : embed.image[0].url
+                                    }
+                                  />
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </Portal>
                         </AnimatePresence>
                       </AnimateSharedLayout>
                     ) : (
