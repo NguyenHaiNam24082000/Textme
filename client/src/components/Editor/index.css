@@ -6,7 +6,7 @@
   border-radius: 4px;
   /* margin-bottom: 2em; */
   /* box-shadow: inset 0px 1px 8px -3px #ababab; */
-  background: #f3f4f6;
+  background: transparent;
 }
 
 .editor :global(.public-DraftEditor-content) {
@@ -35,7 +35,7 @@
   right: 0;
   bottom: 0;
   visibility: hidden;
-  background: rgba(22,22,26,0.6);
+  /* background: rgba(22,22,26,0.6); */
 }
 
 .upload-image:hover::before

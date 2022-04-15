@@ -10,10 +10,10 @@ const useAuth = () => {
 const PublicRoutes = () => {
   const history = useNavigate();
   const isAuth = useAuth();
-  useEffect(() => {
-    isAuth && history("/chanel/@me");
-  }, [isAuth]);
-  return <Outlet />;
+  // useEffect(() => {
+  //   isAuth && history("/chanel/@me");
+  // }, [isAuth]);
+  return isAuth ? history("/chanel/@me") : <Outlet />;
 };
 
 export default PublicRoutes;

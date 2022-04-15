@@ -30,21 +30,16 @@ function friendId(user, object) {
  * @param {Object} body
  * @returns {Promise<User>}
  */
-const createMessage = async (user, body) => {
-  const { channelId, content } = body;
-
-  const channel = await Channel.findOne({
-    $or: [{ owner: user._id }, { members: user._id }],
-    _id: channelId,
+const createMessage = async (user, body, data) => {
+  const { channelId, content, embed } = body;
+  const { channel, files } = data;
+  console.log({
+    user,
+    channel,
+    files,
   });
-
-  if (!channel) {
-    throw new ApiError(
-      httpStatus.NOT_FOUND,
-      `there is no room between you and your friend!`
-    );
-  }
   let embedLink = await postLink(content);
+  embedLink = [JSON.parse(embed), ...embedLink];
   const replies = body.replies
     ? (() => {
         if (typeof body.replies === "string") {
@@ -55,21 +50,7 @@ const createMessage = async (user, body) => {
     : [];
 
   // console.log("replies", replies);
-
-  // const friendShip = await FriendRequest.findOne({
-  //   $or: [
-  //     { from: user._id, to: friendId(user, room) },
-  //     { to: user._id, from: friendId(user, room) },
-  //   ],
-  //   status: FRIEND_STATUS.FRIEND,
-  // });
-
-  // if (!friendShip) {
-  //   throw new ApiError(
-  //     httpStatus.NOT_FOUND,
-  //     `you and your friend do not have friendship!`
-  //   );
-  // }
+  const attachments = files?.map((file) => file._id) || [];
 
   const message = await Message.create({
     ...body,
@@ -77,6 +58,8 @@ const createMessage = async (user, body) => {
     sender: user._id,
     embed: embedLink,
     replies: replies,
+    files: files,
+    attachments: attachments,
   });
 
   channel.lastMessage = message._id;
@@ -85,6 +68,7 @@ const createMessage = async (user, body) => {
   return message.populate([
     "sender",
     "replies",
+    "attachments",
     {
       path: "replies",
       populate: {
@@ -269,7 +253,7 @@ const translateMessage = async (user, messageId, language) => {
   //   });
   // messageTranslated = await translate(message.content, { to: language });
   // messageTranslated = await translate("This is cool!", { to: language });
-  messageTranslated= translate(message.content, { to: language })
+  messageTranslated = translate(message.content, { to: language })
     .then((res) => {
       return res.text;
     })

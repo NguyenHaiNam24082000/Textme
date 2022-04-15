@@ -22,14 +22,14 @@ const passport = require("passport");
 const { jwtStrategy } = require("./app/configs/passport");
 const { errorConverter, errorHandler } = require("./app/middlewares/error");
 const session = require("express-session");
-
+const uploadImage = require("./app/configs/storage");
 // const os = require("os");
 
 // process.env.UV_THREADPOOL_SIZE = os.cpus().length >= 2 ? 2 : 1;
 
 const port = process.env.APP_PORT;
 let server;
-const createServer = () => {
+const createServer = async () => {
   if (connectDB()) {
     server = http.createServer(app);
     // init redis connection
@@ -212,6 +212,22 @@ app.post("/api/v1/translate", (req, res, next) => {
       console.error(err);
     });
 });
+
+// const multer = require('multer');
+
+// const Multer = multer({
+//   storage: multer.memoryStorage(),
+//   limits: {
+//     fileSize: 5 * 1024 * 1024,
+//   },
+// })
+
+// app.post("/api/v1/upload",Multer.array("files"),
+// // uploadImage, 
+// async (req, res, next) => {
+//   console.log(req);
+//   res.status(200).send(req.file);
+// });
 
 // var title =
 //   "Swayy is a beautiful new dashboard for discovering and curating online content [Invites]";

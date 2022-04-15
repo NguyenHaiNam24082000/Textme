@@ -4,7 +4,7 @@ const catchAsync = require("../../utils/catchAsync");
 
 const sendMessage = catchAsync(async (req, res, next) => {
   const formData = JSON.parse(JSON.stringify(req.body));
-  const message = await messageService.createMessage(req.user, formData);
+  const message = await messageService.createMessage(req.user, formData,req.files);
   res.status(httpStatus.CREATED).send(message);
 });
 
@@ -16,7 +16,7 @@ const getMessages = catchAsync(async (req, res, next) => {
   const options = {
     sortBy: "createdAt:desc",
     page,
-    populate: "sender,replies,replies.sender",
+    populate: "sender,replies,replies.sender,attachments",
     limit,
   };
   const messages = await messageService.queryMessages(

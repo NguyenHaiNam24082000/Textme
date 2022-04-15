@@ -6,8 +6,8 @@ import {
   deleteRequest,
 } from "../axiosQuery";
 
-export const sendMessage = (payload) => {
-  return postRequest("/api/v1/messages/send-message", payload);
+export const sendMessage = (payload, config) => {
+  return postRequest("/api/v1/messages/send-message", payload, config);
 };
 
 export const editMessage = (messageId, payload) => {

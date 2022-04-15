@@ -33,7 +33,7 @@ export default function DMList() {
   const { isLoading, data: channelList } = GetOpenChannels();
   const { user } = useSelector((state) => state.user);
   const [channels, setChannels] = useState();
-  useEffect(async () => {
+  useEffect(() => {
     setChannels(channelList);
   }, [channelList]);
   console.log(channels, "channels");

@@ -10,10 +10,10 @@ const useAuth = () => {
 const ProtectedRoutes = () => {
   const history = useNavigate();
   const isAuth = useAuth();
-  useEffect(() => {
-    !isAuth && history("/login");
-  }, [isAuth]);
-  return <Outlet />;
+  // useEffect(() => {
+  //   !isAuth && history("/login");
+  // }, [isAuth]);
+  return !isAuth ? history("/login") : <Outlet />;
 };
 
 export default ProtectedRoutes;

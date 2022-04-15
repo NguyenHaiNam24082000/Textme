@@ -106,6 +106,9 @@ import {
   faTrashCanArrowUp as fasFaTrashCanArrowUp,
   faRotate as fasFaRotate,
   faUpload as fasFaUpload,
+  faPaperPlane as fasFaPaperPlane,
+  faIcons as fasFaIcons,
+  faArrowUpRightFromSquare as fasFaArrowUpRightFromSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -120,6 +123,9 @@ import Friends from "./pages/Me/Friends";
 import Me from "./pages/Me";
 
 library.add(
+  fasFaArrowUpRightFromSquare,
+  fasFaIcons,
+  fasFaPaperPlane,
   fasFaUpload,
   fasFaRotate,
   fasFaTrashCanArrowUp,

@@ -1,7 +1,10 @@
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { Grid } from "@giphy/react-components";
-import { SimpleGrid } from "@mantine/core";
-import React from "react";
+import { SimpleGrid, TextInput } from "@mantine/core";
+import { useDebouncedValue } from "@mantine/hooks";
+import React, { useState } from "react";
+import { CSSTransition } from "react-transition-group";
+import "./index.css";
 
 const gifsGallery = [
   {
@@ -262,7 +265,7 @@ const gifsGallery = [
 ];
 const giphyFetch = new GiphyFetch("sXpGFDGZs0Dv1mmNFvYaGUvYwKX0PWIh");
 
-function GridGif({ query }) {
+function GridGif({ query,setEmbed }) {
   const fetchGifs = async (offset) => {
     const result = await giphyFetch.trending({ offset, limit: 10 });
     if (offset === 0) {
@@ -274,32 +277,91 @@ function GridGif({ query }) {
     }
     return result;
   };
-  return <Grid fetchGifs={fetchGifs} width={340} columns={2} gutter={6} />;
+  return (
+    <div className="max-h-72 h-72 overflow-y-scroll overflow-x-hidden">
+      <Grid noLink={true} onGifClick={(gif,e)=>{
+        console.log(gif,e)
+        setEmbed([{
+          provider: {
+            name: "giphy",
+            url: "https://giphy.com/gifs/",
+          },
+          type: "gifv",
+          url: gif.url,
+          title: gif.title,
+          thumbnail: {
+            url: gif.images.original.url,
+            width: gif.images.original.width,
+            height: gif.images.original.height,
+          },
+          media: {
+            url: gif.images.original.mp4,
+            width: gif.images.original.width,
+            height: gif.images.original.height,
+          },
+        }])
+      }} fetchGifs={fetchGifs} width={390} columns={2} gutter={6} />
+    </div>
+  );
 }
 
-export default function Giphy() {
+export default function Giphy({setEmbed}) {
+  const [value, setValue] = useState("");
+  const [debounced] = useDebouncedValue(value, 500);
   return (
-    <SimpleGrid
-      cols={2}
-      className="max-h-72 overflow-y-scroll overflow-x-hidden"
-    >
-      {gifsGallery &&
-        gifsGallery.map((gif, index) => (
-          <div
-            key={index}
-            className="rounded-lg bg-yellow-500 text-base font-normal text-white h-32 cursor-pointer hover:underline overflow-hidden"
+    <div className="relative overflow-hidden">
+      <div className="mb-3 shadow-md">
+        <TextInput
+          placeholder="Search Gif - Powered by Giphy"
+          variant="filled"
+          value={value}
+          onChange={(event) => setValue(event.currentTarget.value)}
+        />
+      </div>
+      <CSSTransition
+        in={!debounced && "main"}
+        timeout={250}
+        classNames="menu-primary"
+        unmountOnExit
+      >
+        <div>
+          <SimpleGrid
+            cols={2}
+            className="max-h-72 overflow-y-scroll overflow-x-hidden"
           >
-            <div
-              className="flex justify-center items-center w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-              style={{
-                background: `url(${gif.src}) center center no-repeat`,
-                backgroundSize: "cover",
-              }}
-            >
-              {gif.value}
-            </div>
-          </div>
-        ))}
-    </SimpleGrid>
+            {gifsGallery &&
+              gifsGallery.map((gif, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setValue(gif.value);
+                  }}
+                  className="rounded bg-yellow-500 text-base font-normal text-white h-32 cursor-pointer hover:underline overflow-hidden"
+                >
+                  <div
+                    className="flex justify-center items-center w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    style={{
+                      background: `url(${gif.src}) center center no-repeat`,
+                      backgroundSize: "cover",
+                    }}
+                  >
+                    {gif.value}
+                  </div>
+                </div>
+              ))}
+          </SimpleGrid>
+        </div>
+      </CSSTransition>
+      <CSSTransition
+        in={debounced && "searchGifs"}
+        timeout={250}
+        classNames="menu-secondary"
+        unmountOnExit
+      >
+        <div>
+          <GridGif query={debounced} setEmbed={setEmbed} />
+        </div>
+      </CSSTransition>
+    </div>
   );
 }

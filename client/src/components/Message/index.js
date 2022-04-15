@@ -14,8 +14,9 @@ import {
   Portal,
   Collapse,
   Loader,
+  Grid,
 } from "@mantine/core";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   chatMainTime,
   getMoreDetailsTime,
@@ -24,6 +25,8 @@ import {
   isNewDay,
   isSameTime,
 } from "../../commons/dateUtils";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { GetMe } from "../../store/userSlice";
 import "./index.css";
 import MessageInlineEditor from "./MessageInlineEditor";
@@ -50,6 +53,97 @@ import { useClipboard } from "@mantine/hooks";
 import useSpeechSynthesis from "../../hooks/useSpeechSynthesis";
 import { Empty } from "@douyinfe/semi-ui";
 import { IllustrationFailure } from "@douyinfe/semi-illustrations";
+import MusicPreview from "../PreviewFeature/MusicPreview";
+import DocumentPreview from "../PreviewFeature/DocumentPreview";
+import CodeBlockPreview from "../PreviewFeature/CodeBlockPreview";
+import VideoPreview from "../PreviewFeature/VideoPreview";
+import {
+  IMAGE_MIME_TYPE,
+  PDF_MIME_TYPE,
+  MS_WORD_MIME_TYPE,
+  MS_EXCEL_MIME_TYPE,
+  MS_POWERPOINT_MIME_TYPE,
+  MIME_TYPES,
+} from "@mantine/dropzone";
+import IconGif from "../UI/IconGif";
+import IconPdf from "../../assets/images/icons/files-PDF.svg";
+import IconWord from "../../assets/images/icons/files-DOCX.svg";
+import IconExcel from "../../assets/images/icons/files-XLS.svg";
+import IconPowerpoint from "../../assets/images/icons/files-PPT.svg";
+import IconMusic from "../../assets/images/icons/files-music.svg";
+import IconVideo from "../../assets/images/icons/files-video.svg";
+import IconZip from "../../assets/images/icons/files-zip.svg";
+import IconPicture from "../../assets/images/icons/files-picture.svg";
+import IconOther from "../../assets/images/icons/files-other.svg";
+import * as nsfwjs from "nsfwjs";
+
+// const DETECTION_PERIOD = 1000;
+
+// const availableModels = {
+//   mobilenetv2: ["/quant_nsfw_mobilenet/"],
+//   mobilenetMid: ["/quant_mid/", { type: "graph" }],
+//   inceptionv3: ["/model/", { size: 299 }],
+// };
+// const sleep=(ms)=> {
+//   return new Promise((resolve) => setTimeout(resolve, ms))
+// }
+
+const AttachmentFile = ({ attachment }) => {
+  const type = attachment?.contentType || "";
+  // const [predictions, setPredictions] = useState(null);
+  // // const imageRef = useRef(null);
+  // // const currentModelName = "mobilenetMid";
+  // useEffect(async () => {
+  //   const img = document.getElementById(`image-${attachment.id}`);
+  //   if (img && attachment.nsfw) {
+  //     nsfwjs.load().then((model) => {
+  //       // Classify the image.
+  //       model.classify(img, 1).then((predictions) => {
+  //         setPredictions(predictions);
+  //       });
+  //     });
+  //   }
+  // }, []);
+  if (
+    IMAGE_MIME_TYPE.includes(type) ||
+    attachment.filename.match(/\.(?:jpeg|jpg|png|gif)$/i)
+  ) {
+    return (
+      <img
+        // key={attachment.id}
+        id={`image-${attachment.id}`}
+        // width={500}
+        // height={500}
+        crossOrigin="anonymous"
+        src={attachment.url}
+        alt={attachment.filename}
+        className="w-[500px] h-[500px]"
+        style={{
+          filter: attachment.nsfw ? "blur(30px)" : "",
+        }}
+      />
+    );
+  } else if (
+    PDF_MIME_TYPE.includes(type) ||
+    MS_WORD_MIME_TYPE.includes(type) ||
+    MS_EXCEL_MIME_TYPE.includes(type) ||
+    MS_POWERPOINT_MIME_TYPE.includes(type) ||
+    ["application/zip", "application/x-zip-compressed"].includes(type) ||
+    attachment.filename.match(/\.(?:pptx|xlsx)$/i)
+  )
+    return <DocumentPreview attachment={attachment} />;
+  else if (
+    ["audio/mpeg", "audio/mp3", "audio/ogg"].includes(type) ||
+    attachment.filename.match(/\.(?:wav|mp3)$/i)
+  )
+    return <MusicPreview url={attachment.url} name={attachment.filename} />;
+  else if (
+    ["video/mp4", "video/quicktime"].includes(type) ||
+    attachment.filename.match(/\.(?:mp4|mov)$/i)
+  )
+    return <VideoPreview attachment={attachment} />;
+  else return <CodeBlockPreview attachment={attachment} />;
+};
 
 // const synth = window.speechSynthesis;
 // const voices = synth.getVoices();
@@ -683,6 +777,13 @@ export default function Message({
                       </Collapse>
                     </div>
                   )}
+                  {message.attachments && message.attachments.length > 0 && (
+                    <div className="flex flex-col gap-2 max-w-full">
+                      {message.attachments.map((attachment) => (
+                        <AttachmentFile attachment={attachment} />
+                      ))}
+                    </div>
+                  )}
                   {message.embed.length > 0 && (
                     <div className="flex flex-col ml-2">
                       {message.embed.map((embed, index) => (
@@ -732,6 +833,7 @@ export default function Message({
                     >
                       {message.replies.map((reply, index) => (
                         <Timeline.Item
+                          key={index}
                           lineActive={
                             index + 1 < message.replies.length - 1
                               ? me.user.id ===
@@ -922,6 +1024,15 @@ export default function Message({
                               </Collapse>
                             </div>
                           )}
+                          {message.attachments &&
+                            message.attachments.length > 0 && (
+                              <div className="flex flex-col gap-2 max-w-full">
+                                {message.attachments.map((attachment) => (
+                                  <AttachmentFile attachment={attachment} />
+                                ))}
+                              </div>
+                            )}
+
                           {message.embed.length > 0 && (
                             <div className="flex flex-col">
                               {message.embed.map((embed, index) => (
@@ -1056,6 +1167,13 @@ export default function Message({
                                 </blockquote>
                               </div>
                             </Collapse>
+                          </div>
+                        )}
+                        {message.attachments && message.attachments.length > 0 && (
+                          <div className="flex flex-col gap-2 max-w-full">
+                            {message.attachments.map((attachment) => (
+                              <AttachmentFile attachment={attachment} />
+                            ))}
                           </div>
                         )}
                         <div className="flex flex-col">
@@ -1299,9 +1417,11 @@ export default function Message({
   );
 }
 
-const EmbedLink = ({ embed }) => {
+const Embed = ({ embed }) => {
   const [openedImagePreview, setOpenedImagePreview] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const mapContainerRef = useRef(null);
+  const map = useRef(null);
   const [error, setError] = useState(() => {
     // if (embed.thumbnail) {
     //   return !(embed.thumbnail.url && !Array.isArray(embed.image)
@@ -1312,16 +1432,174 @@ const EmbedLink = ({ embed }) => {
     // }
     return false;
   });
+  useEffect(() => {
+    if (!embed.map) return;
+    console.log(
+      `${embed.map.longitude}`,
+      `${embed.map.latitude}`,
+      "embed1",
+      mapContainerRef.current
+    );
+    console.log("render map", embed.map.longitude, embed.map.latitude);
+    map.current = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: `https://api.maptiler.com/maps/streets/style.json?key=4rAtnLcj3zyVW8EqkV0m`,
+      center: [embed.map.longitude, embed.map.latitude],
+      zoom: embed.map.zoom,
+    });
+    map.current.addControl(new maplibregl.NavigationControl(), "top-right");
+    new maplibregl.Marker({ color: "#FF0000" })
+      .setLngLat([embed.map.longitude, embed.map.latitude])
+      .addTo(map.current);
+  }, []);
   const isPlaceholder = !loaded || error;
-  return (
-    <div
-      className="grid grid-flow-row indent-0 min-h-0 min-w-0 py-[0.125rem] relative"
-      style={{
-        gridRowGap: "0.25rem",
-        gridTemplateColumns: "repeat(auto-fill,minmax(100%,1fr))",
-      }}
-    >
-      {embed.type === "image" ? (
+  console.log(embed, "embed");
+  switch (embed.type) {
+    case "link":
+      return (
+        <article
+          className="grid max-w-[520px] rounded relative "
+          style={{
+            borderLeft: "4px solid #000",
+            backgroundColor: "rgba(128,128,128,0.8)",
+          }}
+        >
+          <div
+            className="overflow-hidden inline-grid"
+            style={{
+              gridTemplateColumns: "auto",
+              gridTemplateRows: "auto",
+              padding: "0.5rem 1rem 1rem 0.75rem",
+            }}
+          >
+            {embed.provider && (
+              <div
+                className="min-w-0 font-normal mt-2 text-left text-xs"
+                style={{ gridColumn: "1/1" }}
+              >
+                {embed.provider.name}
+              </div>
+            )}
+            {embed.title && (
+              <div
+                className="min-w-0 font-semibold text-base mt-2"
+                style={{ gridColumn: "1/1" }}
+              >
+                <a
+                  href={embed.url}
+                  target="_blank"
+                  className="text-blue-500 hover:underline no-underline"
+                >
+                  {embed.title}
+                </a>
+              </div>
+            )}
+            {embed.description && (
+              <div
+                className="mt-2 font-normal text-sm whitespace-pre-line text-left"
+                style={{ gridColumn: "1/1" }}
+              >
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `${format(embed.description)}`,
+                  }}
+                ></div>
+              </div>
+            )}
+            {embed.thumbnail?.url && (
+              <div
+                className="w-20 h-20 ml-4 mt-2 flex-shrink-0 justify-self-end flex justify-center items-center object-fill"
+                style={{ gridRow: "1/8", gridColumn: "2/2" }}
+              >
+                <AnimateSharedLayout type="crossfade">
+                  {/* <Image
+                        withPlaceholder
+                        width="80px"
+                        height="80px"
+                        fit="contain"
+                        radius={4}
+                        src={
+                          embed.thumbnail.url && !Array.isArray(embed.image)
+                            ? embed.image.url
+                            : embed.image[0].url
+                        }
+                      /> */}
+                  <Image
+                    component="motion.img"
+                    className="w-20 h-20 rounded object-contain"
+                    onClick={() => setOpenedImagePreview(true)}
+                    layoutId={
+                      embed.thumbnail.url && !Array.isArray(embed.image)
+                        ? embed.image.url
+                        : embed.image[0].url
+                    }
+                    src={
+                      embed.thumbnail.url && !Array.isArray(embed.image)
+                        ? embed.image.url
+                        : embed.image[0].url
+                    }
+                  />
+                  <AnimatePresence>
+                    <Portal zIndex={100}>
+                      {openedImagePreview && (
+                        <div className="fixed inset-0 z-50">
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.6 }}
+                            exit={{ opacity: 0 }}
+                            key="overlay"
+                            className="overlay -inset-20 z-50"
+                            style={{
+                              // backgroundImage: `url(${
+                              //   embed.thumbnail.url &&
+                              //   !Array.isArray(embed.image)
+                              //     ? embed.image.url
+                              //     : embed.image[0].url
+                              // })`,
+                              inset: "-80px -80px -80px -80px",
+                              backgroundColor: "rgba(0,0,0)",
+                              backgroundSize: "cover",
+                              backgroundPosition: "50%",
+                              backgroundRepeat: "no-repeat",
+                              filter: "blur(7px) brightness(.7)",
+                            }}
+                            onClick={() => setOpenedImagePreview(false)}
+                          />
+                          <div
+                            className="single-image-container"
+                            // onClick={() => setSelectedId(null)}
+                          >
+                            <motion.img
+                              key="image"
+                              // index={images[selectedId].id}
+                              className="single-image"
+                              style={{ height: "auto" }}
+                              layoutId={
+                                embed.thumbnail.url &&
+                                !Array.isArray(embed.image)
+                                  ? embed.image.url
+                                  : embed.image[0].url
+                              }
+                              src={
+                                embed.thumbnail.url &&
+                                !Array.isArray(embed.image)
+                                  ? embed.image.url
+                                  : embed.image[0].url
+                              }
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </Portal>
+                  </AnimatePresence>
+                </AnimateSharedLayout>
+              </div>
+            )}
+          </div>
+        </article>
+      );
+    case "image":
+      return (
         <div className="justify-self-start self-start relative grid max-w-[520px] rounded">
           <div
             className="min-w-0 rounded object-fill flex justify-center items-center"
@@ -1428,7 +1706,9 @@ const EmbedLink = ({ embed }) => {
             </AnimateSharedLayout>
           </div>
         </div>
-      ) : (
+      );
+    case "media":
+      return (
         <article
           className="grid max-w-[520px] rounded relative "
           style={{
@@ -1479,202 +1759,218 @@ const EmbedLink = ({ embed }) => {
               </div>
             )}
             {embed.thumbnail?.url && (
-              <>
-                {embed.type === "link" ? (
-                  <div
-                    className="w-20 h-20 ml-4 mt-2 flex-shrink-0 justify-self-end flex justify-center items-center object-fill"
-                    style={{ gridRow: "1/8", gridColumn: "2/2" }}
-                  >
-                    <AnimateSharedLayout type="crossfade">
-                      {/* <Image
-                        withPlaceholder
-                        width="80px"
-                        height="80px"
-                        fit="contain"
-                        radius={4}
-                        src={
-                          embed.thumbnail.url && !Array.isArray(embed.image)
-                            ? embed.image.url
-                            : embed.image[0].url
-                        }
-                      /> */}
-                      <Image
-                        component="motion.img"
-                        className="w-20 h-20 rounded object-contain"
-                        onClick={() => setOpenedImagePreview(true)}
-                        layoutId={
-                          embed.thumbnail.url && !Array.isArray(embed.image)
-                            ? embed.image.url
-                            : embed.image[0].url
-                        }
-                        src={
-                          embed.thumbnail.url && !Array.isArray(embed.image)
-                            ? embed.image.url
-                            : embed.image[0].url
-                        }
-                      />
-                      <AnimatePresence>
-                        <Portal zIndex={100}>
-                          {openedImagePreview && (
-                            <div className="fixed inset-0 z-50">
-                              <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.6 }}
-                                exit={{ opacity: 0 }}
-                                key="overlay"
-                                className="overlay -inset-20 z-50"
-                                style={{
-                                  // backgroundImage: `url(${
-                                  //   embed.thumbnail.url &&
-                                  //   !Array.isArray(embed.image)
-                                  //     ? embed.image.url
-                                  //     : embed.image[0].url
-                                  // })`,
-                                  inset: "-80px -80px -80px -80px",
-                                  backgroundColor: "rgba(0,0,0)",
-                                  backgroundSize: "cover",
-                                  backgroundPosition: "50%",
-                                  backgroundRepeat: "no-repeat",
-                                  filter: "blur(7px) brightness(.7)",
-                                }}
-                                onClick={() => setOpenedImagePreview(false)}
-                              />
-                              <div
-                                className="single-image-container"
-                                // onClick={() => setSelectedId(null)}
-                              >
-                                <motion.img
-                                  key="image"
-                                  // index={images[selectedId].id}
-                                  className="single-image"
-                                  style={{ height: "auto" }}
-                                  layoutId={
-                                    embed.thumbnail.url &&
-                                    !Array.isArray(embed.image)
-                                      ? embed.image.url
-                                      : embed.image[0].url
-                                  }
-                                  src={
-                                    embed.thumbnail.url &&
-                                    !Array.isArray(embed.image)
-                                      ? embed.image.url
-                                      : embed.image[0].url
-                                  }
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </Portal>
-                      </AnimatePresence>
-                    </AnimateSharedLayout>
-                  </div>
-                ) : (
-                  <div
-                    className="mt-4 min-w-0 rounded object-fill flex justify-center items-center"
-                    style={{ gridColumn: "1/1", width: "100%", height: "auto" }}
-                  >
-                    {/* {embed?.url && (
-                      <TikTok url={embed.url} />
-                    )} */}
-                    {embed.type === "article" ? (
-                      <AnimateSharedLayout type="crossfade">
-                        {/* <Image
-                        withPlaceholder
-                        width="100%"
-                        height="auto"
-                        fit="contain"
-                        radius={4}
-                        src={
-                          embed.thumbnail.url && !Array.isArray(embed.image)
-                            ? embed.image.url
-                            : embed.image[0].url
-                        }
-                      /> */}
-                        <Image
-                          component="motion.img"
-                          className="w-full h-auto rounded object-contain"
-                          onClick={() => setOpenedImagePreview(true)}
-                          layoutId={
-                            embed.thumbnail.url && !Array.isArray(embed.image)
-                              ? embed.image.url
-                              : embed.image[0].url
-                          }
-                          src={
-                            embed.thumbnail.url && !Array.isArray(embed.image)
-                              ? embed.image.url
-                              : embed.image[0].url
-                          }
-                        />
-                        <AnimatePresence>
-                          <Portal zIndex={100}>
-                            {openedImagePreview && (
-                              <div className="fixed inset-0 z-50">
-                                <motion.div
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 0.6 }}
-                                  exit={{ opacity: 0 }}
-                                  key="overlay"
-                                  className="overlay inset-0 z-50"
-                                  style={{
-                                    // backgroundImage: `url(${
-                                    //   embed.thumbnail.url &&
-                                    //   !Array.isArray(embed.image)
-                                    //     ? embed.image.url
-                                    //     : embed.image[0].url
-                                    // })`,
-                                    inset: "-80px -80px -80px -80px",
-                                    backgroundColor: "rgba(0,0,0)",
-                                    backgroundSize: "100% 100%",
-                                    backgroundPosition: "50%",
-                                    backgroundRepeat: "no-repeat",
-                                    filter: "blur(7px) brightness(.7)",
-                                  }}
-                                  onClick={() => setOpenedImagePreview(false)}
-                                />
-                                <div
-                                  className="single-image-container"
-                                  // onClick={() => setSelectedId(null)}
-                                >
-                                  <motion.img
-                                    key="image"
-                                    // index={images[selectedId].id}
-                                    className="single-image"
-                                    style={{ height: "auto", zIndex: 200 }}
-                                    layoutId={
-                                      embed.thumbnail.url &&
-                                      !Array.isArray(embed.image)
-                                        ? embed.image.url
-                                        : embed.image[0].url
-                                    }
-                                    src={
-                                      embed.thumbnail.url &&
-                                      !Array.isArray(embed.image)
-                                        ? embed.image.url
-                                        : embed.image[0].url
-                                    }
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </Portal>
-                        </AnimatePresence>
-                      </AnimateSharedLayout>
-                    ) : (
-                      <>
-                        {/* {embed.url.toLowerCase().includes("tiktok") ? (
-                          <TikTok url={embed.url} />
-                        ) : ( */}
-                        <ReactPlayer url={embed.url} controls={true} />
-                        {/* )} */}
-                      </>
-                    )}
-                  </div>
-                )}
-              </>
+              <div
+                className="mt-4 min-w-0 rounded object-fill flex justify-center items-center"
+                style={{ gridColumn: "1/1", width: "100%", height: "auto" }}
+              >
+                {/* {embed?.url && (
+                    <TikTok url={embed.url} />
+                  )} */}
+
+                {/* {embed.url.toLowerCase().includes("tiktok") ? (
+                        <TikTok url={embed.url} />
+                      ) : ( */}
+                <ReactPlayer url={embed.url} controls={true} />
+                {/* )} */}
+              </div>
             )}
           </div>
         </article>
-      )}
+      );
+    case "article":
+      return (
+        <article
+          className="grid max-w-[520px] rounded relative "
+          style={{
+            borderLeft: "4px solid #000",
+            backgroundColor: "rgba(128,128,128,0.8)",
+          }}
+        >
+          <div
+            className="overflow-hidden inline-grid"
+            style={{
+              gridTemplateColumns: "auto",
+              gridTemplateRows: "auto",
+              padding: "0.5rem 1rem 1rem 0.75rem",
+            }}
+          >
+            {embed.provider && (
+              <div
+                className="min-w-0 font-normal mt-2 text-left text-xs"
+                style={{ gridColumn: "1/1" }}
+              >
+                {embed.provider.name}
+              </div>
+            )}
+            {embed.title && (
+              <div
+                className="min-w-0 font-semibold text-base mt-2"
+                style={{ gridColumn: "1/1" }}
+              >
+                <a
+                  href={embed.url}
+                  target="_blank"
+                  className="text-blue-500 hover:underline no-underline"
+                >
+                  {embed.title}
+                </a>
+              </div>
+            )}
+            {embed.description && (
+              <div
+                className="mt-2 font-normal text-sm whitespace-pre-line text-left"
+                style={{ gridColumn: "1/1" }}
+              >
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `${format(embed.description)}`,
+                  }}
+                ></div>
+              </div>
+            )}
+            {embed.thumbnail?.url && (
+              <div
+                className="mt-4 min-w-0 rounded object-fill flex justify-center items-center"
+                style={{ gridColumn: "1/1", width: "100%", height: "auto" }}
+              >
+                <AnimateSharedLayout type="crossfade">
+                  {/* <Image
+                      withPlaceholder
+                      width="100%"
+                      height="auto"
+                      fit="contain"
+                      radius={4}
+                      src={
+                        embed.thumbnail.url && !Array.isArray(embed.image)
+                          ? embed.image.url
+                          : embed.image[0].url
+                      }
+                    /> */}
+                  <Image
+                    component="motion.img"
+                    className="w-full h-auto rounded object-contain"
+                    onClick={() => setOpenedImagePreview(true)}
+                    layoutId={
+                      embed.thumbnail.url && !Array.isArray(embed.image)
+                        ? embed.image.url
+                        : embed.image[0].url
+                    }
+                    src={
+                      embed.thumbnail.url && !Array.isArray(embed.image)
+                        ? embed.image.url
+                        : embed.image[0].url
+                    }
+                  />
+                  <AnimatePresence>
+                    <Portal zIndex={100}>
+                      {openedImagePreview && (
+                        <div className="fixed inset-0 z-50">
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.6 }}
+                            exit={{ opacity: 0 }}
+                            key="overlay"
+                            className="overlay inset-0 z-50"
+                            style={{
+                              // backgroundImage: `url(${
+                              //   embed.thumbnail.url &&
+                              //   !Array.isArray(embed.image)
+                              //     ? embed.image.url
+                              //     : embed.image[0].url
+                              // })`,
+                              inset: "-80px -80px -80px -80px",
+                              backgroundColor: "rgba(0,0,0)",
+                              backgroundSize: "100% 100%",
+                              backgroundPosition: "50%",
+                              backgroundRepeat: "no-repeat",
+                              filter: "blur(7px) brightness(.7)",
+                            }}
+                            onClick={() => setOpenedImagePreview(false)}
+                          />
+                          <div
+                            className="single-image-container"
+                            // onClick={() => setSelectedId(null)}
+                          >
+                            <motion.img
+                              key="image"
+                              // index={images[selectedId].id}
+                              className="single-image"
+                              style={{ height: "auto", zIndex: 200 }}
+                              layoutId={
+                                embed.thumbnail.url &&
+                                !Array.isArray(embed.image)
+                                  ? embed.image.url
+                                  : embed.image[0].url
+                              }
+                              src={
+                                embed.thumbnail.url &&
+                                !Array.isArray(embed.image)
+                                  ? embed.image.url
+                                  : embed.image[0].url
+                              }
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </Portal>
+                  </AnimatePresence>
+                </AnimateSharedLayout>
+              </div>
+            )}
+          </div>
+        </article>
+      );
+    case "gifv":
+      return (
+        <div className="animated-avatar cursor-pointer overflow-hidden rounded justify-self-start self-start relative grid max-w-[520px] rounded">
+          <a
+            target="_blank"
+            href={embed.url}
+            className="cutout-container absolute w-12 h-12 z-10"
+          >
+            <div
+              className="bg-white relative w-full h-full"
+              style={{ transition: "all 0.2s ease-out 0s" }}
+            >
+              <div className="cutout w-4 h-4 pointer-events-none absolute -top-16 right-0"></div>
+            </div>
+          </a>
+          <video
+            autoplay={true}
+            muted={true}
+            poster={embed.thumbnail?.url}
+            src={embed.media.url}
+            width={embed.media.width}
+            height={embed.media.height}
+            loop={true}
+            preload="none"
+          />
+        </div>
+      );
+    case "map":
+      return (
+        <div className="cursor-pointer overflow-hidden rounded justify-self-start self-start relative grid max-w-[520px] rounded">
+          <div
+            ref={mapContainerRef}
+            className="w-96 h-96 rounded-md"
+          ></div>
+        </div>
+      );
+    default:
+      return null;
+  }
+};
+
+const EmbedLink = ({ embed }) => {
+  return (
+    <div
+      className="grid grid-flow-row indent-0 min-h-0 min-w-0 py-[0.125rem] relative"
+      style={{
+        gridRowGap: "0.25rem",
+        gridTemplateColumns: "repeat(auto-fill,minmax(100%,1fr))",
+      }}
+    >
+      <Embed embed={embed} />
     </div>
   );
 };

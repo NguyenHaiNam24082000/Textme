@@ -2,13 +2,21 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const auth = require("../../middlewares/auth");
-const upload = multer();
 const messageController = require("../../controllers/Message/messageController");
+const uploadFile = require('../../configs/storage');
+
+const Multer = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+})
 
 router.post(
   "/send-message",
   auth(),
-  upload.none(),
+  Multer.any(10),
+  uploadFile,
   messageController.sendMessage
 );
 router.get("/:channelId", auth(), messageController.getMessages);

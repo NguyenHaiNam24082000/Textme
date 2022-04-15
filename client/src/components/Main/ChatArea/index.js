@@ -173,11 +173,13 @@ function ChatArea({ channel, user }) {
     //   containerId: "chat-viewport",
     //   smooth: true,
     // });
-    // const resetCurrentMessages = setTimeout(() => {
-    //   setCurrentMessageSelected(null);
-    // }, 3000);
-    // console.log("aaaaaaazzzzz");
-    // return () => clearTimeout(resetCurrentMessages);
+    if (currentMessageSelected) {
+      const resetCurrentMessages = setTimeout(() => {
+        setCurrentMessageSelected(null);
+      }, 3000);
+      // console.log("aaaaaaazzzzz");
+      return () => clearTimeout(resetCurrentMessages);
+    }
   }, [currentMessageSelected]);
 
   useEffect(() => {
@@ -214,11 +216,11 @@ function ChatArea({ channel, user }) {
           <div
             ref={viewportRef}
             id="chat-viewport"
-            className="flex flex-col flex-auto min-h-0 absolute top-0 left-0 right-0 bottom-0  overflow-y-scroll overflow-x-hidden justify-end"
+            className="flex flex-col justify-end flex-auto min-h-0 absolute top-0 left-0 right-0 bottom-0  overflow-y-scroll overflow-x-hidden"
           >
             {isLoading ? (
               <MockChat />
-             ) : (
+            ) : (
               <InfiniteScroll
                 dataLength={msg.length}
                 next={fetchNextPage}
@@ -245,23 +247,25 @@ function ChatArea({ channel, user }) {
                     //   key={message.id}
                     //   name={`chat-messages-${message.id}`}
                     // >
-                    <div
-                      key={message.id}
-                      id={`chat-messages-${message.id}`}
-                      ref={lastMessageRef}
-                    >
-                      <Message
-                        message={message}
-                        key={message.id}
-                        user={user}
-                        searchMessage={searchMessage}
-                        messages={msg}
-                        currentEditMessageId={currentEditMessageId}
-                        setCurrentEditMessageId={setCurrentEditMessageId}
-                        currentMessageSelected={currentMessageSelected}
-                        setCurrentMessageSelected={setCurrentMessageSelected}
-                      />
-                    </div>
+                    <React.Fragment key={message.id}>
+                      <div
+                        // key={message.id}
+                        id={`chat-messages-${message.id}`}
+                        ref={lastMessageRef}
+                      >
+                        <Message
+                          message={message}
+                          key={message.id}
+                          user={user}
+                          searchMessage={searchMessage}
+                          messages={msg}
+                          currentEditMessageId={currentEditMessageId}
+                          setCurrentEditMessageId={setCurrentEditMessageId}
+                          currentMessageSelected={currentMessageSelected}
+                          setCurrentMessageSelected={setCurrentMessageSelected}
+                        />
+                      </div>
+                    </React.Fragment>
                     // </Element>
                     // </AnimatePresence>
                     // </InfinityGauntlet>

@@ -1,5 +1,4 @@
-import { useMotionValue } from "framer-motion";
-import React, { useState } from "react";
+import React from "react";
 import { useMatch, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useRecoilValue } from "recoil";
@@ -9,10 +8,7 @@ import config from "../../assets/jsons/cherrymx-brown-abs/config.json";
 import sound from "../../assets/sounds/audio.ogg";
 import Friends from "./Friends";
 import DMPage from "./DMPage";
-// import Channel from "../../components/Channel";
-// import ChatArea from "../../components/ChatArea";
-// import ModalCreateWorkspace from "../../components/Modals/ModalCreateWorkspace";
-// import Sidebar from "../../components/Sidebar";
+
 import {
   ChannelListSidebar,
   ServerListSidebar,
@@ -20,7 +16,6 @@ import {
 } from "../../components/navigations";
 import { themeState } from "../../recoil/themeState";
 import { isVisibleChanelSelector } from "../../store/uiSlice";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Home from "./Home";
 import Discover from "./Discover";
 
@@ -28,8 +23,6 @@ export default function Me() {
   useMeSocket();
   //   const match = useRouteMatch();
   const location = useLocation();
-  const [openedModalCreateWorkspace, setOpenedModalCreateWorkspace] =
-    useState(false);
   const isVisibleChanel = useSelector(isVisibleChanelSelector);
   const [play] = useSound(sound, {
     sprite: config.defines,
@@ -53,7 +46,6 @@ export default function Me() {
       }}
     >
       <ServerListSidebar />
-      {/* <LeftSidebar /> */}
       <div className="flex flex-auto">
         {location.pathname.includes("/channel/@me") ||
         location.pathname === "/friends" ? (
@@ -65,22 +57,9 @@ export default function Me() {
         {location.pathname === "/channel/@me"&& <Home/>}
         {location.pathname === "/discover" && <Discover />}
         {useMatch("/channel/@me/:channelId") && <DMPage />}
-        {/* {isVisibleChanel && (
-          <div
-            className="flex flex-col w-64 h-full flex-shrink-0 overflow-hidden"
-            style={{
-              backgroundColor: "#f3f4f6",
-              borderRight: "2px solid #e5e7eb",
-            }}
-          ></div>
-        )}
-        <div className="flex flex-col flex-auto min-w-0 min-h-0 relative"></div> */}
+ 
       </div>
-      {/* {openModalConfirm && openModalConfirm()} */}
-      {/* <ModalCreateWorkspace
-        opened={openedModalCreateWorkspace}
-        onClose={() => setOpenedModalCreateWorkspace(false)}
-      /> */}
+     
     </div>
   );
 }

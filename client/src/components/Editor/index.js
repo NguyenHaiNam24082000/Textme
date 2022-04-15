@@ -38,6 +38,7 @@ import {
   Center,
   CloseButton,
   Text,
+  Divider,
 } from "@mantine/core";
 import createInlineToolbarPlugin from "@draft-js-plugins/inline-toolbar";
 import {
@@ -96,6 +97,48 @@ import {
   MIME_TYPES,
 } from "@mantine/dropzone";
 import IconGif from "../UI/IconGif";
+import IconPdf from "../../assets/images/icons/files-PDF.svg";
+import IconWord from "../../assets/images/icons/files-DOCX.svg";
+import IconExcel from "../../assets/images/icons/files-XLS.svg";
+import IconPowerpoint from "../../assets/images/icons/files-PPT.svg";
+import IconMusic from "../../assets/images/icons/files-music.svg";
+import IconVideo from "../../assets/images/icons/files-video.svg";
+import IconZip from "../../assets/images/icons/files-zip.svg";
+import IconPicture from "../../assets/images/icons/files-picture.svg";
+import IconOther from "../../assets/images/icons/files-other.svg";
+import * as nsfwjs from "nsfwjs";
+import Giphy from "../Giphy";
+import Sticker from "../Sticker";
+
+const IconFile = ({ type }) => {
+  if (PDF_MIME_TYPE.includes(type))
+    return <Image width="auto" height="auto" src={IconPdf} />;
+  else if (MS_WORD_MIME_TYPE.includes(type))
+    return <Image width="auto" height="auto" src={IconWord} />;
+  else if (MS_EXCEL_MIME_TYPE.includes(type))
+    return <Image width="auto" height="auto" src={IconExcel} />;
+  else if (MS_POWERPOINT_MIME_TYPE.includes(type))
+    return <Image width="auto" height="auto" src={IconPowerpoint} />;
+  else if (["audio/mpeg", "audio/mp3"].includes(type))
+    return <Image width="auto" height="auto" src={IconMusic} />;
+  else if (["video/mp4", "video/quicktime"].includes(type))
+    return <Image width="auto" height="auto" src={IconVideo} />;
+  else if (["application/zip", "application/x-zip-compressed"].includes(type))
+    return <Image width="auto" height="auto" src={IconZip} />;
+  else
+    return (
+      <div className="flex items-center justify-center relative">
+        <Image width="auto" height="auto" src={IconOther} />
+        {/* <div className="text-white font-medium text-2xl select-none absolute inset-0 w-full h-full flex justify-center items-center uppercase"
+        style={{
+          fontSize: "0.5vw",
+        }}
+      >
+        {type.split("/")[1]}
+      </div> */}
+      </div>
+    );
+};
 
 const INLINE_STYLES = [
   { label: "Bold", style: "BOLD" },
@@ -236,15 +279,23 @@ const handleFileChosen = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
+      const data = reader.result;
+      // if (IMAGE_MIME_TYPE.includes(file.type)) {
+      //   const image = new Image();
+      //   image.src = data;
+      //   image.onload = function () {
+      //     console.log(this.width);
+      //   };
+      // }
       resolve(reader.result);
     };
     reader.onerror = reject;
-    if (IMAGE_MIME_TYPE.includes(file.type)) {
-      reader.readAsDataURL(file);
-    } else {
-      // reader.readAsArrayBuffer(file);
-      reader.readAsText(file);
-    }
+    // if (IMAGE_MIME_TYPE.includes(file.type)) {
+    reader.readAsDataURL(file);
+    // } else {
+    //   // reader.readAsArrayBuffer(file);
+    //   reader.readAsText(file);
+    // }
   });
 };
 
@@ -277,8 +328,54 @@ export default function EditorDraft({ channel, user }) {
   const inputRef = useRef(null);
   const [indexFileReplace, setIndexFileReplace] = useState(-1);
   const [isMultiSelect, setIsMultiSelect] = useState(true);
+  const [openedGif, setOpenedGif] = useState(false);
+  const [openedSticker, setOpenedSticker] = useState(false);
+  const [embed, setEmbed] = useState([]);
   // const [isNSFW, setIsNSFW] = useState(false);
-
+  useEffect(() => {
+    if (embed.length > 0) {
+      handleSendMessage();
+    }
+  }, [embed]);
+  useEffect(() => {
+    if (images && images.length > 0) {
+      const files = Promise.all(
+        images.map(async (image, i) => {
+          if (
+            IMAGE_MIME_TYPE.includes(image.type) ||
+            (image.name.match(/\.(?:jpeg|jpg|png|gif)$/i) &&
+              image.nsfw === false)
+          ) {
+            const img = document.getElementById(`image-${image.id}`);
+            if (img) {
+              const model = await nsfwjs.load();
+              const predictions = await model.classify(img, 1);
+              return {
+                ...image,
+                watermark: predictions[0].className,
+                nsfw: ["Hentai", "Sexy", "Porn"].includes(
+                  predictions[0].className
+                )
+                  ? true
+                  : image.nsfw,
+              };
+            }
+            return image;
+          }
+          return image;
+        })
+      );
+      files.then((files) => {
+        const filesClone = [...files].sort((a, b) => a.createdAt - b.createdAt);
+        const imagesClone = [...images].sort(
+          (a, b) => a.createdAt - b.createdAt
+        );
+        if (JSON.stringify(filesClone) === JSON.stringify(imagesClone)) return;
+        console.log(filesClone, "images");
+        setImages(filesClone);
+      });
+    }
+  }, [images]);
   // connect to socket on component mount.
   useEffect(() => {
     const newSocket = getSocket(me?.tokens?.access?.token);
@@ -290,7 +387,7 @@ export default function EditorDraft({ channel, user }) {
     ["ctrl+R", () => setOpenedEditor(true)],
   ]);
   const handleSendMessage = async () => {
-    if (!editorState.getCurrentContent().hasText()) return;
+    // if (!editorState.getCurrentContent().hasText() || images.length===0) return;
     const contentState = editorState.getCurrentContent();
     const rawContent = convertToRaw(contentState);
     const markdownString = draftToMarkdown(rawContent);
@@ -299,23 +396,63 @@ export default function EditorDraft({ channel, user }) {
       channel && replies[channel._id] && replies[channel._id].length
         ? replies[channel._id].map((reply) => reply.id)
         : [];
+
+    const attachments =
+      images?.map((image, index) => {
+        return {
+          id: index,
+          filename: image.name,
+          type: image.type,
+          size: image.size,
+          nsfw: image.nsfw,
+        };
+      }) || [];
+    console.log(attachments);
+    const files =
+      images?.map((image) => {
+        const base64 = image.url.split(";base64,");
+        const byteCharacters = atob(base64[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: image.type });
+        return blob;
+      }) || [];
     data.append("channelId", channel._id);
     data.append("content", markdownString);
     data.append("replies", replyMsg);
+    data.append("embed", JSON.stringify(embed[0]) || []);
+    data.append("attachments", JSON.stringify(attachments));
+    if (files.length > 0)
+      files.map((file, index) => {
+        data.append(`files[${index}]`, file);
+      });
+    // data.append("files", files);
 
     try {
-      const result = await sendMessage(data);
+      let result = null;
+      if (images.length > 0) {
+        const config = {
+          onUploadProgress: function (progressEvent) {
+            var percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            console.log(percentCompleted);
+          },
+          timeout: 20000,
+        };
+        result = await sendMessage(data, config);
+      } else {
+        result = await sendMessage(data);
+      }
+      // const result = await sendMessage(data);
       socket.emit(CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE, {
         msg: result?.data,
         receiverId: channel._id,
       });
       setEditorState(EditorState.createEmpty(""));
-      console.log(
-        replies[channel._id] && {
-          id: channel._id,
-          messages: [],
-        }
-      );
       replies[channel._id] &&
         dispatch(
           replyMessages({
@@ -323,6 +460,8 @@ export default function EditorDraft({ channel, user }) {
             messages: [],
           })
         );
+      setImages([]);
+      setEmbed([]);
       cache.invalidateQueries(OPEN_CHANNEL);
       cache.setQueryData(CHANNEL_MESSAGES_KEY(channel._id), (d) => {
         if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
@@ -710,117 +849,7 @@ export default function EditorDraft({ channel, user }) {
             />
           </div>
         ))}
-      {images.length > 0 && (
-        <div className="flex overflow-x-auto pt-5 pb-1 px-3">
-          <div className="flex w-fit gap-6">
-            <AnimateSharedLayout type="crossfade">
-              {images
-                .sort((a, b) => a.createdAt - b.createdAt)
-                .map((img, index) => (
-                  <div
-                    key={index}
-                    className="group flex flex-col w-52 truncate overflow-ellipsis text-center"
-                  >
-                    <div
-                      onClick={() => {
-                        setSelectedId(index);
-                        console.log(index);
-                      }}
-                      style={{ border: "2px solid red" }}
-                      className="upload-image overflow-hidden relative w-52 h-52 p-2 rounded-md cursor-pointer bg-slate-300 flex justify-center items-center"
-                    >
-                      <motion.img
-                        className="w-full h-auto rounded"
-                        layoutId={img.id}
-                        src={img.url}
-                        style={{
-                          filter: img.nsfw ? "blur(30px)" : "blur(0px)",
-                        }}
-                      />
-                      {/* <Center className="absolute inset-0">
-                    <Progress
-                      percent={50}
-                      type="circle"
-                      showInfo
-                      format={(per) => per + "%"}
-                      style={{ margin: 5 }}
-                      strokeWidth={8}
-                      aria-label="Upload progress"
-                    />
-                  </Center> */}
-                      {/* <div className="flex absolute bottom-2 right-2 gap-2">
-                    <FontAwesomeIcon
-                      icon="fa-solid fa-circle-exclamation"
-                      className="w-5 h-5"
-                      style={{ color: "red" }}
-                    />
-                  </div> */}
-                      <div className="group-hover:visible invisible flex absolute top-2 right-2 gap-2">
-                        <ActionIcon
-                          variant="light"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const imagesClone = [
-                              ...images.filter((image) => image.id !== img.id),
-                              {
-                                ...img,
-                                nsfw: !img.nsfw,
-                              },
-                            ].sort((a, b) => a.createdAt - b.createdAt);
-                            setImages(imagesClone);
-                          }}
-                        >
-                          {img.nsfw ? (
-                            <FontAwesomeIcon icon="fa-solid fa-eye-slash" />
-                          ) : (
-                            <FontAwesomeIcon icon="fa-solid fa-eye" />
-                          )}
-                        </ActionIcon>
-                        <ActionIcon
-                          variant="light"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsMultiSelect(false);
-                            setIndexFileReplace(index);
-                            inputRef.current.click();
-                          }}
-                        >
-                          <FontAwesomeIcon icon="fa-solid fa-rotate" />
-                        </ActionIcon>
-                        <ActionIcon variant="light">
-                          <FontAwesomeIcon icon="fa-solid fa-pen" />
-                        </ActionIcon>
-                        <ActionIcon
-                          variant="light"
-                          color="red"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setImages(
-                              images.filter((image) => image.id !== img.id)
-                            );
-                          }}
-                        >
-                          <FontAwesomeIcon icon="fa-solid fa-trash-can" />
-                        </ActionIcon>
-                      </div>
-                    </div>
-
-                    <span className="text-xs font-medium truncate overflow-ellipsis">
-                      {img.name}
-                    </span>
-                    <span
-                      className="truncate overflow-ellipsis"
-                      style={{ fontSize: 10 }}
-                    >
-                      {`${img.size}`.length < 7
-                        ? `${Math.round(+img.size / 1024).toFixed(2)} KB`
-                        : `${Math.round(+img.size / 1024 / 1024).toFixed(
-                            2
-                          )} MB`}
-                    </span>
-                  </div>
-
-                  // {/* <div className="flex flex-col w-24 truncate overflow-ellipsis text-center">
+      {/* // <div className="flex flex-col w-24 truncate overflow-ellipsis text-center">
                   //         //   <Image
                   //         //     radius="sm"
                   //         //     width={96}
@@ -838,45 +867,6 @@ export default function EditorDraft({ channel, user }) {
                   //         //     max 5 MB
                   //         //   </span>
                   //         // </div> */}
-                ))}
-              <AnimatePresence>
-                {selectedId !== null && (
-                  <div className="fixed inset-0 z-50">
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.6 }}
-                      exit={{ opacity: 0 }}
-                      key="overlay"
-                      className="overlay inset-0 z-50"
-                      style={{
-                        backgroundImage: `url(${images[selectedId].url})`,
-                        backgroundSize: "100% 100%",
-                        backgroundPosition: "50%",
-                        backgroundRepeat: "no-repeat",
-                        filter: "blur(7px) brightness(.7)",
-                      }}
-                      onClick={() => setSelectedId(null)}
-                    />
-                    <div
-                      className="single-image-container"
-                      // onClick={() => setSelectedId(null)}
-                    >
-                      <motion.img
-                        key="image"
-                        index={images[selectedId].id}
-                        className="single-image"
-                        style={{ height: "auto" }}
-                        layoutId={images[selectedId].id}
-                        src={images[selectedId].url}
-                      />
-                    </div>
-                  </div>
-                )}
-              </AnimatePresence>
-            </AnimateSharedLayout>
-          </div>
-        </div>
-      )}
       <input
         ref={inputRef}
         accept="*"
@@ -899,6 +889,7 @@ export default function EditorDraft({ channel, user }) {
                     size: file.size,
                     type: file.type,
                     nsfw: false,
+                    watermark: "Neutral",
                     createdAt: new Date(),
                   };
                 } else {
@@ -908,6 +899,7 @@ export default function EditorDraft({ channel, user }) {
                     name: file.name,
                     size: file.size,
                     type: file.type,
+                    watermark: file.watermark,
                     nsfw: images[indexFileReplace].nsfw,
                     createdAt: images[indexFileReplace].createdAt,
                   };
@@ -916,6 +908,7 @@ export default function EditorDraft({ channel, user }) {
               })
             );
             if (isMultiSelect) {
+              console.log(results);
               setImages([...images, ...results]);
             } else {
               setImages([
@@ -928,9 +921,9 @@ export default function EditorDraft({ channel, user }) {
           }
         }}
       />
-      {openedEditor ? (
-        <>
-          {/* <Popover
+      {/* {openedEditor ? (
+        <> */}
+      {/* <Popover
             opened={true}
             position="top"
             placement="start"
@@ -939,201 +932,386 @@ export default function EditorDraft({ channel, user }) {
             // onClose={() => setOpened(false)}
             className="w-full overflow-hidden"
             target={ */}
-          {openedShareLocation && (
-            <MapBox
-              setOpenedShareLocation={() => setOpenedShareLocation(false)}
-            />
-          )}
+      <div
+        style={{
+          border: "2px solid #e5e7eb",
+          borderRadius: `${
+            channel && replies[channel._id] && replies[channel._id].length
+              ? "0px 0px"
+              : "6px 6px"
+          } 6px 6px`,
+          backgroundColor: "#e5e7eb",
+        }}
+      >
+        {images.length > 0 && (
           <div
+            className="flex overflow-x-auto py-2 px-3"
             style={{
-              border: "2px solid #e5e7eb",
-              borderRadius: `${
-                channel && replies[channel._id] && replies[channel._id].length
-                  ? "0px 0px"
-                  : "6px 6px"
-              } 6px 6px`,
-              padding: 8,
-              backgroundColor: "#f3f4f6",
+              borderBottom: "2px solid #e5e7eb",
             }}
           >
-            {openStaticToolbar && (
-              <Group
-                position="apart"
-                style={{
-                  marginBottom: 4,
-                }}
-              >
-                <Group spacing="xs">
-                  <Group spacing={0}>
-                    {renderMarkButton("Bold", "BOLD", <IconBold />)}
-                    {renderMarkButton("Italic", "ITALIC", <IconItalic />)}
-                    {renderMarkButton(
-                      "Underline",
-                      "UNDERLINE",
-                      <IconUnderline />
-                    )}
-                    {renderMarkButton(
-                      "Strikethrough",
-                      "STRIKETHROUGH",
-                      <IconStrikeThrough />
-                    )}
-                    {/* <ActionIcon>
+            <div className="flex w-fit gap-6 overflow-x-auto">
+              <AnimateSharedLayout type="crossfade">
+                {images
+                  .sort((a, b) => a.createdAt - b.createdAt)
+                  .map((img, index) => (
+                    <>
+                      <div
+                        key={index}
+                        className="group flex flex-col w-52 p-2 truncate overflow-ellipsis text-center bg-slate-300 rounded"
+                      >
+                        <div
+                          onClick={() => {
+                            if (img.type.includes("image")) {
+                              setSelectedId(index);
+                              console.log(index);
+                            }
+                          }}
+                          // style={{ border: "2px solid red" }}
+                          className="upload-image overflow-hidden relative w-48 h-48 cursor-pointer flex justify-center items-center"
+                        >
+                          {!img.type.includes("image") ? (
+                            <IconFile type={img.type} />
+                          ) : (
+                            <motion.img
+                              className="w-full h-full rounded object-cover"
+                              layoutId={img.id}
+                              src={img.url}
+                              id={`image-${img.id}`}
+                              style={{
+                                filter: img.nsfw ? "blur(30px)" : "blur(0px)",
+                              }}
+                            />
+                          )}
+                          {/* <Center className="absolute inset-0">
+                    <Progress
+                      percent={50}
+                      type="circle"
+                      showInfo
+                      format={(per) => per + "%"}
+                      style={{ margin: 5 }}
+                      strokeWidth={8}
+                      aria-label="Upload progress"
+                    />
+                  </Center> */}
+                          {/* <div className="flex absolute bottom-2 right-2 gap-2">
+                    <FontAwesomeIcon
+                      icon="fa-solid fa-circle-exclamation"
+                      className="w-5 h-5"
+                      style={{ color: "red" }}
+                    />
+                  </div> */}
+                          <div className="group-hover:visible invisible flex absolute top-2 right-2 gap-2">
+                            <ActionIcon
+                              variant="light"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const imagesClone = [
+                                  ...images.filter(
+                                    (image) => image.id !== img.id
+                                  ),
+                                  {
+                                    ...img,
+                                    nsfw: !img.nsfw,
+                                  },
+                                ].sort((a, b) => a.createdAt - b.createdAt);
+                                setImages(imagesClone);
+                              }}
+                            >
+                              {img.nsfw ? (
+                                <FontAwesomeIcon icon="fa-solid fa-eye-slash" />
+                              ) : (
+                                <FontAwesomeIcon icon="fa-solid fa-eye" />
+                              )}
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="light"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMultiSelect(false);
+                                setIndexFileReplace(index);
+                                inputRef.current.click();
+                              }}
+                            >
+                              <FontAwesomeIcon icon="fa-solid fa-rotate" />
+                            </ActionIcon>
+                            <ActionIcon variant="light">
+                              <FontAwesomeIcon icon="fa-solid fa-pen" />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="light"
+                              color="red"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setImages(
+                                  images.filter((image) => image.id !== img.id)
+                                );
+                              }}
+                            >
+                              <FontAwesomeIcon icon="fa-solid fa-trash-can" />
+                            </ActionIcon>
+                          </div>
+                        </div>
+
+                        <span className="text-xs font-medium truncate overflow-ellipsis">
+                          {img.name}
+                        </span>
+                        <span
+                          className="truncate overflow-ellipsis"
+                          style={{ fontSize: 10 }}
+                        >
+                          {`${img.size}`.length < 7
+                            ? `${Math.round(+img.size / 1024).toFixed(2)} KB`
+                            : `${Math.round(+img.size / 1024 / 1024).toFixed(
+                                2
+                              )} MB`}
+                        </span>
+                      </div>
+                      <AnimatePresence>
+                        {selectedId !== null && (
+                          <div className="fixed inset-0 z-50">
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 0.6 }}
+                              exit={{ opacity: 0 }}
+                              key="overlay"
+                              className="overlay inset-0 z-50"
+                              style={{
+                                backgroundImage: `url(${images[selectedId].url})`,
+                                backgroundSize: "100% 100%",
+                                backgroundPosition: "50%",
+                                backgroundRepeat: "no-repeat",
+                                filter: "blur(7px) brightness(.7)",
+                              }}
+                              onClick={() => setSelectedId(null)}
+                            />
+                            <div
+                              className="single-image-container"
+                              // onClick={() => setSelectedId(null)}
+                            >
+                              <motion.img
+                                key="image"
+                                index={images[selectedId].id}
+                                className="single-image"
+                                style={{ height: "auto" }}
+                                layoutId={images[selectedId].id}
+                                src={images[selectedId].url}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ))}
+              </AnimateSharedLayout>
+            </div>
+          </div>
+        )}
+        {openedShareLocation && (
+          <MapBox
+            setEmbed={setEmbed}
+            setOpenedShareLocation={() => setOpenedShareLocation(false)}
+          />
+        )}
+        {openStaticToolbar && (
+          <Group
+            spacing="xs"
+            style={{
+              marginBottom: 4,
+            }}
+          >
+            <Group spacing={0}>
+              {renderMarkButton("Bold", "BOLD", <IconBold />)}
+              {renderMarkButton("Italic", "ITALIC", <IconItalic />)}
+              {renderMarkButton("Underline", "UNDERLINE", <IconUnderline />)}
+              {renderMarkButton(
+                "Strikethrough",
+                "STRIKETHROUGH",
+                <IconStrikeThrough />
+              )}
+              {/* <ActionIcon>
                       <IconBold />
                     </ActionIcon>
                     <ActionIcon>
                       <IconItalic />
                     </ActionIcon> */}
-                    {/* <ActionIcon>
+              {/* <ActionIcon>
                       <IconUnderline />
                     </ActionIcon> */}
-                  </Group>
-                  <Group spacing={0}>
-                    {renderBlockButton(
-                      "Bulleted List",
-                      "unordered-list-item",
-                      <IconList />
-                    )}
-                    {renderBlockButton(
-                      "Numbered List",
-                      "ordered-list-item",
-                      <IconOrderedList />
-                    )}
-                    {/* <ActionIcon>
-                      <IconList />
-                    </ActionIcon>
-                    <ActionIcon>
-                      <IconOrderedList />
-                    </ActionIcon> */}
-                  </Group>
-                  <Group spacing={0}>
-                    {renderBlockButton(
-                      "Block Quote",
-                      "blockquote",
-                      <IconQuote />
-                    )}
-                    {/* <ActionIcon>
-                      <IconQuote />
-                    </ActionIcon> */}
-                    <ActionIcon>
-                      <IconCode />
-                    </ActionIcon>
-                    <ActionIcon>
-                      <IconTerminal />
-                    </ActionIcon>
-                  </Group>
-                </Group>
-                <Group spacing="xs">
-                  <ActionIcon>
-                    <IconExpand />
-                  </ActionIcon>
-                </Group>
-              </Group>
-            )}
-            <div
-              className="editor"
+            </Group>
+            <Group spacing={0}>
+              {renderBlockButton(
+                "Bulleted List",
+                "unordered-list-item",
+                <IconList />
+              )}
+              {renderBlockButton(
+                "Numbered List",
+                "ordered-list-item",
+                <IconOrderedList />
+              )}
+            </Group>
+            <Group spacing={0}>
+              {renderBlockButton("Block Quote", "blockquote", <IconQuote />)}
+              <ActionIcon>
+                <IconCode />
+              </ActionIcon>
+              <ActionIcon>
+                <IconTerminal />
+              </ActionIcon>
+            </Group>
+          </Group>
+        )}
+        <div className="flex gap-1 items-center px-3 rounded-md flex-auto min-w-0">
+          <Menu
+            control={
+              <ActionIcon size="sm" radius="xl" variant="filled">
+                <FontAwesomeIcon icon="fa-solid fa-bolt" className="text-xs" />
+              </ActionIcon>
+            }
+          >
+            <Menu.Item
+              icon={<FontAwesomeIcon icon="fa-solid fa-upload" />}
               onClick={() => {
-                ref.current?.focus();
+                setIsMultiSelect(true);
+                inputRef.current.click();
               }}
             >
-              <Editor
-                editorKey={"editor"}
-                editorState={editorState}
-                onChange={(state) => handleRichTextEditorChange(state)}
-                placeholder="test"
-                plugins={plugins}
-                handleKeyCommand={handleKeyCommand}
-                handlePastedFiles={async (files) => {
-                  // const fileLength = im;
-                  if (files && files.length) {
-                    // const file = files[0];
-                    const results = await Promise.all(
-                      files.map(async (file) => {
-                        const fileContents = await handleFileChosen(file);
-                        console.log(file, fileContents);
-                        return {
-                          id: uuid(),
-                          url: fileContents,
-                          name: file.name,
-                          size: file.size,
-                          type: file.type,
-                          nsfw: false,
-                          createdAt: new Date(),
-                        };
-                      })
-                    );
-                    setImages([...images, ...results]);
-                  }
-                }}
-                handlePastedText={(text, html) => {
-                  console.log(text, html);
-                }}
-                blockRenderMap={blockRenderMap}
-                keyBindingFn={(e) => {
-                  if (e.keyCode === 13) {
-                    return false;
-                  }
-                  return getDefaultKeyBinding(e);
-                }}
-                ref={ref}
-              />
-              <EmojiSuggestions />
-              {!openStaticToolbar && <InlineToolbar />}
-              <MentionMembersSuggestions
-                open={openMembers}
-                onOpenChange={onOpenMembersChange}
-                suggestions={suggestionsMembers}
-                onSearchChange={onSearchChangeMembers}
-                onAddMention={(entry) => {
-                  // get the mention object selected
-                  console.log(entry);
-                }}
-                entryComponent={EntryMembers}
-                popoverContainer={({ children }) => (
-                  <div
-                    className="bg-white z-50"
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      right: 0,
-                      bottom: "calc(100% + 8px)",
-                      cursor: "pointer",
-                      border: "1px solid #d5d5d5",
-                      borderRadius: 6,
-                      padding: 8,
-                    }}
-                  >
-                    {children}
-                  </div>
-                )}
-              />
-              <MentionChannelsSuggestions
-                open={openChannels}
-                onOpenChange={onOpenChannelsChange}
-                suggestions={suggestionsChannels}
-                onSearchChange={onSearchChangeChannels}
-                onAddMention={() => {
-                  // get the mention object selected
-                }}
-                entryComponent={EntryChannels}
-                popoverContainer={({ children }) => (
-                  <div
-                    className="bg-white z-50 shadow-md"
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      right: 0,
-                      bottom: "calc(100% + 8px)",
-                      cursor: "pointer",
-                      border: "1px solid #d5d5d5",
-                      borderRadius: 8,
-                      padding: 8,
-                    }}
-                  >
-                    {children}
-                  </div>
-                )}
-              />
-              {/* <MentionSlashSuggestions
+              Upload files
+            </Menu.Item>
+            <Menu.Item
+              icon={<FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />}
+            >
+              Priority Message
+            </Menu.Item>
+            <Menu.Item
+              icon={<FontAwesomeIcon icon="fa-solid fa-map-location-dot" />}
+              onClick={() => setOpenedShareLocation(!openedShareLocation)}
+            >
+              Location
+            </Menu.Item>
+            <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-microphone" />}>
+              Voice
+            </Menu.Item>
+            <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-video" />}>
+              Video
+            </Menu.Item>
+            <Menu.Item
+              icon={<FontAwesomeIcon icon="fa-solid fa-square-poll-vertical" />}
+            >
+              Create Polls
+            </Menu.Item>
+          </Menu>
+          <div
+            className="editor flex-auto min-w-0"
+            onClick={() => {
+              ref.current?.focus();
+            }}
+          >
+            <Editor
+              editorKey={"editor"}
+              editorState={editorState}
+              onChange={(state) => handleRichTextEditorChange(state)}
+              placeholder={
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span>Message</span>
+                  <Kbd className="py-0">Ctrl+R</Kbd>
+                </div>
+              }
+              plugins={plugins}
+              handleKeyCommand={handleKeyCommand}
+              handlePastedFiles={async (files) => {
+                // const fileLength = im;
+                if (files && files.length) {
+                  // const file = files[0];
+                  const results = await Promise.all(
+                    files.map(async (file) => {
+                      const fileContents = await handleFileChosen(file);
+                      return {
+                        id: uuid(),
+                        url: fileContents,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        nsfw: false,
+                        watermark: "Neutral",
+                        createdAt: new Date(),
+                      };
+                    })
+                  );
+                  setImages([...images, ...results]);
+                }
+              }}
+              handlePastedText={(text, html) => {
+                console.log(text, html);
+              }}
+              blockRenderMap={blockRenderMap}
+              keyBindingFn={(e) => {
+                if (e.keyCode === 13) {
+                  return false;
+                }
+                return getDefaultKeyBinding(e);
+              }}
+              ref={ref}
+            />
+            <EmojiSuggestions />
+            {!openStaticToolbar && <InlineToolbar />}
+            <MentionMembersSuggestions
+              open={openMembers}
+              onOpenChange={onOpenMembersChange}
+              suggestions={suggestionsMembers}
+              onSearchChange={onSearchChangeMembers}
+              onAddMention={(entry) => {
+                // get the mention object selected
+                console.log(entry);
+              }}
+              entryComponent={EntryMembers}
+              popoverContainer={({ children }) => (
+                <div
+                  className="bg-white z-50"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: "calc(100% + 8px)",
+                    cursor: "pointer",
+                    border: "1px solid #d5d5d5",
+                    borderRadius: 6,
+                    padding: 8,
+                  }}
+                >
+                  {children}
+                </div>
+              )}
+            />
+            <MentionChannelsSuggestions
+              open={openChannels}
+              onOpenChange={onOpenChannelsChange}
+              suggestions={suggestionsChannels}
+              onSearchChange={onSearchChangeChannels}
+              onAddMention={() => {
+                // get the mention object selected
+              }}
+              entryComponent={EntryChannels}
+              popoverContainer={({ children }) => (
+                <div
+                  className="bg-white z-50 shadow-md"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: "calc(100% + 8px)",
+                    cursor: "pointer",
+                    border: "1px solid #d5d5d5",
+                    borderRadius: 8,
+                    padding: 8,
+                  }}
+                >
+                  {children}
+                </div>
+              )}
+            />
+            {/* <MentionSlashSuggestions
                 open={openChannels}
                 onOpenChange={onOpenChannelsChange}
                 suggestions={suggestionsChannels}
@@ -1160,146 +1338,95 @@ export default function EditorDraft({ channel, user }) {
                   </div>
                 )}
               /> */}
-            </div>
-            <Group
-              position="apart"
-              style={{
-                marginTop: 4,
-              }}
+          </div>
+          <Group spacing="xs">
+            <ActionIcon
+              variant="transparent"
+              onClick={() => setOpenStaticToolbar((v) => !v)}
             >
-              <Group spacing={0}>
-                <Menu
-                  control={
-                    <ActionIcon>
-                      <FontAwesomeIcon icon="fa-solid fa-bolt" />
-                    </ActionIcon>
-                  }
+              <VscCaseSensitive size={24} />
+            </ActionIcon>
+            <ActionIcon variant="transparent">
+              <span className="text-lg">😀</span>
+            </ActionIcon>
+            <Popover
+              opened={openedSticker}
+              onClose={() => setOpenedSticker(false)}
+              trapFocus={false}
+              placement="end"
+              spacing="sm"
+              width={425}
+              target={
+                <ActionIcon
+                  variant="transparent"
+                  onClick={() => setOpenedSticker((v) => !v)}
                 >
-                  <Menu.Item
-                    icon={<FontAwesomeIcon icon="fa-solid fa-upload" />}
-                    onClick={() => {
-                      setIsMultiSelect(true);
-                      inputRef.current.click();
-                    }}
-                  >
-                    Upload files
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={
-                      <FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />
-                    }
-                  >
-                    Priority Message
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={
-                      <FontAwesomeIcon icon="fa-solid fa-map-location-dot" />
-                    }
-                    onClick={() => setOpenedShareLocation(!openedShareLocation)}
-                  >
-                    Location
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={<FontAwesomeIcon icon="fa-solid fa-microphone" />}
-                  >
-                    Voice
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={<FontAwesomeIcon icon="fa-solid fa-video" />}
-                  >
-                    Video
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={
-                      <FontAwesomeIcon icon="fa-solid fa-square-poll-vertical" />
-                    }
-                  >
-                    Create Polls
-                  </Menu.Item>
-                </Menu>
-                <div
-                  style={{
-                    width: 1,
-                    height: 20,
-                    background: "black !important",
-                  }}
-                ></div>
-                <ActionIcon onClick={() => setOpenStaticToolbar((v) => !v)}>
-                  <VscCaseSensitive size={20} />
-                </ActionIcon>
-                <ActionIcon>
-                  <BsMarkdown size={20} />
-                </ActionIcon>
-                <ActionIcon>
-                  <IconGif className="w-5 h-5" />
-                </ActionIcon>
-                <ActionIcon>
-                  <Image
-                    width={20}
-                    height={20}
-                    src="https://images.blush.design/8734e011be717f718be002d4e9c08b15?w=920&auto=compress&cs=srgb"
+                  <FontAwesomeIcon
+                    icon="fa-solid fa-icons"
+                    className="text-lg"
                   />
                 </ActionIcon>
-              </Group>
-              <Group spacing="xs">
-                <Button
-                  variant="subtle"
-                  size="xs"
-                  color="gray"
-                  onClick={() => setOpenedEditor(false)}
+              }
+            >
+              <Sticker />
+            </Popover>
+            <Popover
+              opened={openedGif}
+              onClose={() => setOpenedGif(false)}
+              trapFocus={false}
+              placement="end"
+              spacing="sm"
+              width={425}
+              target={
+                <ActionIcon
+                  variant="transparent"
+                  onClick={() => setOpenedGif((v) => !v)}
                 >
-                  Discard
-                </Button>
-                <Group
-                  spacing={0}
-                  style={{
-                    background: "#fafafa",
-                    borderRadius: 4,
-                  }}
-                >
-                  <Button
-                    variant="subtle"
-                    size="xs"
-                    color="gray"
-                    onClick={() => handleSendMessage()}
-                  >
-                    Send now
-                  </Button>
-                  <div
-                    style={{
-                      width: 1,
-                      height: 20,
-                      background: "black !important",
-                    }}
-                  ></div>
-                  <ActionIcon size={30}>
-                    <IconCalendarClock />
+                  <IconGif className="w-6 h-6" />
+                </ActionIcon>
+              }
+            >
+              {openedGif && <Giphy setEmbed={setEmbed} />}
+            </Popover>
+            <Group
+              spacing={0}
+              style={{
+                background: "#fafafa",
+                borderRadius: 4,
+              }}
+            >
+              <ActionIcon onClick={() => handleSendMessage()}>
+                <FontAwesomeIcon icon="fa-solid fa-paper-plane" />
+              </ActionIcon>
+              <Menu
+                control={
+                  <ActionIcon>
+                    <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
                   </ActionIcon>
-                </Group>
-              </Group>
+                }
+              >
+                <Menu.Item>Schedule for later</Menu.Item>
+                <Menu.Item>Save draft</Menu.Item>
+                <Menu.Item>Delete</Menu.Item>
+              </Menu>
             </Group>
-          </div>
-          {/* } */}
-          {/* >
-            {/* <div style={{ display: "flex" }}>
-              aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-            </div> */}
-          {/* </Popover> */}
-          <div
-            className="flex w-full h-6 justify-end items-center pl-3 pr-2 gap-3"
-            style={{
-              fontSize: 10,
-            }}
-          >
-            <div>
-              <span className="font-semibold">Enter</span> to send
-            </div>
-            <div>
-              <span className="font-semibold">Shift + Enter</span> to add a new
-              line
-            </div>
-          </div>
-        </>
+          </Group>
+        </div>
+      </div>
+      <div
+        className="flex w-full h-6 justify-end items-center pl-3 pr-2 gap-3"
+        style={{
+          fontSize: 10,
+        }}
+      >
+        <div>
+          <span className="font-semibold">Enter</span> to send
+        </div>
+        <div>
+          <span className="font-semibold">Shift + Enter</span> to add a new line
+        </div>
+      </div>
+      {/* </>
       ) : (
         <div
           className="mb-6 flex flex-1 gap-1 text-sm overflow-hidden items-center justify-between cursor-pointer"
@@ -1321,16 +1448,14 @@ export default function EditorDraft({ channel, user }) {
               className="inline-block flex-1 min-w-0 overflow-ellipsis truncate"
               style={{ maxWidth: 128 }}
             >
-              {/* <Text size="sm" lineClamp={1}> */}
               aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-              {/* </Text> */}
             </div>
           </div>
           <div>
             <Kbd>Ctrl+R</Kbd>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

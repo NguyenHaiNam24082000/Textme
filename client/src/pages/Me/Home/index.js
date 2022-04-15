@@ -18,6 +18,7 @@ import {
   BackgroundImage,
   Box,
 } from "@mantine/core";
+import VideoCall from "../../../components/VideoCall";
 
 const listItems = [
   {
@@ -48,7 +49,8 @@ export default function Home() {
   return (
     <MainBase>
       <HomeNavbar />
-      <div
+      <VideoCall />
+      {/* <div
         className="flex justify-center flex-auto min-w-0 min-h-0 relative overflow-y-scroll "
         style={{ padding: "60px 40px 80px" }}
       >
@@ -64,6 +66,7 @@ export default function Home() {
             {listItems &&
               listItems.map((item, index) => (
                 <Paper
+                  key={index}
                   shadow="sm"
                   radius="md"
                   p="lg"
@@ -131,7 +134,7 @@ export default function Home() {
             </Accordion.Item>
           </Accordion>
         </Container> */}
-      </div>
+      {/* </div> */}
     </MainBase>
   );
 }

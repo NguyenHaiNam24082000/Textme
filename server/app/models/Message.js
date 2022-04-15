@@ -38,6 +38,12 @@ const messageSchema = new mongoose.Schema(
       ref: "Channel",
       required: [true, "Channel must be required"],
     },
+    attachments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Attachment",
+      },
+    ],
     pinned: {
       type: Boolean,
       default: false,
@@ -129,7 +135,7 @@ const messageSchema = new mongoose.Schema(
           },
           type: {
             type: String,
-            enum: ["image", "gifv", "media", "link", "rich", "article"],
+            enum: ["image", "gifv", "media", "link", "rich", "article","map"],
           },
           description: {
             type: String,

@@ -1,0 +1,194 @@
+.hide {
+    display: none;
+  }
+  
+  .VideoPlayer {
+    position: relative;
+    width: 500px;
+    height: auto;
+    display: block;
+  }
+  
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 8px;
+    left: 5px;
+    width: 490px;
+    padding: 4px 4px;
+    border-radius: 4px;
+    background: rgba(30, 30, 30, 0.75);
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.25s ease-out;
+  }
+  
+  .VideoPlayer:hover > .controls {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  /* ==  Play/Pause == */
+  .play_pause_btn {
+    outline: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px 15px;
+    transition: all 0.15s ease-out;
+    background: rgba(203, 133, 137, 0.5);
+  }
+  .play_pause_btn:hover {
+    background: rgba(203, 133, 137, 0.75);
+  }
+  .play_pause_btn .svg_play_pause {
+    fill: #fff;
+    width: 25px;
+    height: 25px;
+    position: relative;
+    top: 2px;
+  }
+  
+  .time {
+    color: #fff;
+    font-size: 12px;
+  }
+  
+  /* ==  Play/Pause == */
+  /* ==  Mute/Unmute == */
+  .mute_unmute_btn {
+    outline: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px 15px;
+    transition: all 0.15s ease-out;
+    background: rgba(203, 133, 137, 0.5);
+  }
+  .mute_unmute_btn:hover {
+    background: rgba(203, 133, 137, 0.75);
+  }
+  .mute_unmute_btn .svg_mute_unmute {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    top: 2px;
+  }
+  .mute_unmute_btn .svg_mute_unmute path,
+  .mute_unmute_btn .svg_mute_unmute polygon,
+  .mute_unmute_btn .svg_mute_unmute rect {
+    fill: #fff;
+  }
+  .mute_unmute_btn .svg_mute_unmute circle {
+    stroke: #fff;
+    stroke-width: 2;
+  }
+  
+  /* ==  Mute/Unmute == */
+  /* ==  Range == */
+  .volume_range {
+    width: 50px !important;
+  }
+  
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 180px;
+    margin: 6px 0;
+    background: none;
+  }
+  
+  input[type=range]:focus {
+    outline: none;
+  }
+  
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(13, 13, 13, 0);
+    background: #796465;
+    border-radius: 1.9px;
+    border: 0px solid rgba(1, 1, 1, 0);
+  }
+  
+  input[type=range]::-webkit-slider-thumb {
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(13, 13, 13, 0);
+    border: 0px solid rgba(0, 0, 0, 0);
+    height: 20px;
+    width: 10px;
+    border-radius: 4px;
+    background: #eeeeee;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -6px;
+  }
+  
+  input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #877071;
+  }
+  
+  input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(13, 13, 13, 0);
+    background: #796465;
+    border-radius: 1.9px;
+    border: 0px solid rgba(1, 1, 1, 0);
+  }
+  
+  input[type=range]::-moz-range-thumb {
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(13, 13, 13, 0);
+    border: 0px solid rgba(0, 0, 0, 0);
+    height: 20px;
+    width: 10px;
+    border-radius: 4px;
+    background: #eeeeee;
+    cursor: pointer;
+  }
+  
+  input[type=range]::-ms-track {
+    width: 100%;
+    height: 8px;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+  }
+  
+  input[type=range]::-ms-fill-lower {
+    background: #6b5859;
+    border: 0px solid rgba(1, 1, 1, 0);
+    border-radius: 3.8px;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(13, 13, 13, 0);
+  }
+  
+  input[type=range]::-ms-fill-upper {
+    background: #796465;
+    border: 0px solid rgba(1, 1, 1, 0);
+    border-radius: 3.8px;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(13, 13, 13, 0);
+  }
+  
+  input[type=range]::-ms-thumb {
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(13, 13, 13, 0);
+    border: 0px solid rgba(0, 0, 0, 0);
+    height: 20px;
+    width: 10px;
+    border-radius: 4px;
+    background: #eeeeee;
+    cursor: pointer;
+    height: 8px;
+  }
+  
+  input[type=range]:focus::-ms-fill-lower {
+    background: #796465;
+  }
+  
+  input[type=range]:focus::-ms-fill-upper {
+    background: #877071;
+  }
+  
+  /* ==  Range == */

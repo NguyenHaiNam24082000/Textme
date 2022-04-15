@@ -2,11 +2,11 @@ import React, { useRef, useEffect, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import useGeoLocation from "../../hooks/useGeoLocation";
-import { CloseButton } from "@mantine/core";
+import { Button, CloseButton } from "@mantine/core";
 
 const API_KEY = "4rAtnLcj3zyVW8EqkV0m";
 
-export default function Map({setOpenedShareLocation}) {
+export default function Map({ setOpenedShareLocation, setEmbed }) {
   const geolocation = useGeoLocation();
   const mapContainerRef = useRef(null);
   const map = useRef(null);
@@ -46,11 +46,31 @@ export default function Map({setOpenedShareLocation}) {
 
   return (
     <div className="relative w-full rounded-md border-none h-56">
-      <CloseButton className="absolute top-[10px] right-[10px] z-[100]" onClick={setOpenedShareLocation}/>
+      <CloseButton
+        className="absolute top-[10px] right-[10px] z-[100]"
+        onClick={setOpenedShareLocation}
+      />
       <div
         ref={mapContainerRef}
         className="w-full h-full absolute rounded-md"
       ></div>
+      <Button
+        className="absolute bottom-[10px] left-[10px] z-[100]"
+        onClick={() => {
+          setEmbed([
+            {
+              type: "map",
+              map: {
+                latitude: geolocation.coordinates.lat,
+                longitude: geolocation.coordinates.lng,
+                zoom: 12,
+              },
+            },
+          ]);
+        }}
+      >
+        Send
+      </Button>
     </div>
   );
 }
