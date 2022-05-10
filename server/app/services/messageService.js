@@ -39,7 +39,7 @@ const createMessage = async (user, body, data) => {
     files,
   });
   let embedLink = await postLink(content);
-  embedLink = [JSON.parse(embed), ...embedLink];
+  embedLink = [embed && JSON.parse(embed), ...embedLink];
   const replies = body.replies
     ? (() => {
         if (typeof body.replies === "string") {

@@ -76,7 +76,7 @@
       }
     }
   
-  /* .space-active
+  .space-active
   {
     @apply flex justify-center;
     border-top-left-radius: 10px;
@@ -85,10 +85,10 @@
     width: 100%;
     position: relative;
   }
-  .space-active > .avatar
+  .space-active > .space-avatar
   {
     border-radius: 10px !important;
-  } */
+  }
   
    /* pre:nth-child(1)
   {

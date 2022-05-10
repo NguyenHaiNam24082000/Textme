@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useMatch } from "react-router";
-import DMItem from "./DMItem";
-import { useSelector } from "react-redux";
 import { Group } from "@mantine/core";
+import React from "react";
+import { useSelector } from "react-redux";
+import { useMatch } from "react-router";
 import EmptyListPlaceholder from "../../../../UI/EmptyListPlaceholder";
-import { getAllDMChannels } from "../../../../../apis/channel";
-import { GetOpenChannels } from "../../../../../reactQuery/channel";
+import DMItem from "./DMItem";
 
 const ShowOpenDMChannel = ({ user, channels }) => {
   const match = useMatch("/channel/@me/:channelId");
@@ -29,19 +27,14 @@ const EmptyDmList = () => {
   );
 };
 
-export default function DMList() {
-  const { isLoading, data: channelList } = GetOpenChannels();
+export default function DMList({ channels }) {
   const { user } = useSelector((state) => state.user);
-  const [channels, setChannels] = useState();
-  useEffect(() => {
-    setChannels(channelList);
-  }, [channelList]);
-  console.log(channels, "channels");
   return (
     <>
-      {!isLoading && channelList && channelList?.length ? (
+      {channels && channels?.length ? (
+        // {/* {!isLoading && channelList && channelList?.length ? ( */}
         <Group spacing={4} className="flex flex-col overflow-y-auto">
-          <ShowOpenDMChannel user={user} channels={channelList} />
+          <ShowOpenDMChannel user={user} channels={channels} />
         </Group>
       ) : (
         <EmptyDmList />

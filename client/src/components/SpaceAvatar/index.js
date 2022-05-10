@@ -3,8 +3,7 @@ import { Avatar, Badge } from "@douyinfe/semi-ui";
 import { Popover, Text } from "@mantine/core";
 import "./index.css";
 
-export default function SpaceAvatar({ onClick, image, title }) {
-  const [active, setActive] = useState(false);
+export default function SpaceAvatar({ onClick, image, title,active }) {
   const [opened, setOpened] = useState(false);
   return (
     <Popover
@@ -24,12 +23,12 @@ export default function SpaceAvatar({ onClick, image, title }) {
           onMouseEnter={() => setOpened(true)}
           onMouseLeave={() => setOpened(false)}
           // className={`${active ? "space-active" : ""} relative`}
-          className="relative flex justify-center items-center select-none"
+          className={`relative flex justify-center items-center select-none ${active ? "space-active" : ""}`}
           style={{ height: "58px" }}
         >
           {/* <pre></pre>
         <pre></pre> */}
-          <Badge
+          {/* <Badge
             count={"999"}
             position="rightBottom"
             style={{
@@ -45,13 +44,26 @@ export default function SpaceAvatar({ onClick, image, title }) {
               size="medium"
               onClick={() => {
                 setActive(!active);
+                typeof onClick === "function" && onClick();
               }}
             ></Avatar>
-          </Badge>
+          </Badge> */}
+          <Avatar
+            className="space-avatar"
+            radius="xl"
+            // src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
+            onClick={() => {
+              typeof onClick === "function" && onClick();
+            }}
+          >
+            {title[0].toUpperCase()}
+          </Avatar>
         </div>
       }
     >
-      <Text size="sm" weight={600}>Thanks for stopping by and checking</Text>
+      <Text size="sm" weight={600}>
+        Thanks for stopping by and checking
+      </Text>
     </Popover>
   );
 }

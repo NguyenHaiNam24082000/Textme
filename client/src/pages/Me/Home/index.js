@@ -1,24 +1,12 @@
+import {
+  BackgroundImage,
+  Box, Paper,
+  SimpleGrid,
+  Text
+} from "@mantine/core";
 import React from "react";
 import { MainBase } from "../../../components/Main";
 import HomeNavbar from "../../../components/navigations/top/HomeNavbar";
-import {
-  createStyles,
-  Title,
-  Container,
-  Accordion,
-  ThemeIcon,
-  Button,
-  SimpleGrid,
-  Card,
-  Text,
-  Badge,
-  Group,
-  Image,
-  Paper,
-  BackgroundImage,
-  Box,
-} from "@mantine/core";
-import VideoCall from "../../../components/VideoCall";
 
 const listItems = [
   {
@@ -49,8 +37,7 @@ export default function Home() {
   return (
     <MainBase>
       <HomeNavbar />
-      <VideoCall />
-      {/* <div
+      <div
         className="flex justify-center flex-auto min-w-0 min-h-0 relative overflow-y-scroll "
         style={{ padding: "60px 40px 80px" }}
       >
@@ -133,8 +120,8 @@ export default function Home() {
               </Button>
             </Accordion.Item>
           </Accordion>
-        </Container> */}
-      {/* </div> */}
+        </Container>*/}
+      </div>
     </MainBase>
   );
 }

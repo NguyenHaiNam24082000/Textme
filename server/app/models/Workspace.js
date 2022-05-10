@@ -13,7 +13,7 @@ const workspaceSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "https://i.imgur.com/X2JhY8y.png",
+      // default: "https://i.imgur.com/X2JhY8y.png",
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,7 +21,7 @@ const workspaceSchema = new mongoose.Schema(
     },
     banner: {
       type: String,
-      default: "https://i.imgur.com/X2JhY8y.png",
+      // default: "https://i.imgur.com/X2JhY8y.png",
     },
     type: {
       type: String,
@@ -39,6 +39,7 @@ const workspaceSchema = new mongoose.Schema(
     },
     channels: [
       {
+        _id: false,
         channel: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Channel",

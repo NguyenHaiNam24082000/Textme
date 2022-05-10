@@ -7,6 +7,7 @@ export const CHANNEL_SOCKET = {
   CHANNEL_SEND_EDIT_MESSAGE: "channelSendEditMessage",
   CHANNEL_EDIT_MESSAGE: "channelEditMessage",
   LEAVE_CHANNEL: "leaveChannel",
+  CALL: "call",
 };
 
 export const ME_SOCKET = {

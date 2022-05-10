@@ -1,10 +1,5 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
-import { Me } from "../reactQuery/user";
-
-export const getMe = createAsyncThunk("user/getMe", async (params) => {
-  return Me(params);
-});
 
 const initialUser = localStorage.getItem("user")
   ? JSON.parse(localStorage.getItem("user"))
@@ -28,19 +23,6 @@ const slice = createSlice({
     logoutSuccess: (state, action) => {
       state.user = null;
       localStorage.removeItem("user");
-    },
-  },
-  extraReducers: {
-    [getMe.pending]: (state, action) => {
-      state.isLoading = true;
-    },
-    [getMe.fulfilled]: (state, action) => {
-      state.isLoading = false;
-      state.user = action.payload;
-    },
-    [getMe.rejected]: (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload;
     },
   },
 });

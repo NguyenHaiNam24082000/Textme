@@ -99,7 +99,29 @@ export default function Login() {
     // },
   });
 
-  useEffect(async () => {
+  // useEffect(async () => {
+  //   const payload = JSON.stringify({
+  //     // username: values.username,
+  //     email: values.email,
+  //     password: values.password,
+  //   });
+  //   const { data } = await login(payload);
+  //   console.log(data)
+  //   // const actionResult = await dispatch(getMe());
+  //   setTimeout(() => {
+  //     setLoading(false);
+  //     if (data.error?.email || data.error?.username) {
+  //       setServerError(data.error);
+  //     } else {
+  //       dispatch(loginSuccess(data));
+  //       history("/app");
+  //     }
+  //   }, 1500);
+  // }, [token]);
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    setValues(values);
+    //test
     const payload = JSON.stringify({
       // username: values.username,
       email: values.email,
@@ -114,13 +136,9 @@ export default function Login() {
         setServerError(data.error);
       } else {
         dispatch(loginSuccess(data));
-        history("/app");
+        history("/channel/@me");
       }
     }, 1500);
-  }, [token]);
-  const handleSubmit = (values) => {
-    setLoading(true);
-    setValues(values);
   };
   const onLoad = () => {
     // this reaches out to the hCaptcha JS API and runs the
@@ -144,16 +162,16 @@ export default function Login() {
           visible={loading}
           loader={
             <>
-              {token === null ? (
+              {/* {token === null ? (
                 <HCaptcha
-                  sitekey="794b8617-4db1-4406-9ef0-dfdd04ae462b"
+                  sitekey="682fed61-9e30-4880-b49d-0ff6d2be2bc5"
                   onVerify={setToken}
                   onLoad={onLoad}
                   ref={captchaRef}
                 />
-              ) : (
+              ) : ( */}
                 <Loader size="xl" />
-              )}
+              {/* )} */}
             </>
           }
         />
@@ -169,6 +187,7 @@ export default function Login() {
           <div className="my-3 text-sm">
             Tham gia hàng triệu máy chủ công cộng miễn phí lớn nhất
           </div>
+          {serverError && (<div>{serverError}</div>)}
           <Divider />
           <Group position="apart" className="my-3">
             <span>{t("login_with")}</span>

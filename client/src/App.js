@@ -310,18 +310,13 @@ function App() {
                                 element={<Me />}
                               />
                               <Route
-                                path="/channel/:channel/:message"
+                                path="/channel/@me/:channel/:message"
                                 element={<Me />}
                               />
                               <Route
-                                path="/server/:server/channel/:channel/:message"
+                                path="/channel/:server/:channel"
                                 element={<Me />}
                               />
-                              <Route
-                                path="/server/:server/channel/:channel"
-                                element={<Me />}
-                              />
-                              <Route path="/server/:server" element={<Me />} />
                               <Route
                                 path="/channel/:channel"
                                 element={<Me />}
@@ -331,6 +326,7 @@ function App() {
                                 element={<Me />}
                               />
                               <Route path="/discover" element={<Me />} />
+                              <Route path="/invite/:server" element={<Me />} />
                               <Route path="/friends" element={<Me />} />
                               {/* <Route path="/app" element={<Workspace />} />
                             <Route path="/app" element={<Workspace />} />

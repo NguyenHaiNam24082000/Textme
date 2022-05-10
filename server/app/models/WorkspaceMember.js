@@ -10,11 +10,24 @@ const workspaceMemberSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Workspace",
     },
-    role: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "Role",
-      default: [],
-      required: [true, "Role must be required"],
+    roles: [
+      {
+        type: mongoose.Schema.Types.Mixed,
+        default: "MEMBER",
+      },
+    ],
+    status: {
+      type: String,
+      enum: [
+        "PENDING",
+        "INVITED",
+        "JOINED",
+        "BLOCKED",
+        "LEFT",
+        "BANNED",
+        "KICKED",
+      ],
+      default: "PENDING",
     },
   },
   { timestamps: true },

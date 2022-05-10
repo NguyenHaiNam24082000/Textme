@@ -1,55 +1,23 @@
-import React, { useState } from "react";
-import ThemeLayout from "../../../../ThemeLayout";
-import { ActionIcon, SimpleGrid, ColorInput, Image } from "@mantine/core";
-import { themes } from "../../../../../configs/themes";
+import { ColorInput, Image, Select, SimpleGrid, Slider } from "@mantine/core";
 import { Emoji } from "emoji-mart";
-import { Select } from "@mantine/core";
-import { Slider } from "@mantine/core";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  SwapSpinner,
-  BarsSpinner,
-  BallSpinner,
-  GridSpinner,
-  WaveSpinner,
-  PushSpinner,
-  FireworkSpinner,
-  StageSpinner,
-  HeartSpinner,
-  GuardSpinner,
-  CircleSpinner,
-  SpiralSpinner,
-  PulseSpinner,
-  SequenceSpinner,
-  DominoSpinner,
-  ImpulseSpinner,
-  CubeSpinner,
-  FillSpinner,
-  SphereSpinner,
-  FlagSpinner,
-  ClapSpinner,
-  RotateSpinner,
-  SwishSpinner,
-  GooSpinner,
-  CombSpinner,
-  PongSpinner,
-  RainbowSpinner,
-  RingSpinner,
-  HoopSpinner,
-  FlapperSpinner,
-  MagicSpinner,
-  JellyfishSpinner,
-  TraceSpinner,
-  ClassicSpinner,
-  WhisperSpinner,
-  MetroSpinner,
+  BallSpinner, BarsSpinner, CircleSpinner, ClapSpinner, ClassicSpinner, CombSpinner, CubeSpinner, DominoSpinner, FillSpinner, FireworkSpinner, FlagSpinner, FlapperSpinner, GooSpinner, GridSpinner, GuardSpinner, HeartSpinner, HoopSpinner, ImpulseSpinner, JellyfishSpinner, MagicSpinner, MetroSpinner, PongSpinner, PulseSpinner, PushSpinner, RainbowSpinner,
+  RingSpinner, RotateSpinner, SequenceSpinner, SphereSpinner, SpiralSpinner, StageSpinner, SwapSpinner, SwishSpinner, TraceSpinner, WaveSpinner, WhisperSpinner
 } from "react-spinners-kit";
+import { themes } from "../../../../../configs/themes";
+import { setTheme, themeSelector } from "../../../../../store/uiSlice";
+import ThemeLayout from "../../../../ThemeLayout";
 
 export default function Display() {
-  const [sidebar, setSidebar] = useState("");
-  const [activeItem, setActiveItem] = useState("");
-  const [activeItemText, setActiveItemText] = useState("");
-  const [textColor, setTextColor] = useState("");
-  const [mentionBadge, setMentionBadge] = useState("");
+  // const [sidebar, setSidebar] = useState("");
+  // const [activeItem, setActiveItem] = useState("");
+  // const [activeItemText, setActiveItemText] = useState("");
+  // const [textColor, setTextColor] = useState("");
+  // const [mentionBadge, setMentionBadge] = useState("");
+  const dispatch = useDispatch();
+  const theme = useSelector(themeSelector);
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col w-full">
@@ -195,14 +163,16 @@ export default function Display() {
         </SimpleGrid>
         <SimpleGrid cols={3}>
           {themes.map((theme, i) => (
-            <ThemeLayout
-              key={i}
-              sidebarColor={theme.sidebarBackground}
-              activeItem={theme.activeItem}
-              activeItemText={theme.activeItemText}
-              textColor={theme.textColor}
-              mentionBadge={theme.mentionBadge}
-            />
+            <div onClick={() => dispatch(setTheme(theme))}>
+              <ThemeLayout
+                key={i}
+                sidebarColor={theme.sidebarBackground}
+                activeItem={theme.activeItem}
+                activeItemText={theme.activeItemText}
+                textColor={theme.textColor}
+                mentionBadge={theme.mentionBadge}
+              />
+            </div>
           ))}
         </SimpleGrid>
       </div>

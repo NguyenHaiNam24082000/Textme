@@ -18,11 +18,13 @@ import All from "./All";
 import Blocked from "./Blocked";
 import Online from "./Online";
 import Pending from "./Pending";
+import { useTranslation } from "react-i18next";
 
 export default function FriendsMain() {
   // const [data,setData]= useState(PendingRequests());
   const { data: pendingRequestsData } = PendingRequests();
   const [activeTab, setActiveTab] = useState(0);
+  const { t } = useTranslation();
   return (
     <main className="flex min-w-0 min-h-0 relative flex-col flex-auto">
       <Tabs
@@ -36,42 +38,21 @@ export default function FriendsMain() {
       >
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-earth-asia" />}
-          label="Online"
+          label={t("Online")}
         >
           <Online />
         </Tabs.Tab>
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-users" />}
-          label="All"
+          label={t("All")}
         >
-          {/* <TextInput
-            icon={<Search size={18} />}
-            radius="xl"
-            size="md"
-            // rightSection={
-            //   <ActionIcon
-            //     size={32}
-            //     radius="xl"
-            //     color={theme.primaryColor}
-            //     variant="filled"
-            //   >
-            //     {theme.dir === "ltr" ? (
-            //       <ArrowRight size={18} />
-            //     ) : (
-            //       <ArrowLeft size={18} />
-            //     )}
-            //   </ActionIcon>
-            // }
-            placeholder="Search questions"
-            rightSectionWidth={42}
-          /> */}
-          <All setActiveTab={setActiveTab}/>
+          <All setActiveTab={setActiveTab} />
         </Tabs.Tab>
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-user-clock" />}
           label={
             <div className="flex gap-2">
-              <span>Pending</span>
+              <span>{t("Pending")}</span>
               {pendingRequestsData?.length > 0 && (
                 <div className="text-xs text-white bg-red-500 rounded-full w-4 h-4 flex justify-center items-center">
                   {pendingRequestsData?.length}
@@ -84,13 +65,13 @@ export default function FriendsMain() {
         </Tabs.Tab>
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-user-xmark" />}
-          label="Blocked"
+          label={t("Blocked")}
         >
           <Blocked />
         </Tabs.Tab>
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-user-plus" />}
-          label="Add Friend"
+          label={t("Add Friend")}
           className="bg-green-700 text-white hover:bg-green-700 hover:text-white focus:bg-inherit focus:text-green-700 active:text-green-700"
         >
           <AddFriend />

@@ -1,32 +1,23 @@
-import SidebarBase from "../../SidebarBase";
-import EmptyListPlaceholder from "../../../UI/EmptyListPlaceholder";
-import {
-  createStyles,
-  Navbar,
-  TextInput,
-  Code,
-  UnstyledButton,
-  Badge,
-  Text,
-  Group,
-  ActionIcon,
-  Tooltip,
-  Avatar,
-} from "@mantine/core";
-import {
-  Bulb,
-  User,
-  Checkbox,
-  Search,
-  Plus,
-  Selector,
-} from "tabler-icons-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom";
-import DMList from "./DMList";
-import { PendingRequests } from "../../../../reactQuery/friend";
+import {
+  ActionIcon,
+  Badge,
+  Code,
+  createStyles,
+  Group,
+  Text,
+  TextInput,
+  Tooltip,
+} from "@mantine/core";
 import { useSpotlight } from "@mantine/spotlight";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Search } from "tabler-icons-react";
+import { PendingRequests } from "../../../../reactQuery/friend";
+import SidebarBase from "../../SidebarBase";
+import DMList from "./DMList";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -144,38 +135,27 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const collections = [
-  { emoji: "👍", label: "Sales" },
-  { emoji: "🚚", label: "Deliveries" },
-  { emoji: "💸", label: "Discounts" },
-  { emoji: "💰", label: "Profits" },
-  { emoji: "✨", label: "Reports" },
-  { emoji: "🛒", label: "Orders" },
-  { emoji: "📅", label: "Events" },
-  { emoji: "🙈", label: "Debts" },
-  { emoji: "💁‍♀️", label: "Customers" },
-];
-
-export default function HomeSidebar() {
+export default function HomeSidebar({ channels }) {
   const { classes } = useStyles();
   const spotlight = useSpotlight();
   const { data: pendingRequestsData } = PendingRequests();
+  const { t } = useTranslation();
+  const location = useLocation();
   const links = [
     {
       icon: <FontAwesomeIcon icon="fa-solid fa-house" />,
-      label: "Home",
+      label: t("Home"),
       notifications: 0,
       to: "/channel/@me",
     },
     {
       icon: <FontAwesomeIcon icon="fa-solid fa-user-group" />,
-      label: "Friends",
+      label: t("Friends"),
       notifications: pendingRequestsData?.length,
       to: "/friends",
     },
     // { icon: User, label: "Contacts" },
   ];
-  const [active, setActive] = useState(links[0].label);
 
   return (
     <SidebarBase>
@@ -210,12 +190,9 @@ export default function HomeSidebar() {
                 >
                   <div
                     className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200 ${
-                      active === link.label && "bg-gray-200"
+                      location.pathname === link.to && "bg-gray-200"
                     }`}
                     style={{ marginBottom: 2, borderRadius: 6 }}
-                    onClick={() => {
-                      setActive(link.label);
-                    }}
                   >
                     <div className="flex items-center justify-center w-5 contrast-50">
                       {link.icon}
@@ -237,7 +214,7 @@ export default function HomeSidebar() {
           </div>
           <Group className={classes.collectionsHeader} position="apart">
             <Text weight={500} color="dimmed">
-              Direct Messages
+              {t("Direct Messages")}
             </Text>
             <Group spacing={8}>
               <Tooltip label="List options" withArrow position="right">
@@ -252,7 +229,7 @@ export default function HomeSidebar() {
               </Tooltip>
             </Group>
           </Group>
-          <DMList />
+          <DMList channels={channels} />
         </div>
       </div>
     </SidebarBase>

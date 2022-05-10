@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled from "@emotion/styled";
-import { ActionIcon } from "@mantine/core";
+import { ActionIcon, AspectRatio, Drawer, Grid } from "@mantine/core";
 // import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
 // import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
 // import { Player } from "@lottiefiles/react-lottie-player";
@@ -17,7 +17,12 @@ import { Modal } from "@mantine/core";
 import { Badge } from "@douyinfe/semi-ui";
 import * as bodyPix from "@tensorflow-models/body-pix";
 import Webcam from "react-webcam";
-import { MdOutlineScreenShare, MdOutlineStopScreenShare } from "react-icons/md";
+import {
+  MdBlurOff,
+  MdBlurOn,
+  MdOutlineScreenShare,
+  MdOutlineStopScreenShare,
+} from "react-icons/md";
 import { HiOutlineDesktopComputer } from "react-icons/hi";
 import { Group } from "@mantine/core";
 import { Button } from "@mantine/core";
@@ -25,6 +30,38 @@ import { IconCaretdown, IconChevronDown } from "@douyinfe/semi-icons";
 import { Menu, Divider, Text } from "@mantine/core";
 import { SelfieSegmentation } from "@mediapipe/selfie_segmentation";
 import "./index.css";
+import bg1 from "../../assets/images/backgrounds/bg1.jpg";
+import bg2 from "../../assets/images/backgrounds/bg2.jpg";
+import bg3 from "../../assets/images/backgrounds/bg3.jpeg";
+import bg4 from "../../assets/images/backgrounds/bg4.jpg";
+import bg5 from "../../assets/images/backgrounds/bg5.jpg";
+import bg6 from "../../assets/images/backgrounds/bg6.jpg";
+import bg7 from "../../assets/images/backgrounds/bg7.jpg";
+import bg8 from "../../assets/images/backgrounds/bg8.jpg";
+import bg9 from "../../assets/images/backgrounds/bg9.jpg";
+import bg10 from "../../assets/images/backgrounds/bg10.webp";
+import bg11 from "../../assets/images/backgrounds/bg11.webp";
+import bg12 from "../../assets/images/backgrounds/bg12.jpg";
+import Peer from "simple-peer";
+import { GetMe } from "../../store/userSlice";
+import getSocket from "../../apis/socket";
+import { CHANNEL_SOCKET } from "../../configs/socketRoute";
+
+const backgrounds = [
+  bg1,
+  bg2,
+  bg3,
+  bg4,
+  bg5,
+  bg6,
+  bg7,
+  bg8,
+  bg9,
+  bg10,
+  bg11,
+  bg12,
+];
+
 const FloatingTrackContainer = styled.div`
   position: absolute;
   right: 0;
@@ -37,6 +74,7 @@ const FloatingTrackContainer = styled.div`
 `;
 
 export default function VideoCall() {
+  const me = GetMe();
   const [openedModalPreviewVideo, setOpenedModalPreviewVideo] = useState(false);
   const [audioInput, setAudioInput] = useState([]);
   const [videoInput, setVideoInput] = useState([]);
@@ -44,40 +82,55 @@ export default function VideoCall() {
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const webcamRef = useRef(null);
+  const imgRef = useRef(null);
   const [bodypixnet, setBodypixnet] = useState();
   const [prevClassName, setPrevClassName] = useState();
+  const [openedSetting, setOpenedSetting] = useState(false);
+  const [background, setBackground] = useState("none");
+  const [socket, setSocket] = useState();
+  const [ stream, setStream ] = useState()
+  const [ callerSignal, setCallerSignal ] = useState()
 
   useEffect(() => {
-    contextRef.current = canvasRef.current.getContext("2d");
-    const constraints = {
-      video: { width: { min: 1280 }, height: { min: 720 } },
-    };
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-      webcamRef.current.srcObject = stream;
-      sendToMediaPipe();
-    });
+    if (openedSetting) {
+      if (canvasRef.current) {
+        contextRef.current = canvasRef.current.getContext("2d");
+        const constraints = {
+          video: { width: { min: 1280 }, height: { min: 720 } },
+        };
+        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+          webcamRef.current.srcObject = stream;
+          sendToMediaPipe();
+        });
 
-    const selfieSegmentation = new SelfieSegmentation({
-      locateFile: (file) =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
-    });
+        const selfieSegmentation = new SelfieSegmentation({
+          locateFile: (file) =>
+            `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
+        });
 
-    selfieSegmentation.setOptions({
-      modelSelection: 1,
-      selfieMode: true,
-    });
+        selfieSegmentation.setOptions({
+          modelSelection: 1,
+          selfieMode: true,
+        });
 
-    selfieSegmentation.onResults(onResults);
+        selfieSegmentation.onResults(onResults);
 
-    const sendToMediaPipe = async () => {
-      if (!webcamRef.current.videoWidth) {
-        console.log(webcamRef.current.videoWidth);
-        requestAnimationFrame(sendToMediaPipe);
-      } else {
-        await selfieSegmentation.send({ image: webcamRef.current });
-        requestAnimationFrame(sendToMediaPipe);
+        const sendToMediaPipe = async () => {
+          if (!webcamRef.current.videoWidth) {
+            console.log(webcamRef.current.videoWidth);
+            requestAnimationFrame(sendToMediaPipe);
+          } else {
+            await selfieSegmentation.send({ image: webcamRef.current });
+            requestAnimationFrame(sendToMediaPipe);
+          }
+        };
       }
-    };
+    }
+  }, [openedSetting, background]);
+
+  useEffect(() => {
+    const newSocket = getSocket(me?.tokens?.access?.token);
+    setSocket(newSocket);
   }, []);
 
   const onResults = (results) => {
@@ -97,13 +150,28 @@ export default function VideoCall() {
     );
     // Only overwrite existing pixels.
     contextRef.current.globalCompositeOperation = "source-out";
-    contextRef.current.fillStyle = "#00FF00";
-    contextRef.current.fillRect(
-      0,
-      0,
-      canvasRef.current.width,
-      canvasRef.current.height
-    );
+    // contextRef.current.fillStyle = "#00FF00";
+    // contextRef.current.fillRect(
+    //   0,
+    //   0,
+    //   canvasRef.current.width,
+    //   canvasRef.current.height
+    // );
+    const image = new Image();
+    image.src = background;
+    if (background === "blur(5px)") {
+      contextRef.current.filter = "blur(5px)";
+    } else if (background === "blur(10px)") {
+      contextRef.current.filter = "blur(10px)";
+    } else {
+      contextRef.current.drawImage(
+        image,
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+    }
 
     // Only overwrite missing pixels.
     contextRef.current.globalCompositeOperation = "destination-atop";
@@ -193,28 +261,53 @@ export default function VideoCall() {
   //   }
   // };
 
-  // const getVideo = () => {
-  //   navigator.mediaDevices
-  //     .getUserMedia({ video: true, audio: true })
-  //     .then((stream) => {
-  //       videoRef.current.srcObject = stream;
-  //       videoRef.current.play();
-  //     });
-  // };
-  // useEffect(() => {
-  //   getVideo();
-  // }, [videoRef]);
+  const getVideo = () => {
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      });
+  };
+  useEffect(() => {
+    getVideo();
+  }, [videoRef]);
 
   const getDisplayMedia = () => {
     try {
-      navigator.mediaDevices.getDisplayMedia({
-        video: false
-      }).then((stream) => {
-        webcamRef.current.srcObject = stream;
-      });
+      navigator.mediaDevices
+        .getDisplayMedia({
+          video: false,
+        })
+        .then((stream) => {
+          webcamRef.current.srcObject = stream;
+        });
     } catch (e) {
       console.log("Unable to acquire screen capture: " + e);
     }
+  };
+
+  const call = (id) => {
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream: webcamRef.current.srcObject,
+    });
+    peer.on("signal", (data) => {
+      socket.emit(CHANNEL_SOCKET.CALL, {
+        to: id,
+        signalData: data,
+        from: socket.id,
+      });
+    });
+    peer.on("stream", (stream) => {
+      // setPeer(peer)
+      // setStream(stream)
+      // setCall(true)
+    });
+    socket.on("callAccepted", (data) => {
+      peer.signal(data);
+    });
   };
 
   return (
@@ -234,16 +327,47 @@ export default function VideoCall() {
           ></Player>
         }
       /> */}
-      <div className="flex relative w-6/12">
+      {/* <img
+        ref={imgRef}
+        id="scream"
+        src="https://magazine.artstation.com/wp-content/uploads/2022/04/FG6.jpg"
+        alt="The Scream"
+        width="220"
+        height="277"
+      ></img> */}
+      <div className="flex relative w-6/12 rounded-md overflow-hidden">
         <video
           autoPlay
-          ref={webcamRef}
-          className="absolute inset-0 z-10 w-full h-auto"
+          muted
+          ref={videoRef}
+          className="absolute inset-0 z-10 w-full h-auto rounded-md"
         />
-        <canvas ref={canvasRef} className="absolute inset-0 z-10 w-full" />
+        {/* <video
+          autoPlay
+          ref={webcamRef}
+          className="absolute inset-0 z-10 w-full h-auto rounded-md"
+        /> */}
+        {/* <canvas
+          ref={canvasRef}
+          className="absolute inset-0 z-10 rounded-md"
+          style={{
+            width: webcamRef.current?.clientWidth || "100%",
+            height: webcamRef.current?.clientHeight || "100%",
+          }}
+        /> */}
       </div>
       <div className="px-2 w-full h-14 flex items-center justify-between absolute bottom-2 left-0">
         <Group spacing="xs">
+          <ActionIcon
+            size={56}
+            radius="xl"
+            variant="light"
+            onClick={() => {
+              setOpenedSetting(!openedSetting);
+            }}
+          >
+            <BsMicFill className="w-6 h-auto" />
+          </ActionIcon>
           <div className="w-auto h-auto relative">
             <ActionIcon size={56} radius="xl" variant="light">
               <BsCameraVideoFill className="w-6 h-auto" />
@@ -321,7 +445,12 @@ export default function VideoCall() {
               cursor: "pointer",
             }}
           >
-            <ActionIcon size={56} radius="xl" variant="light" onClick={getDisplayMedia}>
+            <ActionIcon
+              size={56}
+              radius="xl"
+              variant="light"
+              onClick={getDisplayMedia}
+            >
               <MdOutlineScreenShare className="w-6 h-auto" />
             </ActionIcon>
           </Badge>
@@ -333,6 +462,77 @@ export default function VideoCall() {
           </Button>
         </Group>
       </div>
+      <Drawer
+        opened={openedSetting}
+        onClose={() => setOpenedSetting(false)}
+        title="Settings"
+        padding="xl"
+        size="xl"
+      >
+        <AspectRatio ratio={16 / 9}>
+          <div className="flex relative w-full rounded-md overflow-hidden">
+            <video
+              autoPlay
+              ref={webcamRef}
+              className="absolute inset-0 z-10 w-full h-auto rounded-md"
+            />
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 z-10 rounded-md"
+              style={{
+                width: webcamRef.current?.clientWidth || "100%",
+                height: webcamRef.current?.clientHeight || "100%",
+              }}
+            />
+          </div>
+        </AspectRatio>
+        <div className="flex flex-col gap-2 mt-2">
+          <Text weight={500}>Semibold</Text>
+          <Grid>
+            <Grid.Col span={3}>
+              <ActionIcon size="100%" variant="outline">
+                <MdBlurOff className="w-6 h-auto" />
+              </ActionIcon>
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <ActionIcon
+                onClick={() => setBackground("blur(5px)")}
+                size="100%"
+                variant="outline"
+              >
+                <MdBlurOn className="w-6 h-auto" />
+              </ActionIcon>
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <ActionIcon
+                onClick={() => setBackground("blur(10px)")}
+                size="100%"
+                variant="outline"
+              >
+                <MdBlurOn className="w-12 h-auto" />
+              </ActionIcon>
+            </Grid.Col>
+          </Grid>
+          <Text weight={500}>Semibold</Text>
+          <Grid gutter="xs">
+            {backgrounds &&
+              backgrounds.map((bg, index) => (
+                <Grid.Col span={3} key={index}>
+                  <img
+                    onClick={() => {
+                      setBackground(bg);
+                    }}
+                    className="rounded"
+                    src={bg}
+                    alt="bg"
+                    width="100%"
+                    height="100%"
+                  />
+                </Grid.Col>
+              ))}
+          </Grid>
+        </div>
+      </Drawer>
       <Modal
         opened={openedModalPreviewVideo}
         onClose={() => setOpenedModalPreviewVideo(false)}

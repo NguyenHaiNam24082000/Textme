@@ -1,8 +1,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { Text } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 
 export default function FriendsNavbar() {
+  const { t } = useTranslation();
   return (
     <section
       className="h-auto w-full min-w-0 relative flex "
@@ -18,10 +20,13 @@ export default function FriendsNavbar() {
         >
           <div className="flex gap-2 items-center">
             <FontAwesomeIcon icon="fa-solid fa-user-group" />
-            <Text weight={500}>Friends</Text>
+            <Text weight={500}>{t("Friends")}</Text>
           </div>
           <div className="flex gap-2 items-center">
-            <FontAwesomeIcon icon="fa-solid fa-comments" className="cursor-pointer" />
+            <FontAwesomeIcon
+              icon="fa-solid fa-comments"
+              className="cursor-pointer"
+            />
           </div>
         </div>
       </div>

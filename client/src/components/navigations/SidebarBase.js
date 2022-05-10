@@ -1,9 +1,13 @@
 import UserArea from "./bottom/UserArea";
+import { useSelector } from "react-redux";
+import { themeSelector } from "../../store/uiSlice";
+
 export default function SidebarBase({ children }) {
+  const theme = useSelector(themeSelector);
   return (
     <div
-      className="flex flex-col w-64 h-full flex-shrink-0 overflow-hidden"
-      style={{ backgroundColor: "#f3f4f6", borderRight: "2px solid #e5e7eb" }}
+      className="flex flex-col w-64 h-full flex-shrink-0 overflow-hidden bg-slate-300"
+      style={{ backgroundColor: theme.channelBackground, borderRight: "2px solid #e5e7eb" }}
     >
       <nav className="flex flex-col w-full flex-auto min-h-0">{children}</nav>
       <UserArea />

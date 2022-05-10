@@ -26,10 +26,10 @@ const channelSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    position: {
-      type: Number,
-      min: [0, "Position must be greater than 0"],
-    },
+    // position: {
+    //   type: Number,
+    //   min: [0, "Position must be greater than 0"],
+    // },
     type: {
       type: String,
       enum: ["TEXT", "VOICE", "DM", "GROUP"],

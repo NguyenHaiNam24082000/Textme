@@ -1,30 +1,15 @@
-import { IconChevronLeft, IconClose } from "@douyinfe/semi-icons";
-import { Button, Collapse } from "@douyinfe/semi-ui";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  ActionIcon,
-  Avatar,
-  Highlight,
-  Input,
-  Loader,
-  SegmentedControl,
-  Text,
-} from "@mantine/core";
 import { useIdle } from "@mantine/hooks";
-import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "react-bubble-ui/dist/index.css";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useInfiniteQuery } from "react-query";
 import { useDispatch } from "react-redux";
-import { CSSTransition } from "react-transition-group";
+import { getMessages } from "../../../apis/messages";
+import { CHANNEL_MESSAGES_KEY } from "../../../configs/queryKeys";
 import Editor from "../../Editor";
 import Message from "../../Message";
-import { CHANNEL_MESSAGES_KEY } from "../../../configs/queryKeys";
-import { useInfiniteQuery } from "react-query";
-import { getMessages } from "../../../apis/messages";
-import InfiniteScroll from "react-infinite-scroll-component";
-import "./index.css";
-import { scroller, Element } from "react-scroll";
 import MockChat from "../../MockChat";
+import "./index.css";
 
 const users = [
   {

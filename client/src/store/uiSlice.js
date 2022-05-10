@@ -12,6 +12,7 @@ const slice = createSlice({
     isDeafen: get("deafen") ?? false,
     isVoiceConnected: get("voiceConnected") ?? false,
     replies: get("replies") ?? {},
+    theme: get("theme") ?? {},
     //isCallEnded: 
   },
   reducers: {
@@ -43,6 +44,10 @@ const slice = createSlice({
     voiceConnected: (state, action) => {
       state.isVoiceConnected = action.payload;
     },
+    setTheme: (state, action) => {
+      set("theme", JSON.stringify(action.payload));
+      state.theme = action.payload;
+    }
   },
 });
 
@@ -58,6 +63,7 @@ export const isVisibleComplement = (state) => state.ui.isVisibleComplement;
 export const isMute = (state) => state.ui.isMute;
 export const isDeafen = (state) => state.ui.isDeafen;
 export const isVoiceConnectedSelector = (state) => state.ui.isVoiceConnected;
+export const themeSelector = (state) => state.ui.theme;
 
 // export const closeModal = (dispatch) => {
 //     dispatch(actions.closedModal());
@@ -76,4 +82,5 @@ export const {
   mute,
   deafen,
   voiceConnected,
+  setTheme,
 } = slice.actions;

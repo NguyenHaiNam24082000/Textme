@@ -15,7 +15,13 @@ const friendSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["PENDING", "BLOCKED", "FRIEND"],
+      enum: [
+        "PENDING",
+        "BLOCKED",
+        "FRIEND",
+        "BLOCKED_BY_SENDER",
+        "BLOCKED_BY_RECEIVER",
+      ],
       default: "PENDING",
     },
     channel: {

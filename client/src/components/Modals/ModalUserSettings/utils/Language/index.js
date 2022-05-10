@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UnstyledButton, Group, Image, Text, Select } from "@mantine/core";
 import langs from "../../../../../configs/langs";
 import Sound from "./Sound";
 import Checkbox from "../../../../Checkbox";
+import i18next from "i18next";
 
 export default function Language() {
-  const [languages, setLanguages] = useState(langs);
-  const [language, setLanguage] = useState(langs[0].code);
+  // const [languages, setLanguages] = useState(langs);
+  const [language, setLanguage] = useState(i18next.language);
+  // const [langValue, setLangValue] = useState(i18next.language);
+  useEffect(() => {
+    i18next.changeLanguage(language);
+  }, [language]);
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col w-full">
@@ -38,11 +43,13 @@ export default function Language() {
             <Sound />
           </div>
           phiên dich Choose your language
-          {languages &&
-            languages.map((lang) => (
+          {langs &&
+            langs.map((lang) => (
               <Checkbox
                 isChecked={lang.code === language}
-                onClick={() => setLanguage(lang.code)}
+                onClick={() => {
+                  setLanguage(lang.code);
+                }}
                 className={`${
                   lang.code === language ? "bg-gray-200" : "bg-slate-200"
                 } flex w-full h-full p-2 rounded-md justify-between items-center cursor-pointer`}

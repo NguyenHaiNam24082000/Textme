@@ -9,10 +9,12 @@ import {
   Text,
 } from "@mantine/core";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function Account() {
   const [showPhone, setShowPhone] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
+  const { t } = useTranslation();
   const [info, setInfo] = useState({
     username: "NguyenHaiNam",
     email: "nghainam2000@gmail.com",
@@ -22,7 +24,7 @@ export default function Account() {
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col w-full">
-        <h3 className="text-xl font-semibold mb-3">Tài khoản người dùng</h3>
+        <h3 className="text-xl font-semibold mb-3">{t("My Account")}</h3>
         <div className="flex flex-col w-full h-auto bg-gray-200 rounded-lg overflow-hidden">
           <BackgroundImage
             src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=720&q=80"
@@ -76,7 +78,7 @@ export default function Account() {
                     className="bg-red-600"
                     leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                   >
-                    Edit User Profile
+                    {t("Edit User Profile")}
                   </Button>
                 </div>
               </div>
@@ -94,7 +96,7 @@ export default function Account() {
                 />
                 <div className="flex flex-col">
                   <div className="flex uppercase text-xs font-semibold mb-1">
-                    Tên đăng nhập
+                    {t("Username")}
                   </div>
                   <div className="flex">{info.username}</div>
                 </div>
@@ -104,7 +106,7 @@ export default function Account() {
                   leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                   variant="white"
                 >
-                  Edit
+                  {t("Edit")}
                 </Button>
               </div>
             </div>
@@ -116,7 +118,7 @@ export default function Account() {
                 />
                 <div className="flex flex-col">
                   <div className="flex uppercase text-xs font-semibold mb-1">
-                    Email
+                    {t("Email")}
                   </div>
                   <div className="flex items-center">
                     {showEmail ? info.email : info.email.replace(/[^@.]/g, "*")}
@@ -125,7 +127,7 @@ export default function Account() {
                       className="ml-1 cursor-pointer"
                       onClick={() => setShowEmail((v) => !v)}
                     >
-                      {showEmail ? "Ẩn" : "Hiện"}
+                      {showEmail ? t("Hide") : t("Show")}
                     </Text>
                   </div>
                 </div>
@@ -135,7 +137,7 @@ export default function Account() {
                   leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                   variant="white"
                 >
-                  Edit
+                  {t("Edit")}
                 </Button>
               </div>
             </div>
@@ -147,7 +149,7 @@ export default function Account() {
                 />
                 <div className="flex flex-col">
                   <div className="flex uppercase text-xs font-semibold mb-1">
-                    Số điện thoại
+                    {t("Phone Number")}
                   </div>
                   <div className="flex items-center">
                     {showPhone ? info.phone : info.phone.replace(/./g, "*")}
@@ -156,7 +158,7 @@ export default function Account() {
                       className="ml-1 cursor-pointer"
                       onClick={() => setShowPhone((v) => !v)}
                     >
-                      {showPhone ? "Ẩn" : "Hiện"}
+                      {showPhone ? t("Hide") : t("Show")}
                     </Text>
                   </div>
                 </div>
@@ -166,7 +168,7 @@ export default function Account() {
                   leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                   variant="white"
                 >
-                  Edit
+                  {t("Edit")}
                 </Button>
               </div>
             </div>
@@ -178,7 +180,7 @@ export default function Account() {
                 />
                 <div className="flex flex-col">
                   <div className="flex uppercase text-xs font-semibold mb-1">
-                    Mật khẩu
+                    {t("Password")}
                   </div>
                   <div className="flex">{info.password}</div>
                 </div>
@@ -188,7 +190,7 @@ export default function Account() {
                   leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                   variant="white"
                 >
-                  Edit
+                  {t("Edit")}
                 </Button>
               </div>
             </div>

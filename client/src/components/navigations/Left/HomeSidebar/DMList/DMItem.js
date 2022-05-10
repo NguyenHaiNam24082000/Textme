@@ -1,11 +1,7 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  ActionIcon,
-  Badge,
-  Group,
+  Avatar, Group,
   Text,
-  UnstyledButton,
-  Avatar,
+  UnstyledButton
 } from "@mantine/core";
 import moment from "moment";
 import React from "react";

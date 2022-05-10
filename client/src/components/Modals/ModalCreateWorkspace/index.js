@@ -14,6 +14,7 @@ import Modal from "../Modal";
 import UploadImage from "../../UI/UploadImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CSSTransition } from "react-transition-group";
+import { createWorkspace } from "../../../apis/workspace";
 
 const titleTypeRoom = {
   private: `Anyone will be able to find but only people invited will be join this room. You can change this at any time from room settings.`,
@@ -25,9 +26,16 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
   const [typeWorkspace, setTypeWorkspace] = useState("public");
   const [activeMenu, setActiveMenu] = useState("main");
   const [open, setOpen] = useState(false);
+  const [payload, setPayload] = useState({});
   useEffect(() => {
     setActiveMenu("main");
   }, [opened]);
+
+  const createServer = async () => {
+    const { data } = await createWorkspace({...payload,typeWorkspace});
+    console.log(data);
+  };
+
   return (
     <Modal
       size="md"
@@ -124,10 +132,21 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
                 <UploadImage />
               </Upload>
             </Group>
-            <TextInput placeholder="Name" label="Name" required />
+            <TextInput placeholder="Name" label="Name" required onChange={(e)=>{
+              setPayload({
+                ...payload,
+                name: e.target.value
+              })
+            }}/>
             <TextInput
               placeholder="Topic (optional)"
               label="Topic (optional)"
+              onChange={(e)=>{
+                setPayload({
+                  ...payload,
+                  topic: e.target.value
+                })
+              }}
             />
             <Group grow className="my-4">
               <Card
@@ -229,7 +248,11 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
               >
                 Cancel
               </Button>
-              <Button style={{ backgroundColor: "#18f59f" }} radius="md">
+              <Button
+                style={{ backgroundColor: "#18f59f" }}
+                radius="md"
+                onClick={createServer}
+              >
                 Create Workspace
               </Button>
             </Group>

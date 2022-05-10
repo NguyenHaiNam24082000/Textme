@@ -1,99 +1,107 @@
 import "./index.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tree } from "@douyinfe/semi-ui";
 import { ActionIcon } from "@mantine/core";
-import { IconPlus, IconHash } from "@douyinfe/semi-icons";
+import { IconPlus, IconHash, IconSetting } from "@douyinfe/semi-icons";
 import { Highlight } from "@mantine/core";
+import { useNavigate, useParams } from "react-router";
+import ModalCreateChannel from "../Modals/ModalCreateChannel";
+import ModalChannelSettings from "../Modals/ModalChannelSettings";
+import { useHover } from "@mantine/hooks";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useTranslation } from "react-i18next";
 
-export default function TreeComponent() {
-  const buttons = (
-    <ActionIcon size="sm">
-      <IconPlus />
-    </ActionIcon>
-  );
-  const initialData = [
-    {
-      label: "Asia",
-      value: "Asia",
-      key: "0",
-      button: buttons,
-      children: [
-        {
-          label: "China",
-          value: "China",
-          key: "0-0",
-          icon: <IconHash />,
-          button: buttons,
-        },
-        {
-          label: "Japan",
-          value: "Japan",
-          key: "0-1",
-          icon: <IconHash />,
-          button: buttons,
-        },
-      ],
-    },
-    {
-      label: "North America",
-      value: "North America",
-      key: "1",
-      button: buttons,
-      children: [
-        {
-          label: "United States",
-          value: "United States",
-          key: "1-0",
-          icon: <IconHash />,
-          button: buttons,
-        },
-        {
-          label: "Canada",
-          value: "Canada",
-          key: "1-1",
-          icon: <IconHash />,
-          button: buttons,
-        },
-      ],
-    },
-    {
-      label: "North America",
-      value: "North America",
-      key: "2",
-      button: buttons,
-      children: [
-        {
-          label: "United States",
-          value: "United States",
-          key: "2-0",
-          icon: <IconHash />,
-          button: buttons,
-        },
-        {
-          label: "Canada",
-          value: "Canada",
-          key: "2-1",
-          icon: <IconHash />,
-          button: buttons,
-        },
-      ],
-    },
-  ];
+export default function TreeComponent({ server }) {
+  const history = useNavigate();
+  const [openedModalCreateChannel, setOpenedModalCreateChannel] =
+    useState(false);
+  const [openedModalChannelSettings, setOpenedModalChannelSettings] =
+    useState(false);
+  const { channel: channelId } = useParams();
   const [searchKey, setSearchKey] = useState("");
-  const [treeData, setTreeData] = useState(initialData);
+  const [treeData, setTreeData] = useState([]);
+  const [value, setValue] = useState(channelId);
+  const [channel, setChannel] = useState(null);
+  const {t}= useTranslation();
+  useEffect(() => {
+    if (server?.channels) {
+      setTreeData([
+        {
+          label: "Channels",
+          value: "Channels",
+          key: "0",
+          button: (
+            <ActionIcon
+              size="sm"
+              variant="transparent"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenedModalCreateChannel(true);
+              }}
+            >
+              <IconPlus />
+            </ActionIcon>
+          ),
+          children: [
+            ...server.channels?.map((channel) => ({
+              label: channel.channel.name,
+              value: channel.channel._id,
+              key: `0-${channel.position}`,
+              icon:
+                channel.channel.type === "TEXT" ? (
+                  <IconHash />
+                ) : (
+                  <FontAwesomeIcon icon="fa-solid fa-volume-high" />
+                ),
+              click: () => {
+                history(`/channel/${server._id}/${channel.channel._id}`);
+              },
+              button: (
+                <ActionIcon
+                  size="sm"
+                  variant="transparent"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setChannel(channel.channel);
+                    setOpenedModalChannelSettings(true);
+                  }}
+                >
+                  <IconSetting />
+                </ActionIcon>
+              ),
+            })),
+          ],
+        },
+      ]);
+    }
+  }, [server]);
   const renderLabel = ({ className, onExpand, onClick, data, expandIcon }) => {
-    const { label, icon, button } = data;
+    const { label, icon, button, click, value } = data;
+    const isActive = value === channelId;
     const isLeaf = !(data.children && data.children.length);
     return (
       <li
-        className={className}
+        className={`${className} ${isLeaf ? "group" : ""}`}
         role="treeitem"
-        onClick={isLeaf ? onClick : onExpand}
+        onClick={
+          isLeaf
+            ? () => {
+                typeof click === "function" && click();
+                typeof onClick === "function" && onClick();
+              }
+            : onExpand
+        }
+        style={{
+          "--semi-tree-option-selected": isActive ? "#e1e1e1" : "",
+          background: isActive ? "#e1e1e1" : "",
+        }}
       >
         {isLeaf ? null : expandIcon}
         {icon}
         <Highlight highlight={searchKey}>{label}</Highlight>
-        {button}
+        <div className={`${isLeaf ? "invisible group-hover:visible" : ""}`}>
+          {button}
+        </div>
       </li>
     );
   };
@@ -152,18 +160,38 @@ export default function TreeComponent() {
   };
 
   return (
-    <div className="flex flex-col flex-shrink-0 flex-auto w-64">
-      <Tree
-        treeData={treeData}
-        defaultValue="Shanghai"
-        filterTreeNode
-        searchPlaceholder="hahah"
-        onSearch={(input) => setSearchKey(input)}
-        showFilteredOnly={true}
-        renderFullLabel={renderLabel}
-        draggable
-        onDrop={onDrop}
+    <>
+      <div className="flex flex-col flex-shrink-0 flex-auto w-64">
+        <Tree
+          treeData={treeData}
+          // defaultValue="Shanghai"
+          // value={searchKey}
+          value={value || channelId}
+          onChange={(value) => {
+            setValue(value);
+          }}
+          filterTreeNode
+          searchPlaceholder={t("Search")}
+          onSearch={(input) => setSearchKey(input)}
+          showFilteredOnly={true}
+          renderFullLabel={renderLabel}
+          draggable
+          onDrop={onDrop}
+        />
+        <ModalCreateChannel
+          opened={openedModalCreateChannel}
+          onClose={() => {
+            setOpenedModalCreateChannel(false);
+          }}
+        />
+      </div>
+      <ModalChannelSettings
+        opened={openedModalChannelSettings}
+        onClose={() => {
+          setOpenedModalChannelSettings(false);
+        }}
+        channel={channel}
       />
-    </div>
+    </>
   );
 }
