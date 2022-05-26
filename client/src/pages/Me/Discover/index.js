@@ -1,5 +1,14 @@
 import React from "react";
-import { BackgroundImage, Center, Text, Box, Stack, TextInput, Group, Badge } from "@mantine/core";
+import {
+  BackgroundImage,
+  Center,
+  Text,
+  Box,
+  Stack,
+  TextInput,
+  Group,
+  Badge,
+} from "@mantine/core";
 
 export default function Discover() {
   return (
@@ -26,13 +35,12 @@ export default function Discover() {
             <Text size={14}>
               From one community to another, there's a place for everyone.
             </Text>
-            <TextInput
-              placeholder="Search workspaces"
-              variant="filled"
-            />
+            <TextInput placeholder="Search workspaces" variant="filled" />
             <Group spacing="xs">
               <span>Related tags:</span>
-              <Badge radius="sm" variant="outline">#Badge</Badge>
+              <Badge radius="sm" variant="outline">
+                #Badge
+              </Badge>
             </Group>
           </Stack>
         </Center>

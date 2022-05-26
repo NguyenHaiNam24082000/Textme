@@ -135,7 +135,7 @@ const messageSchema = new mongoose.Schema(
           },
           type: {
             type: String,
-            enum: ["image", "gifv", "media", "link", "rich", "article","map"],
+            enum: ["image", "gifv", "media", "link", "rich", "article", "map"],
           },
           description: {
             type: String,
@@ -275,10 +275,10 @@ const messageSchema = new mongoose.Schema(
     messageDeleted: {
       type: Boolean,
       default: false,
-    }
+    },
   },
-  { timestamps: true },
   {
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }

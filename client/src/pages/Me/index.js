@@ -74,25 +74,6 @@ export default function Me() {
       setChannel(null);
       setServer(null);
     }
-    // if (serverId) {
-    //   if (servers && servers.length > 0) {
-    //     const s = servers.find((server) => server._id === serverId);
-    //     s &&
-    //       s.channels &&
-    //       s.channels.length > 0 &&
-    //       setChannel(
-    //         s.channels.find((channel) => channel.channel._id === channelId)
-    //       );
-    //     setServer(s);
-    //   }
-    // } else {
-    // if (channels && channels.length > 0) {
-    //   const c = channels.find((channel) => channel._id === channelId);
-    //   console.log("channelssss", c);
-    //   setChannel(c);
-    //   setServer(null);
-    // }
-    // }
   }, [params]);
 
   console.log("channel", channel, server);

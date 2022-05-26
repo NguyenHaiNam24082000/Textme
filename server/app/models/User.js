@@ -186,25 +186,8 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     avatar_urls: {
-      type: Object,
-      properties: {
-        s32: {
-          type: String,
-          format: "uri",
-        },
-        s64: {
-          type: String,
-          format: "uri",
-        },
-        s128: {
-          type: String,
-          format: "uri",
-        },
-        s256: {
-          type: String,
-          format: "uri",
-        },
-      },
+      type: String,
+      default: null,
     },
     mfa_enabled: {
       type: Boolean,
@@ -236,7 +219,11 @@ const userSchema = new mongoose.Schema(
       },
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
 // add plugin that converts mongoose to json

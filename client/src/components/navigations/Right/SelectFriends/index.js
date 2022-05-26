@@ -21,10 +21,11 @@ import ModalCreateNewGroup from "../../../Modals/ModalCreateNewGroup";
 import {
   getOrCreateDMChannel,
   createGroupChannel,
+  inviteFriendsToChannel,
 } from "../../../../apis/channel";
 import { OPEN_CHANNEL } from "../../../../configs/queryKeys";
 import { GetOpenChannels } from "../../../../reactQuery/channel";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useQueryClient } from "react-query";
 
 const Item = forwardRef(({ value, label, ...others }, ref) => {
@@ -81,7 +82,11 @@ function Value({ value, label, onRemove, classNames, ...others }) {
   );
 }
 
-export default function SelectFriends({ setActiveMenu }) {
+export default function SelectFriends({
+  alreadyFriends = [],
+  channel,
+  server = null,
+}) {
   const me = GetMe();
   const { isLoading, data: allFriends } = AllFriends();
   const { data: channels } = GetOpenChannels();
@@ -92,15 +97,20 @@ export default function SelectFriends({ setActiveMenu }) {
   const [value, setValue] = useState([]);
   const history = useNavigate();
   const cache = useQueryClient();
+  const params = useParams();
 
   const data = allFriends
-    ? allFriends.flatMap((friend) => {
-        const obj = friendObject(me, friend);
-        return {
-          value: obj.id,
-          label: obj.username,
-        };
-      })
+    ? allFriends
+        .filter((friend) => {
+          return !alreadyFriends.includes(friendObject(me, friend).id);
+        })
+        .flatMap((friend) => {
+          const obj = friendObject(me, friend);
+          return {
+            value: obj.id,
+            label: obj.username,
+          };
+        })
     : [];
 
   const createGroup = async () => {
@@ -143,6 +153,44 @@ export default function SelectFriends({ setActiveMenu }) {
             setLoading(false);
           }
         }
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
+  const inviteFriends = async () => {
+    if (value.length === 0) {
+      return;
+    }
+    try {
+      if (!server) {
+        if (channel.type === "DM") {
+          const members = channel.members.filter(
+            (member) => member.id !== me.id
+          );
+          const { data: channelId } = await createGroupChannel({
+            members: [...value, ...members],
+          });
+          if (channelId) {
+            cache.invalidateQueries(OPEN_CHANNEL);
+            history(`/channel/@me/${channelId._id}`);
+          }
+        } else if (channel.type === "GROUP") {
+          const { data: channelId } = await inviteFriendsToChannel({
+            members: [...value, ...channel.members],
+            type: channel.type,
+          });
+          if (channelId) {
+            cache.invalidateQueries(OPEN_CHANNEL);
+          }
+        }
+      } else {
+        //todo
+        // const { data } = await inviteMembers({
+        //   members: value,
+        // });
       }
     } catch (error) {
       console.log(error);
@@ -243,13 +291,23 @@ export default function SelectFriends({ setActiveMenu }) {
         </AnimateSharedLayout>
 
         <div className="flex w-full h-12 mt-1">
-          <Button
-            className="w-full bg-yellow-400"
-            onClick={createGroup}
-            loading={loading}
-          >
-            Create Group DM
-          </Button>
+          {params.channel ? (
+            <Button
+              className="w-full bg-yellow-400"
+              onClick={inviteFriends}
+              loading={loading}
+            >
+              Invite Friends
+            </Button>
+          ) : (
+            <Button
+              className="w-full bg-yellow-400"
+              onClick={createGroup}
+              loading={loading}
+            >
+              Create Group DM
+            </Button>
+          )}
         </div>
       </div>
       <ModalCreateNewGroup

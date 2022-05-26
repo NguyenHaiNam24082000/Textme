@@ -5,15 +5,14 @@ const slice = createSlice({
   name: "ui",
   initialState: {
     isVisibleChanel: get("channelToggled") ?? true,
-    isVisibleComplement: get("complementToggled")
-      ? get("complementToggled")
-      : false,
+    isVisibleComplement: get("complementToggled") ?? false,
+    activeComplement: "main",
     isMute: get("mute") ?? false,
     isDeafen: get("deafen") ?? false,
     isVoiceConnected: get("voiceConnected") ?? false,
     replies: get("replies") ?? {},
     theme: get("theme") ?? {},
-    //isCallEnded: 
+    //isCallEnded:
   },
   reducers: {
     replyMessages: (state, action) => {
@@ -28,6 +27,9 @@ const slice = createSlice({
     },
     expandedComplement: (state, action) => {
       state.isVisibleComplement = !state.isVisibleComplement;
+    },
+    setActiveComplement: (state, action) => {
+      state.activeComplement = action.payload;
     },
     mute: (state, action) => {
       state.isMute = action.payload;
@@ -47,7 +49,7 @@ const slice = createSlice({
     setTheme: (state, action) => {
       set("theme", JSON.stringify(action.payload));
       state.theme = action.payload;
-    }
+    },
   },
 });
 
@@ -64,6 +66,7 @@ export const isMute = (state) => state.ui.isMute;
 export const isDeafen = (state) => state.ui.isDeafen;
 export const isVoiceConnectedSelector = (state) => state.ui.isVoiceConnected;
 export const themeSelector = (state) => state.ui.theme;
+export const activeComplementSelector = (state) => state.ui.activeComplement;
 
 // export const closeModal = (dispatch) => {
 //     dispatch(actions.closedModal());
@@ -83,4 +86,5 @@ export const {
   deafen,
   voiceConnected,
   setTheme,
+  setActiveComplement,
 } = slice.actions;

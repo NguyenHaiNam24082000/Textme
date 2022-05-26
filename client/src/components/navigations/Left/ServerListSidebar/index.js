@@ -20,7 +20,6 @@ export default function Sidebar({ servers }) {
       className="flex flex-col w-16 h-full flex-shrink-0 bg-slate-300"
       style={{
         backgroundColor: theme.sidebarBackground,
-        borderRight: "2px solid #e5e7eb",
       }}
     >
       <div className="sidebar flex flex-col overflow-x-hidden overflow-y-auto">

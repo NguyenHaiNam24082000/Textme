@@ -1,10 +1,21 @@
 import { Button } from "@douyinfe/semi-ui";
-import { ActionIcon, Avatar, Collapse, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Avatar,
+  Accordion,
+  Text,
+  SimpleGrid,
+  Image,
+} from "@mantine/core";
 import { IconClose } from "@douyinfe/semi-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function Info({setActiveMenu}) {
-  const [tabKey, setTabKey] = useState(0);
+export default function Info({ setActiveMenu, messages }) {
+  const [images, setImages] = useState([]);
+  useEffect(() => {
+    console.log(messages);
+  }, [messages]);
+  console.log(messages, "images");
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex w-full h-10 items-center justify-end p-2">
@@ -25,51 +36,61 @@ export default function Info({setActiveMenu}) {
           Online
         </Text>
       </div>
-      <Collapse className="w-full">
-        <Collapse.Panel header="Members" itemKey="1">
+      <Accordion className="w-full" offsetIcon={false} multiple>
+        <Accordion.Item label="Members">
           <Button
             className="w-full bg-yellow-400"
             onClick={() => {
-              setActiveMenu("members");
+              // setActiveMenu("members");
+              console.log("members");
             }}
           >
             More
           </Button>
-        </Collapse.Panel>
-        <Collapse.Panel header="Images/Videos" itemKey="2">
+        </Accordion.Item>
+        <Accordion.Item label="Images/Videos">
+          {images.length && (
+            <SimpleGrid cols={4} spacing="xs">
+              {images.map((image) => (
+                <Image
+                  key={image}
+                  radius="sm"
+                  src={image}
+                  alt="Random unsplash image"
+                />
+              ))}
+            </SimpleGrid>
+          )}
           <Button
             className="w-full bg-yellow-400"
             onClick={() => {
-              setActiveMenu("storages");
-              setTabKey(1);
+              // setActiveMenu("storages");
             }}
           >
             More
           </Button>
-        </Collapse.Panel>
-        <Collapse.Panel header="Files" itemKey="3">
+        </Accordion.Item>
+        <Accordion.Item label="Files">
           <Button
             className="w-full bg-yellow-400"
             onClick={() => {
-              setActiveMenu("storages");
-              setTabKey(2);
+              // setActiveMenu("storages");
             }}
           >
             More
           </Button>
-        </Collapse.Panel>
-        <Collapse.Panel header="Links" itemKey="4">
+        </Accordion.Item>
+        <Accordion.Item label="Links">
           <Button
             className="w-full bg-yellow-400"
             onClick={() => {
-              setActiveMenu("storages");
-              setTabKey(3);
+              // setActiveMenu("storages");
             }}
           >
             More
           </Button>
-        </Collapse.Panel>
-      </Collapse>
+        </Accordion.Item>
+      </Accordion>
     </div>
   );
 }

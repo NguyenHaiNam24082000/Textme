@@ -108,14 +108,86 @@ const queryMessages = async (filter, options, user) => {
       `there is no channel between you and your friend!`
     );
   }
+  let messages = [];
 
   // if (user._id.toString() === room.sender.toString()) {
   //   filterClone.messageDeletedBySender = false;
   // } else {
   //   filterClone.messageDeletedByReceiver = false;
   // }
+  const limit =
+    options.limit && parseInt(options.limit, 10) > 0
+      ? parseInt(options.limit, 10)
+      : 10;
+  if (options.nearBy) {
+    let a = this.find({
+      ...filter,
+      _id: {
+        $gte: options.nearBy,
+      },
+    }).limit(limit / 2 + 1);
+    let b = this.find({
+      ...filter,
+      _id: {
+        $lt: options.nearBy,
+      },
+    }).limit(limit / 2);
 
-  const messages = await Message.paginate(filterClone, options);
+    // console.log(await this.collection.getIndexes());
+
+    if (options.populate) {
+      options.populate.split(",").forEach((populateOption) => {
+        a = a.populate(
+          populateOption
+            .split(".")
+            .reverse()
+            .reduce((a, b) => ({ path: b, populate: a }))
+        );
+        b = b.populate(
+          populateOption
+            .split(".")
+            .reverse()
+            .reduce((a, b) => ({ path: b, populate: a }))
+        );
+      });
+    }
+    messages = Promise.all([a.exec(), b.exec()]).then(([a, b]) => {
+      return [...a, ...b];
+    });
+    //combine two objects moongoose  docsPromise
+  } else if (options.before || options.after) {
+    if (options.before) {
+      messages = Message.find({
+        ...filter,
+        _id: {
+          $lt: options.before,
+        },
+      }).limit(limit);
+      // .sort({ _id: -1 });
+    }
+    if (options.after) {
+      messages = Message.find({
+        ...filter,
+        _id: {
+          $gt: options.after,
+        },
+      }).limit(limit);
+      // .sort({ _id: 1 });
+    }
+    if (options.populate) {
+      options.populate.split(",").forEach((populateOption) => {
+        messages = messages.populate(
+          populateOption
+            .split(".")
+            .reverse()
+            .reduce((a, b) => ({ path: b, populate: a }))
+        );
+      });
+    }
+    messages = messages.exec();
+  } else {
+    messages = await Message.paginate(filterClone, options);
+  }
   return messages;
 };
 
@@ -128,12 +200,12 @@ const searchMessages = async (filter, options, user) => {
     limit: options.limit,
   };
   if (options.sort_by.toLowerCase() === "relevance") {
-    const content = removeAccents(filter.content);
-    filter.content = { $regex: `.*${content}.*` };
+    const content = removeAccents(filter.content).split(" ").join("|");
+    filter.content = { $regex: `.*(${content}).*`, $options: "gi" };
   } else {
     filter.content = { $regex: `.*${filter.content}.*` };
   }
-  const filterClone = { ...filter };
+  const filterClone = { ...filter, systemMessage: false };
   const channel = await Channel.findOne({
     $or: [{ owner: user._id }, { members: user._id }],
 

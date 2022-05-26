@@ -4,9 +4,11 @@
   cursor: text;
   padding: 8px 8px;
   border-radius: 4px;
+  /* position: relative; */
+  z-index: 1000;
   /* margin-bottom: 2em; */
   /* box-shadow: inset 0px 1px 8px -3px #ababab; */
-  background: transparent;
+  background: red;
 }
 
 .editor :global(.public-DraftEditor-content) {
@@ -21,13 +23,11 @@
   user-select: none;
 }
 
-.headlineButtonWrapper 
-{
+.headlineButtonWrapper {
   z-index: 100;
 }
 
-.upload-image::before
-{
+.upload-image::before {
   content: "";
   position: absolute;
   top: 0;
@@ -38,8 +38,7 @@
   /* background: rgba(22,22,26,0.6); */
 }
 
-.upload-image:hover::before
-{
+.upload-image:hover::before {
   visibility: visible;
 }
 

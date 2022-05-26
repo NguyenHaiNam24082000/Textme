@@ -8,6 +8,7 @@ import {
 } from "react-beautiful-dnd";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { DndTable } from "../../../../DnDTable";
 
 const ROOT_NODE_ID = "root";
 
@@ -183,6 +184,40 @@ export default function Roles() {
           </Popover>
           <Button className="ml-4">Thêm vai trò</Button>
         </div>
+        <DndTable
+          data={[
+            {
+              position: 6,
+              mass: 12.011,
+              symbol: "C",
+              name: "Carbon",
+            },
+            {
+              position: 7,
+              mass: 14.007,
+              symbol: "N",
+              name: "Nitrogen",
+            },
+            {
+              position: 39,
+              mass: 88.906,
+              symbol: "Y",
+              name: "Yttrium",
+            },
+            {
+              position: 56,
+              mass: 137.33,
+              symbol: "Ba",
+              name: "Barium",
+            },
+            {
+              position: 58,
+              mass: 140.12,
+              symbol: "Ce",
+              name: "Cerium",
+            },
+          ]}
+        />
       </div>
     </div>
   );

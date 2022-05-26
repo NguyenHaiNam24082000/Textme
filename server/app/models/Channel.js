@@ -32,11 +32,11 @@ const channelSchema = new mongoose.Schema(
     // },
     type: {
       type: String,
-      enum: ["TEXT", "VOICE", "DM", "GROUP"],
+      enum: ["TEXT", "VOICE", "DM", "GROUP", "CATEGORY"],
       required: [true, "Type must be required"],
       validate: [
-        /^(TEXT|VOICE|DM|GROUP)$/,
-        "Type must be TEXT, VOICE, DM or GROUP",
+        /^(TEXT|VOICE|DM|GROUP|CATEGORY)$/,
+        "Type must be TEXT, VOICE, DM, GROUP or CATEGORY",
       ],
     },
     avatar: {
@@ -61,8 +61,8 @@ const channelSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true },
   {
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }

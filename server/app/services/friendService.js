@@ -29,9 +29,12 @@ const createFriendRequest = async (user, userBody) => {
   }
 
   const alreadyRequest = await Friend.findOne({
-    sender: user.id,
-    receiver: foundUser._id,
+    $or: [
+      { receiver: foundUser._id, sender: user.id },
+      { receiver: user.id, sender: foundUser._id },
+    ],
   });
+  console.log(alreadyRequest);
 
   if (alreadyRequest) {
     throw new ApiError(
@@ -146,7 +149,56 @@ const getPendingRequests = async (user) => {
   return pendingRequests;
 };
 
+const blockFriendRequest = async (user, requestId) => {
+  const friendRequest = await Friend.findOne({
+    _id: requestId,
+    $or: [{ receiver: user.id }, { sender: user.id }],
+  });
+  if (!friendRequest) {
+    throw new ApiError(
+      httpStatus.NOT_ACCEPTABLE,
+      "You can't block this request"
+    );
+  }
+  friendRequest.status =
+    friendRequest.sender.toString() === user.id
+      ? FRIEND_STATUS.BLOCKED_BY_RECEIVER
+      : FRIEND_STATUS.BLOCKED_BY_SENDER;
+  const result = await friendRequest.save();
+  return result;
+};
+
+const unblockFriendRequest = async (user, requestId) => {
+  const friendRequest = await Friend.findOne({
+    _id: requestId,
+    $or: [{ receiver: user.id }, { sender: user.id }],
+  });
+  if (!friendRequest) {
+    throw new ApiError(
+      httpStatus.NOT_ACCEPTABLE,
+      "You can't unblock this request"
+    );
+  }
+  friendRequest.status = FRIEND_STATUS.FRIEND;
+  const result = await friendRequest.save();
+  return result;
+};
+
+const getAllBlockedFriends = async (user) => {
+  const blockedFriends = await Friend.find({
+    $or: [{ receiver: user.id }, { sender: user.id }],
+    $or: [
+      { status: FRIEND_STATUS.BLOCKED_BY_RECEIVER },
+      { status: FRIEND_STATUS.BLOCKED_BY_SENDER },
+    ],
+  })
+    .populate({ path: "receiver" })
+    .populate({ path: "sender" });
+  return blockedFriends;
+};
+
 module.exports = {
+  unblockFriendRequest,
   createFriendRequest,
   pendingFriendRequests,
   outGoingRequests,
@@ -154,4 +206,6 @@ module.exports = {
   acceptPendingRequest,
   getAllFriends,
   getPendingRequests,
+  blockFriendRequest,
+  getAllBlockedFriends,
 };

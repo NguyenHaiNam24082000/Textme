@@ -52,6 +52,15 @@ const reactionMessage = catchAsync(async (req, res, next) => {
   res.status(httpStatus.OK).send(result);
 });
 
+const inviteMembersToChannel = catchAsync(async (req, res, next) => {
+  const result = await channelService.inviteMembersToChannel(
+    req.user,
+    req.params,
+    req.body
+  );
+  res.status(httpStatus.OK).send(result);
+});
+
 module.exports = {
   getOrCreateDMChannel,
   getDMChannels,
@@ -61,4 +70,5 @@ module.exports = {
   getPinnedMessage,
   pinnedMessage,
   reactionMessage,
+  inviteMembersToChannel,
 };

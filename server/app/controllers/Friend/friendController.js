@@ -39,6 +39,27 @@ const acceptPendingRequest = catchAsync(async (req, res, next) => {
   res.status(httpStatus.OK).send(friendRequest);
 });
 
+const blockFriendRequest = catchAsync(async (req, res, next) => {
+  const friendRequest = await friendService.blockFriendRequest(
+    req.user,
+    req.body.id
+  );
+  res.status(httpStatus.OK).send(friendRequest);
+});
+
+const getAllBlockedFriends = catchAsync(async (req, res, next) => {
+  const blockedFriends = await friendService.getAllBlockedFriends(req.user);
+  res.status(httpStatus.OK).send(blockedFriends);
+});
+
+const unblockFriendRequest = catchAsync(async (req, res, next) => {
+  const friendRequest = await friendService.unblockFriendRequest(
+    req.user,
+    req.body.id
+  );
+  res.status(httpStatus.OK).send(friendRequest);
+});
+
 module.exports = {
   getAllFriends,
   getPendingRequests,
@@ -46,4 +67,7 @@ module.exports = {
   createFriendRequest,
   cancelPendingRequest,
   acceptPendingRequest,
+  blockFriendRequest,
+  getAllBlockedFriends,
+  unblockFriendRequest,
 };

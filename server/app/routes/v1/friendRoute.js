@@ -11,5 +11,8 @@ router.get('/outgoing-requests', auth(), friendsController.outGoingRequests);
 router.patch('/cancel-pending-request', auth(), friendsController.cancelPendingRequest);
 router.patch('/accept-pending-request', auth(), friendsController.acceptPendingRequest);
 router.get('/all-friends', auth(), friendsController.getAllFriends);
+router.patch('/block-friend', auth(), friendsController.blockFriendRequest);
+router.get('/all-blocked-friends', auth(), friendsController.getAllBlockedFriends);
+router.patch('/unblock-friend', auth(), friendsController.unblockFriendRequest);
 
 module.exports = router;

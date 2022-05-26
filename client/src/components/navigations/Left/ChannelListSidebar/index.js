@@ -8,12 +8,20 @@ import useBoop from "../../../../hooks/use-boop";
 import ModalWorkspaceSettings from "../../../Modals/ModalWorkspaceSettings";
 import Tree from "../../../Tree";
 import SidebarBase from "../../SidebarBase";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  expandedComplement,
+  isVisibleComplement,
+  setActiveComplement,
+} from "../../../../store/uiSlice";
 
 export default function ChannelListSidebar({ server }) {
   const [openedModalWorkspaceSettings, setOpenedModalWorkspaceSettings] =
     useState(false);
   const [style, trigger] = useBoop({ y: 2 });
-  const {t}= useTranslation();
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const isVisibleRightSidebar = useSelector(isVisibleComplement);
   return (
     <SidebarBase>
       <Menu
@@ -34,7 +42,7 @@ export default function ChannelListSidebar({ server }) {
                 className="flex w-full h-full items-center justify-between px-2"
                 style={{ borderBottom: "2px solid #e5e7eb" }}
               >
-                <div className="font-bold">test</div>
+                <div className="font-bold">{server?.name || ""}</div>
                 <animated.span style={style}>
                   <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
                 </animated.span>
@@ -43,7 +51,15 @@ export default function ChannelListSidebar({ server }) {
           </BackgroundImage>
         }
       >
-        <Menu.Item>Invite People</Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            console.log("selectFriends");
+            dispatch(setActiveComplement("selectFriends"));
+            !isVisibleRightSidebar && dispatch(expandedComplement());
+          }}
+        >
+          Invite People
+        </Menu.Item>
         <Menu.Item onClick={() => setOpenedModalWorkspaceSettings(true)}>
           Workspace Settings
         </Menu.Item>
@@ -115,7 +131,6 @@ export default function ChannelListSidebar({ server }) {
               <div className="text-sm font-semibold">Draft</div>
             </div>
             <div>
-              
               {/* {server &&
                 server.channels.map((channel) => (
                   <div
@@ -138,12 +153,15 @@ export default function ChannelListSidebar({ server }) {
             </div>
           </div>
 
-          <Tree server={server}/>
+          <Tree server={server} />
         </div>
       </div>
-      <ModalWorkspaceSettings opened={openedModalWorkspaceSettings} onClose={()=>{
-        setOpenedModalWorkspaceSettings(false)
-      }} />
+      <ModalWorkspaceSettings
+        opened={openedModalWorkspaceSettings}
+        onClose={() => {
+          setOpenedModalWorkspaceSettings(false);
+        }}
+      />
     </SidebarBase>
   );
 }

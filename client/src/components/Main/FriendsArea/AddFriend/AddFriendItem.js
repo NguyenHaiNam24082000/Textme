@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ActionIcon, Group, Paper, Text } from "@mantine/core";
+import { ActionIcon, Group, Text } from "@mantine/core";
 import React from "react";
 
 export default function AddFriendItem({user}) {

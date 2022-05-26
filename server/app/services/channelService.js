@@ -34,6 +34,17 @@ const createVoiceChannel = async (user, body) => {
   });
 };
 
+const createCategoryChannel = async (user, body) => {
+  const { name, members } = body;
+  const categoryChannel = await createChannel({
+    name,
+    owner: user.id,
+    type: "CATEGORY",
+    members,
+  });
+  return categoryChannel;
+};
+
 const createDMChannel = async (user, body) => {
   const { friendId } = body;
   const alreadyInChannel = await alreadyInDMChannel(user, friendId);
@@ -77,6 +88,7 @@ const alreadyInDMChannel = async (user, friendId) => {
       },
       { members: [user._id, friendId] },
     ],
+    type: "DM",
   }).populate("members");
   console.log(channel, "channel");
   return channel;
@@ -98,6 +110,7 @@ const alreadyInGroupChannel = async (user, members) => {
         ],
       },
     ],
+    type: "GROUP",
   });
   return channel;
 };
@@ -169,9 +182,37 @@ const getAllDMChannels = async (user) => {
     .populate("members")
     .populate("lastMessage");
 
-  const channels = await query;
+  const channels = await query.exec();
+  const results = Promise.all(
+    Array.from(channels).map(async (channel) => {
+      let with_status = "";
+      const friend = await Friend.findOne({
+        $or: [
+          {
+            sender: user.id,
+            receiver:
+              channel.members[0].id === user.id
+                ? channel.members[1].id
+                : channel.members[0].id,
+          },
+          {
+            sender:
+              channel.members[0].id === user.id
+                ? channel.members[1].id
+                : channel.members[0].id,
+            receiver: user.id,
+          },
+        ],
+      });
+      with_status = friend.status;
 
-  return channels;
+      return { ...JSON.parse(JSON.stringify(channel)), with_status };
+    })
+  ).then((results) => {
+    return results;
+  });
+
+  return await results;
 };
 
 const getAllGroupChannels = async (user) => {
@@ -186,8 +227,15 @@ const getAllGroupChannels = async (user) => {
     .populate("owner");
 
   const channels = await query;
+  const results = Promise.all(
+    Array.from(channels).map(async (channel) => {
+      return { ...JSON.parse(JSON.stringify(channel)), with_status: null };
+    })
+  ).then((results) => {
+    return results;
+  });
 
-  return channels;
+  return await results;
 };
 
 const pinnedMessage = async (user, data) => {
@@ -304,6 +352,74 @@ const reactionMessage = async (user, body) => {
   ]);
 };
 
+const getImagesGallery = async (user, channelId) => {
+  const channel = await Channel.findOne({
+    _id: channelId,
+    $or: [{ owner: user._id }, { members: user._id }],
+  });
+  if (!channel) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
+  }
+  const messages = await Message.find({
+    channel: channelId,
+    image: { $ne: null },
+  }).populate("sender");
+};
+
+const getLinks = async (user, channelId) => {
+  const channel = await Channel.findOne({
+    _id: channelId,
+    $or: [{ owner: user._id }, { members: user._id }],
+  });
+  if (!channel) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
+  }
+  const messages = await Message.find({
+    channel: channelId,
+    message: { $regex: /(https?:\/\/[^\s]+)/g },
+  });
+
+  return messages;
+};
+
+const getFiles = async (user, channelId) => {
+  const channel = await Channel.findOne({
+    _id: channelId,
+    $or: [{ owner: user._id }, { members: user._id }],
+  });
+  if (!channel) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
+  }
+  const messages = await Message.find({
+    channel: channelId,
+    file: { $ne: null },
+  }).populate("sender");
+
+  return messages;
+};
+
+const inviteMembersToChannel = async (user, params, data) => {
+  const { members, type } = data;
+  const channel = await Channel.findOne({
+    _id: params.channelId,
+    $or: [{ owner: user._id }, { members: user._id }],
+    type: type,
+  });
+  if (!channel) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
+  }
+  const users = await User.find({
+    _id: { $in: members },
+  });
+  if (users.length !== members.length) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a user!`);
+  }
+  const newMembers = users.map((user) => user._id);
+  channel.members = [...channel.members, ...newMembers];
+  await channel.save();
+  return channel.populate("members");
+};
+
 module.exports = {
   createDMChannel,
   createTextChannel,
@@ -317,4 +433,8 @@ module.exports = {
   getPinnedMessage,
   pinnedMessage,
   reactionMessage,
+  getLinks,
+  getImagesGallery,
+  getFiles,
+  inviteMembersToChannel,
 };

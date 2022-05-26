@@ -35,3 +35,13 @@ export const restoreMessage = (messageId) => {
 export const translateMessage = (messageId) => {
   return getRequest(`/api/v1/messages/translate/${messageId}`);
 };
+
+export const searchMessages = (channelId, options) => {
+  return getRequest(
+    `/api/v1/messages/${channelId}/search?content=${options.content}&page=${
+      options.page || 1
+    }&limit=${options.limit}&sort_by=${options.sort_by}&sort_order=${
+      options.sort_order
+    }`
+  );
+};

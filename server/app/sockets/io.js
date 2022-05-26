@@ -5,7 +5,7 @@ const passport = require("passport");
 const { jwtStrategy } = require("../configs/passport");
 const routes = require("../routes/socketRoute");
 const { getUserById } = require("../services/userService");
-
+const usersOnline = {};
 // https://philenius.github.io/web%20development/2021/03/31/use-passportjs-for-authentication-in-socket-io.html
 // authenticate socket.io connection using passport jwt strategy
 passport.use("jwt", jwtStrategy);
@@ -45,13 +45,24 @@ const setup = async (server, cors) => {
     // .use(wrapMiddlewareForSocketIo(passport.session()))
     .use(wrapMiddlewareForSocketIo(passport.authenticate(["jwt"])))
     .on("connection", (socket) => {
-      console.log("socket connected", socket.id);
-      socket.emit("connected", "hello");
+      // console.log("socket connected", socket.id);
+      // socket.emit("connected", "hello");
+      socket.on("userConnected", (user) => {
+        usersOnline[user.id] = { user: user, socketId: socket.id };
+        console.log("user connected", usersOnline);
+        io.emit("updateUserStatus", usersOnline);
+      });
       // init routes
       routes.map((route) =>
         socket.on(route.name, (data) => route.controller(socket, data))
       );
       socket.on("disconnect", () => {
+        Object.values(usersOnline).find((user) => {
+          if (user.socketId === socket.id) {
+            delete usersOnline[user.user.id];
+          }
+        });
+        io.emit("updateUserStatus", usersOnline);
         console.log("socket disconnected", socket.id);
       });
     });

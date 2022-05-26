@@ -45,7 +45,6 @@ export default function All({setActiveTab}) {
   const { data: friends } = AllFriends();
   const [allFriends, setAllFriends] = useState(friends);
 
-  console.log(friends);
   useEffect(() => {
     setAllFriends(friends);
   }, [friends]);

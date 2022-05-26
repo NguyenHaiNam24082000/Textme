@@ -4,14 +4,21 @@ import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { useNavigate } from "react-router";
 import { getOrCreateDMChannel } from "../../../apis/channel";
-import { cancelPendingRequestApi } from "../../../apis/friend";
+import {
+  blockFriendRequestApi,
+  cancelPendingRequestApi,
+} from "../../../apis/friend";
 import getSocket from "../../../apis/socket";
 import friendObject, {
   pendingDiscriminator,
   pendingStatus,
   pendingUsername,
 } from "../../../commons/friendObject";
-import { ALL_FRIENDS_KEY, OPEN_CHANNEL } from "../../../configs/queryKeys";
+import {
+  ALL_FRIENDS_KEY,
+  BLOCKED_FRIENDS_KEY,
+  OPEN_CHANNEL,
+} from "../../../configs/queryKeys";
 import { ME_SOCKET } from "../../../configs/socketRoute";
 import { GetMe } from "../../../store/userSlice";
 import ModalUserProfile from "../../Modals/ModalUserProfile";
@@ -56,6 +63,25 @@ export default function FriendItem({ user, friend }) {
         friend.sender.id === me.id ? friend.receiver.id : friend.sender.id;
       console.log(receiverId, "receiverId");
       socket.emit(ME_SOCKET.SEND_CANCEL_FRIEND_REQUEST, {
+        receiverId: receiverId,
+      });
+      setIsLoading(false);
+    } catch (err) {
+      // const result = apiErrorHandler(err);
+      setIsLoading(false);
+    }
+  };
+
+  const blockedHandler = async (e) => {
+    e.stopPropagation();
+    setIsLoading(true);
+    try {
+      await blockFriendRequestApi(friend.id);
+      cache.invalidateQueries(ALL_FRIENDS_KEY);
+      cache.invalidateQueries(BLOCKED_FRIENDS_KEY);
+      const receiverId =
+        friend.sender.id === me.id ? friend.receiver.id : friend.sender.id;
+      socket.emit(ME_SOCKET.SEND_BLOCK_FRIEND_REQUEST, {
         receiverId: receiverId,
       });
       setIsLoading(false);
@@ -128,7 +154,7 @@ export default function FriendItem({ user, friend }) {
               </ActionIcon>
             }
           >
-            <Menu.Item>Blocked Friend</Menu.Item>
+            <Menu.Item onClick={blockedHandler}>Blocked Friend</Menu.Item>
             <Menu.Item onClick={cancelPending}>Remove Friend</Menu.Item>
           </Menu>
         </Group>

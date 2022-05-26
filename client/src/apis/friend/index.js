@@ -23,3 +23,15 @@ export const acceptPendingRequestApi = (id) => {
 export const allFriendsRequestApi = () => {
   return getRequest("/api/v1/friend/all-friends");
 };
+
+export const blockFriendRequestApi = (id) => {
+  return patchRequest("/api/v1/friend/block-friend", { id });
+}
+
+export const unblockFriendRequestApi = (id) => {
+  return patchRequest("/api/v1/friend/unblock-friend", { id });
+}
+
+export const allBlockedFriendsRequestApi = () => {
+  return getRequest("/api/v1/friend/all-blocked-friends");
+}

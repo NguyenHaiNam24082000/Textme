@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { getMessages } from "../../../apis/messages";
 import { CHANNEL_MESSAGES_KEY } from "../../../configs/queryKeys";
 import Editor from "../../Editor";
+// import Editor from "../../LexicalEditor";
 import Message from "../../Message";
 import MockChat from "../../MockChat";
 import "./index.css";
@@ -95,7 +96,7 @@ function ChatArea({ channel, user }) {
   const [searchMember, setSearchMember] = useState("");
   const [members, setMembers] = useState([]);
   const [previousIdMember, setPreviousIdMember] = useState(null);
-  const [messages, setMessages] = useState([]);
+  // const [messages, setMessages] = useState([]);
   const [currentEditMessageId, setCurrentEditMessageId] = useState(null);
   const [currentMessageSelected, setCurrentMessageSelected] = useState(null);
   const dispatch = useDispatch();

@@ -73,12 +73,30 @@ const FloatingTrackContainer = styled.div`
   //   background: rgba(0, 0, 0, 0.5);
 `;
 
-export default function VideoCall() {
+const VideoBox = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  > video {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  :hover {
+    > i {
+      display: block;
+    }
+  }
+`;
+
+export default function VideoCall({ channel }) {
   const me = GetMe();
   const [openedModalPreviewVideo, setOpenedModalPreviewVideo] = useState(false);
   const [audioInput, setAudioInput] = useState([]);
   const [videoInput, setVideoInput] = useState([]);
-  const videoRef = useRef(null);
+  const userVideoRef = useRef(null);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const webcamRef = useRef(null);
@@ -87,9 +105,15 @@ export default function VideoCall() {
   const [prevClassName, setPrevClassName] = useState();
   const [openedSetting, setOpenedSetting] = useState(false);
   const [background, setBackground] = useState("none");
-  const [socket, setSocket] = useState();
-  const [ stream, setStream ] = useState()
-  const [ callerSignal, setCallerSignal ] = useState()
+  const [socket, setSocket] = useState(getSocket(me?.tokens?.access?.token));
+  const [stream, setStream] = useState();
+  const [callerSignal, setCallerSignal] = useState();
+  const [userVideoAudio, setUserVideoAudio] = useState({
+    localUser: { video: true, audio: true },
+  });
+  const peersRef = useRef(null);
+  const [peers, setPeers] = useState();
+  const userStream = useRef();
 
   useEffect(() => {
     if (openedSetting) {
@@ -129,9 +153,151 @@ export default function VideoCall() {
   }, [openedSetting, background]);
 
   useEffect(() => {
-    const newSocket = getSocket(me?.tokens?.access?.token);
-    setSocket(newSocket);
+    // const newSocket = getSocket(me?.tokens?.access?.token);
+    // if (!socket) {
+    //   setSocket(newSocket);
+    // }
+    // const peer = new Peer({
+    //   initiator: true,
+    //   trickle: false,
+    //   stream: videoRef.current.srcObject,
+    // });
+    // peer.on("signal", (data) => {
+    //   newSocket.emit(CHANNEL_SOCKET.CALL, {
+    //     to: channel.id,
+    //     signalData: data,
+    //     from: newSocket.id,
+    //   });
+    // });
+    // peer.on("stream", (stream) => {
+    //   // setPeer(peer)
+    //   // setStream(stream)
+    //   // setCall(true)
+    // });
+    // socket.on("callAccepted", (data) => {
+    //   peer.signal(data);
+    // });
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      const audioInputs = devices.filter(
+        (device) => device.kind === "audioinput"
+      );
+      const videoInputs = devices.filter(
+        (device) => device.kind === "videoinput"
+      );
+      setAudioInput(audioInputs);
+      setVideoInput(videoInputs);
+    });
+
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        userVideoRef.current.srcObject = stream;
+        userStream.current = stream;
+        socket.emit(CHANNEL_SOCKET.CALL, {
+          to: channel.id,
+          from: socket.id,
+        });
+      });
   }, []);
+
+  const toggleCameraAudio = (e) => {
+    const target = e.target.getAttribute("data-switch");
+
+    setUserVideoAudio((preList) => {
+      let videoSwitch = preList["localUser"].video;
+      let audioSwitch = preList["localUser"].audio;
+
+      if (target === "video") {
+        console.log(target);
+        const userVideoTrack =
+          userVideoRef.current.srcObject.getVideoTracks()[0];
+        videoSwitch = !videoSwitch;
+        if (videoSwitch) {
+          userVideoTrack.enabled = true;
+          userVideoTrack.start();
+        } else {
+          userVideoTrack.enabled = false;
+          userVideoTrack.stop();
+        }
+      } else {
+        const userAudioTrack =
+          userVideoRef.current.srcObject.getAudioTracks()[0];
+        audioSwitch = !audioSwitch;
+
+        if (userAudioTrack) {
+          userAudioTrack.enabled = audioSwitch;
+        } else {
+          userStream.current.getAudioTracks()[0].enabled = audioSwitch;
+        }
+      }
+
+      return {
+        ...preList,
+        localUser: { video: videoSwitch, audio: audioSwitch },
+      };
+    });
+
+    // socket.emit('BE-toggle-camera-audio', { roomId, switchTarget: target });
+  };
+
+  function createPeer(userId, caller, stream) {
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream,
+    });
+
+    peer.on("signal", (signal) => {
+      socket.emit(CHANNEL_SOCKET.CALL, {
+        to: channel.id,
+        signalData: signal,
+        from: socket.id,
+      });
+    });
+    peer.on("disconnect", () => {
+      peer.destroy();
+    });
+
+    return peer;
+  }
+
+  function addPeer(incomingSignal, callerId, stream) {
+    const peer = new Peer({
+      initiator: false,
+      trickle: false,
+      stream,
+    });
+
+    peer.on("signal", (signal) => {
+      socket.emit("BE-accept-call", { signal, to: callerId });
+    });
+
+    peer.on("disconnect", () => {
+      peer.destroy();
+    });
+
+    peer.signal(incomingSignal);
+
+    return peer;
+  }
+
+  function findPeer(id) {
+    return peersRef.current.find((p) => p.peerID === id);
+  }
+
+  function createUserVideo(peer, index, arr) {
+    return (
+      <VideoBox
+        className={`width-peer${peers.length > 8 ? "" : peers.length}`}
+        // onClick={expandScreen}
+        key={index}
+      >
+        {/* {writeUserName(peer.userName)} */}
+        {/* <FaIcon className='fas fa-expand' /> */}
+        {/* <VideoCard key={index} peer={peer} number={arr.length} /> */}
+      </VideoBox>
+    );
+  }
 
   const onResults = (results) => {
     contextRef.current.save();
@@ -261,17 +427,17 @@ export default function VideoCall() {
   //   }
   // };
 
-  const getVideo = () => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      });
-  };
-  useEffect(() => {
-    getVideo();
-  }, [videoRef]);
+  // const getVideo = () => {
+  //   navigator.mediaDevices
+  //     .getUserMedia({ video: true, audio: true })
+  //     .then((stream) => {
+  //       userVideoRef.current.srcObject = stream;
+  //       userVideoRef.current.play();
+  //     });
+  // };
+  // useEffect(() => {
+  //   getVideo();
+  // }, [userVideoRef]);
 
   const getDisplayMedia = () => {
     try {
@@ -304,10 +470,43 @@ export default function VideoCall() {
       // setPeer(peer)
       // setStream(stream)
       // setCall(true)
+      webcamRef.current.srcObject = stream;
     });
-    socket.on("callAccepted", (data) => {
-      peer.signal(data);
+    socket.on("callAccepted", ({ signalData }) => {
+      peer.signal(signalData);
     });
+  };
+
+  const clickCameraDevice = (id) => {
+    if (id) {
+      const deviceId = id;
+      const enabledAudio =
+        userVideoRef.current.srcObject.getAudioTracks()[0].enabled;
+      console.log(id);
+
+      navigator.mediaDevices
+        .getUserMedia({ video: { deviceId }, audio: enabledAudio })
+        .then((stream) => {
+          const newStreamTrack = stream
+            .getTracks()
+            .find((track) => track.kind === "video");
+          const oldStreamTrack = userStream.current
+            .getTracks()
+            .find((track) => track.kind === "video");
+
+          userStream.current.removeTrack(oldStreamTrack);
+          userStream.current.addTrack(newStreamTrack);
+
+          peersRef.current.forEach(({ peer }) => {
+            // replaceTrack (oldTrack, newTrack, oldStream);
+            peer.replaceTrack(
+              oldStreamTrack,
+              newStreamTrack,
+              userStream.current
+            );
+          });
+        });
+    }
   };
 
   return (
@@ -339,7 +538,8 @@ export default function VideoCall() {
         <video
           autoPlay
           muted
-          ref={videoRef}
+          playInline
+          ref={userVideoRef}
           className="absolute inset-0 z-10 w-full h-auto rounded-md"
         />
         {/* <video
@@ -369,10 +569,18 @@ export default function VideoCall() {
             <BsMicFill className="w-6 h-auto" />
           </ActionIcon>
           <div className="w-auto h-auto relative">
-            <ActionIcon size={56} radius="xl" variant="light">
+            <ActionIcon
+              size={56}
+              radius="xl"
+              variant="light"
+              onClick={toggleCameraAudio}
+              data-switch="video"
+            >
               <BsCameraVideoFill className="w-6 h-auto" />
             </ActionIcon>
             <Menu
+              size="xl"
+              closeOnItemClick={false}
               control={
                 <ActionIcon
                   size={20}
@@ -391,9 +599,8 @@ export default function VideoCall() {
                 videoInput.map((device) => (
                   <Menu.Item
                     key={device.deviceId}
-                    onClick={() => {
-                      console.log(device.deviceId);
-                    }}
+                    data-value={device.deviceId}
+                    onClick={() => clickCameraDevice(device.deviceId)}
                   >
                     {device.label}
                   </Menu.Item>
@@ -405,13 +612,18 @@ export default function VideoCall() {
             </Menu>
           </div>
           <div className="w-auto h-auto relative">
-            <ActionIcon size={56} radius="xl" variant="light">
+            <ActionIcon
+              size={56}
+              radius="xl"
+              variant="light"
+              onClick={toggleCameraAudio}
+              data-switch="audio"
+            >
               <BsMicFill className="w-6 h-auto" />
             </ActionIcon>
             <Menu
-              gutter={40}
               closeOnItemClick={false}
-              placement="center"
+              size="xl"
               control={
                 <ActionIcon
                   size={20}
@@ -424,10 +636,18 @@ export default function VideoCall() {
               }
               className="absolute bottom-0 right-0"
             >
-              <Menu.Label>Application</Menu.Label>
-              <Menu.Item>Settings</Menu.Item>
-              <Menu.Item>Messages</Menu.Item>
-              <Menu.Item>Gallery</Menu.Item>
+              <Menu.Label>MICROPHONE</Menu.Label>
+              {audioInput &&
+                audioInput.map((device) => (
+                  <Menu.Item
+                    key={device.deviceId}
+                    onClick={() => {
+                      console.log(device.deviceId);
+                    }}
+                  >
+                    {device.label}
+                  </Menu.Item>
+                ))}
             </Menu>
           </div>
           <Badge
@@ -542,7 +762,7 @@ export default function VideoCall() {
           <video
             className="w-96 h-52"
             style={{ borderRadius: 6, objectFit: "cover" }}
-            ref={videoRef}
+            // ref={userVideoRef}
           ></video>
         </div>
       </Modal>

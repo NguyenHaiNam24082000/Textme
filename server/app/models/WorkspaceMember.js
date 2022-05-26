@@ -30,8 +30,8 @@ const workspaceMemberSchema = new mongoose.Schema(
       default: "PENDING",
     },
   },
-  { timestamps: true },
   {
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }

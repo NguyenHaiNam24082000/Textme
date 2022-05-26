@@ -8,12 +8,15 @@ import VideoCall from "../../../components/VideoCall";
 import NSFW from "../../../components/Main/NSFW";
 import { DMChannelNavbar } from "../../../components/navigations";
 import { themeState } from "../../../recoil/themeState";
+import { isVisibleComplement } from "../../../store/uiSlice";
+import RightSidebar from "../../../components/navigations/RightSidebar";
 
 export default function Server({ channel }) {
   // useMeSocket();
   const [isContinue, setIsContinue] = useState(false);
   const { user } = useSelector((state) => state.user);
   const theme = useRecoilValue(themeState);
+  const isVisibleRightSidebar = useSelector(isVisibleComplement);
   const isNSFW = false;
   return (
     <MainBase>
@@ -25,9 +28,9 @@ export default function Server({ channel }) {
             {channel.type === "TEXT" ? (
               <ChatArea channel={channel} user={user} />
             ) : (
-              <VideoCall />
+              <VideoCall channel={channel} />
             )}
-            {/* <RightSidebar channel={channel}/> */}
+            {isVisibleRightSidebar && <RightSidebar channel={channel} />}
           </div>
         </>
       ) : (

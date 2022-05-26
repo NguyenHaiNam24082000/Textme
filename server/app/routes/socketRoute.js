@@ -1,7 +1,7 @@
 const { getConnection } = require("../lib/redisConnection");
 const redis = getConnection();
 const userService = require("../services/userService");
-const {CHANNEL_SOCKET, ME_SOCKET} = require("../configs/socketKeys");
+const { CHANNEL_SOCKET, ME_SOCKET } = require("../configs/socketKeys");
 
 const SOCKET_ID_IN_ROOM = "socketIdInRoom-";
 const USER = "user-";
@@ -13,6 +13,9 @@ module.exports = [
     name: ME_SOCKET.ONLINE,
     controller: async (socket, { userId, onlineUser }) => {
       await redis.set(`${ONLINE_USER}${socket.id}`, userId);
+      // usersOnline.push(userId);
+      // socket.emit("userOnline", usersOnline);
+      // console.log("user online", usersOnline);
       socket.join(userId);
     },
   },
@@ -44,7 +47,7 @@ module.exports = [
         redis.get(`${USER}${socket.id}`),
       ]);
 
-      console.log(channelId, userObject,"channelId, userObject");
+      console.log(channelId, userObject, "channelId, userObject");
 
       const newMessage = msg;
       newMessage.senderId = JSON.parse(userObject);
@@ -77,7 +80,7 @@ module.exports = [
   {
     name: ME_SOCKET.SEND_ACCEPT_FRIEND_REQUEST,
     controller: async (socket, { receiverId }) => {
-      console.log(receiverId,"receiverId");
+      console.log(receiverId, "receiverId");
       if (receiverId) {
         socket.to(receiverId).emit("friendAcceptRequest");
       }
@@ -87,7 +90,9 @@ module.exports = [
     name: CHANNEL_SOCKET.CHANNEL_SEND_DELETE_MESSAGE,
     controller: async (socket, { channelId, messageId }) => {
       if (channelId) {
-        socket.to(channelId).emit("roomDeleteMessage", { messageId, channelId });
+        socket
+          .to(channelId)
+          .emit("roomDeleteMessage", { messageId, channelId });
       }
     },
   },
@@ -96,6 +101,15 @@ module.exports = [
     controller: async (socket, message) => {
       if (message) {
         socket.to(message.channelId).emit("roomEditMessage", message);
+      }
+    },
+  },
+  {
+    name: CHANNEL_SOCKET.CALL,
+    controller: async (socket, { to, signalData, from }) => {
+      console.log(to, signalData, from, "call");
+      if (to) {
+        socket.to(to).emit("callAccepted", { signalData, from });
       }
     },
   },

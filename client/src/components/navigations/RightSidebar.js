@@ -1,3 +1,5 @@
+import { IconChevronLeft, IconClose } from "@douyinfe/semi-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ActionIcon,
   Button,
@@ -5,17 +7,26 @@ import {
   SegmentedControl,
   Text,
 } from "@mantine/core";
-import React, { useState } from "react";
-import { CSSTransition } from "react-transition-group";
-import SelectFriends from "./Right/SelectFriends";
-import PinnedList from "./Right/PinnedList";
 import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
-import { IconClose, IconChevronLeft } from "@douyinfe/semi-icons";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { CSSTransition } from "react-transition-group";
+import {
+  activeComplementSelector,
+  setActiveComplement,
+} from "../../store/uiSlice";
 import Info from "./Right/Info";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-export default function RightSidebar({ channel = null }) {
-  const [activeMenu, setActiveMenu] = useState("selectFriends");
+import PinnedList from "./Right/PinnedList";
+import SelectFriends from "./Right/SelectFriends";
+import Search from "./Right/Search";
+
+export default function RightSidebar({ channel = null, messages = [] }) {
+  const activeMenu = useSelector(activeComplementSelector);
+  const dispatch = useDispatch();
   const [searchMember, setSearchMember] = useState("");
+  const alreadyFriends = channel
+    ? channel.members.map((member) => member.id)
+    : [];
   return (
     <aside
       className="flex w-96 h-full flex-shrink-0 overflow-hidden relative"
@@ -31,7 +42,7 @@ export default function RightSidebar({ channel = null }) {
         unmountOnExit
       >
         <div className="flex flex-col w-full h-full">
-          {/* <Info setActiveMenu={setActiveMenu} /> */}
+          <Info messages={messages} />
         </div>
       </CSSTransition>
       <CSSTransition
@@ -42,7 +53,7 @@ export default function RightSidebar({ channel = null }) {
       >
         <div className="flex flex-col w-full h-full">
           <div className="flex w-full h-10 items-center justify-between p-2 flex-shrink-0">
-            <ActionIcon onClick={() => setActiveMenu("main")}>
+            <ActionIcon onClick={() => dispatch(setActiveComplement("main"))}>
               <IconChevronLeft />
             </ActionIcon>
             <ActionIcon>
@@ -98,7 +109,7 @@ export default function RightSidebar({ channel = null }) {
         <div className="flex flex-col w-full h-full">
           <div className="flex w-full h-10 p-2 flex-shrink-0">
             <div className="flex w-full items-center justify-between">
-              <ActionIcon onClick={() => setActiveMenu("main")}>
+              <ActionIcon onClick={() => dispatch(setActiveComplement("main"))}>
                 <IconChevronLeft />
               </ActionIcon>
               <Text weight={500}>Members</Text>
@@ -164,7 +175,7 @@ export default function RightSidebar({ channel = null }) {
               <Button
                 className="w-full bg-yellow-400"
                 onClick={() => {
-                  setActiveMenu("members");
+                  dispatch(setActiveComplement("members"));
                 }}
               >
                 Add Members
@@ -180,42 +191,7 @@ export default function RightSidebar({ channel = null }) {
         unmountOnExit
       >
         <div className="flex flex-col w-full h-full">
-          <div className="flex w-full h-10 items-center justify-between p-2 flex-shrink-0">
-            <ActionIcon onClick={() => setActiveMenu("main")}>
-              <IconChevronLeft />
-            </ActionIcon>
-            <ActionIcon>
-              <IconClose />
-            </ActionIcon>
-          </div>
-          <div className="flex flex-col px-4 w-full h-full">
-            <div className="flex flex-col w-full h-auto py-2 my-1 gap-2">
-              <div className="flex w-full">
-                <Input
-                  icon={<FontAwesomeIcon icon="fa-solid fa-magnifying-glass" />}
-                  className="flex-auto"
-                  searchable
-                  // value={searchMember}
-                  // onChange={onSearchChangeMembers}
-                  // ref={inputRef}
-                  placeholder="Pick all that you like"
-                  clearable
-                />
-                <Button
-                  leftIcon={<FontAwesomeIcon icon="fa-solid fa-filter" />}
-                >
-                  Filter
-                </Button>
-              </div>
-              <SegmentedControl
-                data={[
-                  { label: "Mới nhất", value: "New" },
-                  { label: "Cũ nhất", value: "Old" },
-                  { label: "Liên quan", value: "vue" },
-                ]}
-              />
-            </div>
-          </div>
+          <Search channel={channel} />
         </div>
       </CSSTransition>
       <CSSTransition
@@ -224,7 +200,7 @@ export default function RightSidebar({ channel = null }) {
         classNames="menu-secondary"
         unmountOnExit
       >
-        <SelectFriends setActiveMenu={setActiveMenu} />
+        <SelectFriends alreadyFriends={alreadyFriends} channel={channel} />
       </CSSTransition>
       {channel && (
         <CSSTransition

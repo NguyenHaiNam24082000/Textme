@@ -16,7 +16,15 @@ import { MdScreenShare } from "react-icons/md";
 import VideoCall from "../../../VideoCall";
 import ModalUserProfile from "../../../Modals/ModalUserProfile";
 import { useDispatch, useSelector } from "react-redux";
-import { mute, deafen, voiceConnected } from "../../../../store/uiSlice";
+import {
+  mute,
+  deafen,
+  voiceConnected,
+  expandedComplement,
+  setActiveComplement,
+  isVisibleComplement,
+} from "../../../../store/uiSlice";
+
 export default function DMChannelNavbar({ channel, user }) {
   const [voiceCall, setVoiceCall] = useState(false);
   const [videoCall, setVideoCall] = useState(false);
@@ -28,6 +36,7 @@ export default function DMChannelNavbar({ channel, user }) {
   const [playEnd, { stopEnd, isPlayingEnd }] = useSound(callEnd);
   const isMute = useSelector((state) => state.ui.isMute);
   const isDeafen = useSelector((state) => state.ui.isDeafen);
+  const isVisibleRightSidebar = useSelector(isVisibleComplement);
   const dispatch = useDispatch();
   useEffect(() => {
     let ringSound = null;
@@ -119,8 +128,12 @@ export default function DMChannelNavbar({ channel, user }) {
               </>
             )}
             <FontAwesomeIcon
-              icon="fa-solid fa-bell"
-              className="cursor-pointer fa-shake"
+              icon="fa-solid fa-user-plus"
+              className="cursor-pointer"
+              onClick={() => {
+                dispatch(setActiveComplement("selectFriends"));
+                !isVisibleRightSidebar && dispatch(expandedComplement());
+              }}
             />
             <FontAwesomeIcon
               icon="fa-solid fa-thumbtack"
@@ -135,10 +148,18 @@ export default function DMChannelNavbar({ channel, user }) {
             <FontAwesomeIcon
               icon="fa-solid fa-magnifying-glass"
               className="cursor-pointer"
+              onClick={() => {
+                dispatch(setActiveComplement("search"));
+                !isVisibleRightSidebar && dispatch(expandedComplement());
+              }}
             />
             <FontAwesomeIcon
               icon="fa-solid fa-circle-info"
               className="cursor-pointer"
+              onClick={() => {
+                dispatch(setActiveComplement("main"));
+                !isVisibleRightSidebar && dispatch(expandedComplement());
+              }}
             />
           </Group>
         </div>

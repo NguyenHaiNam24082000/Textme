@@ -30,12 +30,10 @@ const friendSchema = new mongoose.Schema(
     },
   },
   {
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
-  {
-    timestamps: true,
-  }
 );
 
 // add plugin that converts mongoose to json

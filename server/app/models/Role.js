@@ -1,35 +1,35 @@
 const mongoose = require("mongoose");
 
 const roleSchema = new mongoose.Schema(
-    {
-        name: {
-            type: String,
-            required: [true, "Name must be required"],
-            trim: true,
-        },
-        color: {
-            type: String,
-            default: "#000000",
-        },
-        workspace: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Workspace",
-        },
-        position: {
-            type: Number,
-            min: [0, "Position must be greater than 0"],
-            required: [true, "Position must be required"],
-        },
-        permissions: {
-            type: [Number],
-            default: [],
-        },
+  {
+    name: {
+      type: String,
+      required: [true, "Name must be required"],
+      trim: true,
     },
-    {
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true },
+    color: {
+      type: String,
+      default: "#000000",
     },
-    { timestamps: true }
+    workspace: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Workspace",
+    },
+    position: {
+      type: Number,
+      min: [0, "Position must be greater than 0"],
+      required: [true, "Position must be required"],
+    },
+    permissions: {
+      type: [Number],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
 const Role = mongoose.model("Role", roleSchema);

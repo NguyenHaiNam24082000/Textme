@@ -8,7 +8,7 @@ export function GetOpenChannels() {
     try {
       let dmChannels = await getAllDMChannels().then((res) => res.data);
       let groupChannels = await getAllGroupChannels().then((res) => res.data);
-      data = [...dmChannels, ...groupChannels];
+      data = [...Array.from(dmChannels), ...Array.from(groupChannels)];
     } catch (error) {
       console.log(error);
     }

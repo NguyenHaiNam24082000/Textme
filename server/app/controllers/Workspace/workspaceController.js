@@ -22,8 +22,18 @@ const createWorkspaceChannel = catchAsync(async (req, res, next) => {
   res.status(httpStatus.CREATED).send(channel);
 });
 
+const inviteMember = catchAsync(async (req, res, next) => {
+  const workspace = await workspaceService.inviteMember(
+    req.user,
+    req.params,
+    req.body
+  );
+  res.status(httpStatus.CREATED).send(workspace);
+});
+
 module.exports = {
-    createServer,
-    getAllWorkspaces,
-    createWorkspaceChannel
+  createServer,
+  getAllWorkspaces,
+  createWorkspaceChannel,
+  inviteMember,
 };

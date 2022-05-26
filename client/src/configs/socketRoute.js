@@ -15,5 +15,7 @@ export const ME_SOCKET = {
   SEND_FRIEND_REQUEST: "sendFriendRequest",
   SEND_ACCEPT_FRIEND_REQUEST: "sendFriendAcceptRequest",
   SEND_CANCEL_FRIEND_REQUEST: "sendCancelFriendRequest",
+  SEND_BLOCK_FRIEND_REQUEST: "sendBlockFriendRequest",
+  SEND_UNBLOCKED_FRIENDS_KEY: "unblockedFriends",
   LOGOUT: "logOut",
 };

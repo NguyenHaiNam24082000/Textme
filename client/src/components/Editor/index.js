@@ -10,6 +10,7 @@ import {
   convertFromRaw,
   convertToRaw,
   EditorState,
+  ContentState,
   getDefaultKeyBinding,
   RichUtils,
 } from "draft-js";
@@ -196,6 +197,7 @@ function EntryMembers(props) {
     ...parentProps
   } = props;
   const index = parentProps.id.split("-").slice(-1)[0];
+  console.log(searchValue, "aaaaaaa");
   useHotkeys([
     [
       `ctrl+${index}`,
@@ -215,20 +217,20 @@ function EntryMembers(props) {
     >
       <div className={theme?.mentionSuggestionsEntryContainer}>
         <div className={theme?.mentionSuggestionsEntryContainerLeft}>
-          <img
+          {/* <img
             src={mention.avatar}
             className={theme?.mentionSuggestionsEntryAvatar}
             role="presentation"
-          />
+          /> */}
         </div>
 
         <div className={theme?.mentionSuggestionsEntryContainerRight}>
           <div className={theme?.mentionSuggestionsEntryText}>
-            <Highlight highlight={searchValue}>{mention.name}</Highlight>
+            <Highlight highlight={searchValue}>{mention.username}</Highlight>
           </div>
 
           <div className={theme?.mentionSuggestionsEntryTitle}>
-            {mention.title}
+            {/* {mention.title} */}
           </div>
         </div>
       </div>
@@ -299,6 +301,20 @@ const handleFileChosen = async (file) => {
   });
 };
 
+const isShowEditor = (channel) => {
+  console.log(channel.with_status);
+  if (!channel.with_status) {
+    return true;
+  }
+  if (
+    channel.with_status === "BLOCKED_BY_SENDER" ||
+    channel.with_status === "BLOCKED_BY_RECEIVER"
+  ) {
+    return false;
+  }
+  return true;
+};
+
 export default function EditorDraft({ channel, user }) {
   const me = GetMe();
   const ref = useRef(null);
@@ -310,13 +326,11 @@ export default function EditorDraft({ channel, user }) {
   const [openMembers, setOpenMembers] = useState(false);
   const [openChannels, setOpenChannels] = useState(false);
   const [openSlash, setOpenSlash] = useState(false);
-  const [suggestionsMembers, setSuggestionsMembers] = useState(mentions["@"]);
-  const [suggestionsChannels, setSuggestionsChannels] = useState(
-    mentions["in:"]
-  );
+  const [suggestionsMembers, setSuggestionsMembers] = useState([]);
+  const [suggestionsChannels, setSuggestionsChannels] = useState([]);
   const replies = useSelector(repliesSelector);
   const dispatch = useDispatch();
-  const [suggestionsSlash, setSuggestionsSlash] = useState(mentions["/"]);
+  const [suggestionsSlash, setSuggestionsSlash] = useState([]);
   const [openedShareLocation, setOpenedShareLocation] = useState(false);
   const [openedEditor, setOpenedEditor] = useState(false);
   const [markdown, setMarkdown] = useState("");
@@ -331,7 +345,19 @@ export default function EditorDraft({ channel, user }) {
   const [openedGif, setOpenedGif] = useState(false);
   const [openedSticker, setOpenedSticker] = useState(false);
   const [embed, setEmbed] = useState([]);
+  const [mentions, setMentions] = useState([]);
   // const [isNSFW, setIsNSFW] = useState(false);
+  useEffect(() => {
+    if (channel && channel.members) {
+      setMentions({ ...mentions, "@": channel.members });
+      setSuggestionsMembers(channel.members);
+    } else {
+      setMentions({ ...mentions, "@": [] });
+      setSuggestionsMembers([]);
+    }
+    console.log(channel.members);
+  }, [channel]);
+  console.log(mentions);
   useEffect(() => {
     if (embed.length > 0) {
       handleSendMessage();
@@ -531,56 +557,26 @@ export default function EditorDraft({ channel, user }) {
   //   },
   // ];
 
-  useEffect(() => {
-    const elements = document.querySelectorAll('[data-contents="true"]');
-
-    elements.forEach((element) => element.classList.add("markdown"));
-    handleMarkdownEditorChange(markdown);
-
-    // const notificationsInterval = setInterval(() => {
-    //   notifications.showNotification({
-    //     title: `Notification 1`,
-    //     message: "Most notifications are added to queue",
-    //     autoClose: 10000,
-    //     icon: <FontAwesomeIcon icon="fa-solid fa-exclamation" />,
-    //     color: "red",
-    //   });
-    //   console.log("Notification 1");
-    // }, 5000);
-
-    // const a = setTimeout(() => {
-    //   clearInterval(notificationsInterval);
-    // }, 30000);
-
-    // return () => {
-    //   clearTimeout(a);
-    // };
-  }, []);
-
   const handleRichTextEditorChange = (newEditorState) => {
     // Convert input from draftjs state to markdown
     const rawEditorState = convertToRaw(newEditorState.getCurrentContent());
-    // console.log(rawEditorState);
-    const newMarkdown = draftToMarkdown(
-      rawEditorState
-      // {
-      //   styleItems: {
-      //     admonition: {
-      //       open: (block) => `:::${block.data.type || ""}\n`,
-      //       close: () => "\n:::"
-      //     }
-      //   },
-      //   entityItems: {
-      //     mention: {
-      //       open: (entity) =>
-      //         `<span class="mention-item" data-user-id="${entity.data.id}">`,
-      //       close: () => `</span>`
-      //     }
+    console.log(rawEditorState);
+    const newMarkdown = draftToMarkdown(rawEditorState, {
+      // styleItems: {
+      //   admonition: {
+      //     open: (block) => `:::${block.data.type || ""}\n`,
+      //     close: () => "\n:::"
       //   }
-      // }
-    );
+      // },
+      entityItems: {
+        mention: {
+          open: (entity) => `<@${entity.id}`,
+          close: () => `>`,
+        },
+      },
+    });
     // const decoratedEditorState = EditorState.set(newEditorState, { decorator });
-
+    console.log(newMarkdown);
     setEditorState(newEditorState);
     setMarkdown(
       // formatMarkdown(
@@ -661,12 +657,12 @@ export default function EditorDraft({ channel, user }) {
   };
 
   const {
+    plugins,
     MentionMembersSuggestions,
     MentionChannelsSuggestions,
     MentionSlashSuggestions,
     InlineToolbar,
     EmojiSuggestions,
-    plugins,
   } = useMemo(() => {
     const inlineToolbarPlugin = createInlineToolbarPlugin();
     const hashtagPlugin = createHashtagPlugin();
@@ -678,26 +674,26 @@ export default function EditorDraft({ channel, user }) {
       mentionPrefix: "@",
       supportWhitespace: true,
       mentionTrigger: "@",
-      mentionComponent: ({ entityKey, mention, className, decoratedText }) => (
-        <Badge
-          sx={{ paddingLeft: 0 }}
-          className="normal-case select-none"
-          size="lg"
-          radius="xl"
-          color="teal"
-          leftSection={
-            <Avatar
-              alt="Avatar for badge"
-              size={24}
-              mr={5}
-              radius="xl"
-              src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-            />
-          }
-        >
-          <span>{decoratedText}</span>
-        </Badge>
-      ),
+      // mentionComponent: ({ entityKey, mention, className, decoratedText }) => (
+      //   <Badge
+      //     sx={{ paddingLeft: 0 }}
+      //     className="normal-case select-none"
+      //     size="lg"
+      //     radius="xl"
+      //     color="teal"
+      //     leftSection={
+      //       <Avatar
+      //         alt="Avatar for badge"
+      //         size={24}
+      //         mr={5}
+      //         radius="xl"
+      //         src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
+      //       />
+      //     }
+      //   >
+      //     <span>{decoratedText}</span>
+      //   </Badge>
+      // ),
     });
     const mentionChanelsPlugin = createMentionPlugin({
       entityMutability: "IMMUTABLE",
@@ -727,10 +723,10 @@ export default function EditorDraft({ channel, user }) {
     const EmojiSuggestions = emojiPlugin.EmojiSuggestions;
     // eslint-disable-next-line no-shadow
     const plugins = [
+      mentionMembersPlugin,
       mentionChanelsPlugin,
       hashtagPlugin,
       mentionSlashPlugin,
-      mentionMembersPlugin,
       markdownShortcutsPlugin,
       inlineToolbarPlugin,
       EmojiSuggestions,
@@ -753,12 +749,15 @@ export default function EditorDraft({ channel, user }) {
     setEditorState(_editorState);
   }, []);
   const onOpenMembersChange = useCallback((_open) => {
+    console.log(_open);
     setOpenMembers(_open);
   }, []);
   const onOpenChannelsChange = useCallback((_open) => {
+    console.log(_open);
     setOpenChannels(_open);
   }, []);
   const onSearchChangeMembers = useCallback(({ trigger, value }) => {
+    console.log(value);
     setSuggestionsMembers(defaultSuggestionsFilter(value, mentions, trigger));
   }, []);
   const onSearchChangeChannels = useCallback(({ trigger, value }) => {
@@ -778,7 +777,7 @@ export default function EditorDraft({ channel, user }) {
   };
 
   return (
-    <div className="mx-4 relative flex-shrink-0 truncate overflow-ellipsis">
+    <div className="mx-4 relative flex-shrink-0 overflow-ellipsis">
       {channel &&
         replies[channel._id] &&
         replies[channel._id].map((reply, index) => (
@@ -872,7 +871,7 @@ export default function EditorDraft({ channel, user }) {
         accept="*"
         type="file"
         multiple={isMultiSelect}
-        autocomplete="off"
+        autoComplete="off"
         style={{ display: "none", pointerEvents: "none" }}
         onChange={async (e) => {
           const files = e.target.files;
@@ -921,9 +920,9 @@ export default function EditorDraft({ channel, user }) {
           }
         }}
       />
-      {/* {openedEditor ? (
-        <> */}
-      {/* <Popover
+      {isShowEditor(channel) ? (
+        <>
+          {/* <Popover
             opened={true}
             position="top"
             placement="start"
@@ -932,58 +931,61 @@ export default function EditorDraft({ channel, user }) {
             // onClose={() => setOpened(false)}
             className="w-full overflow-hidden"
             target={ */}
-      <div
-        style={{
-          border: "2px solid #e5e7eb",
-          borderRadius: `${
-            channel && replies[channel._id] && replies[channel._id].length
-              ? "0px 0px"
-              : "6px 6px"
-          } 6px 6px`,
-          backgroundColor: "#e5e7eb",
-        }}
-      >
-        {images.length > 0 && (
           <div
-            className="flex overflow-x-auto py-2 px-3"
             style={{
-              borderBottom: "2px solid #e5e7eb",
+              border: "2px solid #e5e7eb",
+              borderRadius: `${
+                channel && replies[channel._id] && replies[channel._id].length
+                  ? "0px 0px"
+                  : "6px 6px"
+              } 6px 6px`,
+              backgroundColor: "#e5e7eb",
+              height: "auto",
             }}
           >
-            <div className="flex w-fit gap-6 overflow-x-auto">
-              <AnimateSharedLayout type="crossfade">
-                {images
-                  .sort((a, b) => a.createdAt - b.createdAt)
-                  .map((img, index) => (
-                    <>
-                      <div
-                        key={index}
-                        className="group flex flex-col w-52 p-2 truncate overflow-ellipsis text-center bg-slate-300 rounded"
-                      >
-                        <div
-                          onClick={() => {
-                            if (img.type.includes("image")) {
-                              setSelectedId(index);
-                              console.log(index);
-                            }
-                          }}
-                          // style={{ border: "2px solid red" }}
-                          className="upload-image overflow-hidden relative w-48 h-48 cursor-pointer flex justify-center items-center"
-                        >
-                          {!img.type.includes("image") ? (
-                            <IconFile type={img.type} />
-                          ) : (
-                            <motion.img
-                              className="w-full h-full rounded object-cover"
-                              layoutId={img.id}
-                              src={img.url}
-                              id={`image-${img.id}`}
-                              style={{
-                                filter: img.nsfw ? "blur(30px)" : "blur(0px)",
+            {images.length > 0 && (
+              <div
+                className="flex overflow-x-auto py-2 px-3"
+                style={{
+                  borderBottom: "2px solid #e5e7eb",
+                }}
+              >
+                <div className="flex w-fit gap-6 overflow-x-auto">
+                  <AnimateSharedLayout type="crossfade">
+                    {images
+                      .sort((a, b) => a.createdAt - b.createdAt)
+                      .map((img, index) => (
+                        <>
+                          <div
+                            key={index}
+                            className="group flex flex-col w-52 p-2 truncate overflow-ellipsis text-center bg-slate-300 rounded"
+                          >
+                            <div
+                              onClick={() => {
+                                if (img.type.includes("image")) {
+                                  setSelectedId(index);
+                                  console.log(index);
+                                }
                               }}
-                            />
-                          )}
-                          {/* <Center className="absolute inset-0">
+                              // style={{ border: "2px solid red" }}
+                              className="upload-image overflow-hidden relative w-48 h-48 cursor-pointer flex justify-center items-center"
+                            >
+                              {!img.type.includes("image") ? (
+                                <IconFile type={img.type} />
+                              ) : (
+                                <motion.img
+                                  className="w-full h-full rounded object-cover"
+                                  layoutId={img.id}
+                                  src={img.url}
+                                  id={`image-${img.id}`}
+                                  style={{
+                                    filter: img.nsfw
+                                      ? "blur(30px)"
+                                      : "blur(0px)",
+                                  }}
+                                />
+                              )}
+                              {/* <Center className="absolute inset-0">
                     <Progress
                       percent={50}
                       type="circle"
@@ -994,324 +996,345 @@ export default function EditorDraft({ channel, user }) {
                       aria-label="Upload progress"
                     />
                   </Center> */}
-                          {/* <div className="flex absolute bottom-2 right-2 gap-2">
+                              {/* <div className="flex absolute bottom-2 right-2 gap-2">
                     <FontAwesomeIcon
                       icon="fa-solid fa-circle-exclamation"
                       className="w-5 h-5"
                       style={{ color: "red" }}
                     />
                   </div> */}
-                          <div className="group-hover:visible invisible flex absolute top-2 right-2 gap-2">
-                            <ActionIcon
-                              variant="light"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const imagesClone = [
-                                  ...images.filter(
-                                    (image) => image.id !== img.id
-                                  ),
-                                  {
-                                    ...img,
-                                    nsfw: !img.nsfw,
-                                  },
-                                ].sort((a, b) => a.createdAt - b.createdAt);
-                                setImages(imagesClone);
-                              }}
-                            >
-                              {img.nsfw ? (
-                                <FontAwesomeIcon icon="fa-solid fa-eye-slash" />
-                              ) : (
-                                <FontAwesomeIcon icon="fa-solid fa-eye" />
-                              )}
-                            </ActionIcon>
-                            <ActionIcon
-                              variant="light"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsMultiSelect(false);
-                                setIndexFileReplace(index);
-                                inputRef.current.click();
-                              }}
-                            >
-                              <FontAwesomeIcon icon="fa-solid fa-rotate" />
-                            </ActionIcon>
-                            <ActionIcon variant="light">
-                              <FontAwesomeIcon icon="fa-solid fa-pen" />
-                            </ActionIcon>
-                            <ActionIcon
-                              variant="light"
-                              color="red"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setImages(
-                                  images.filter((image) => image.id !== img.id)
-                                );
-                              }}
-                            >
-                              <FontAwesomeIcon icon="fa-solid fa-trash-can" />
-                            </ActionIcon>
-                          </div>
-                        </div>
-
-                        <span className="text-xs font-medium truncate overflow-ellipsis">
-                          {img.name}
-                        </span>
-                        <span
-                          className="truncate overflow-ellipsis"
-                          style={{ fontSize: 10 }}
-                        >
-                          {`${img.size}`.length < 7
-                            ? `${Math.round(+img.size / 1024).toFixed(2)} KB`
-                            : `${Math.round(+img.size / 1024 / 1024).toFixed(
-                                2
-                              )} MB`}
-                        </span>
-                      </div>
-                      <AnimatePresence>
-                        {selectedId !== null && (
-                          <div className="fixed inset-0 z-50">
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 0.6 }}
-                              exit={{ opacity: 0 }}
-                              key="overlay"
-                              className="overlay inset-0 z-50"
-                              style={{
-                                backgroundImage: `url(${images[selectedId].url})`,
-                                backgroundSize: "100% 100%",
-                                backgroundPosition: "50%",
-                                backgroundRepeat: "no-repeat",
-                                filter: "blur(7px) brightness(.7)",
-                              }}
-                              onClick={() => setSelectedId(null)}
-                            />
-                            <div
-                              className="single-image-container"
-                              // onClick={() => setSelectedId(null)}
-                            >
-                              <motion.img
-                                key="image"
-                                index={images[selectedId].id}
-                                className="single-image"
-                                style={{ height: "auto" }}
-                                layoutId={images[selectedId].id}
-                                src={images[selectedId].url}
-                              />
+                              <div className="group-hover:visible invisible flex absolute top-2 right-2 gap-2">
+                                <ActionIcon
+                                  variant="light"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const imagesClone = [
+                                      ...images.filter(
+                                        (image) => image.id !== img.id
+                                      ),
+                                      {
+                                        ...img,
+                                        nsfw: !img.nsfw,
+                                      },
+                                    ].sort((a, b) => a.createdAt - b.createdAt);
+                                    setImages(imagesClone);
+                                  }}
+                                >
+                                  {img.nsfw ? (
+                                    <FontAwesomeIcon icon="fa-solid fa-eye-slash" />
+                                  ) : (
+                                    <FontAwesomeIcon icon="fa-solid fa-eye" />
+                                  )}
+                                </ActionIcon>
+                                <ActionIcon
+                                  variant="light"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsMultiSelect(false);
+                                    setIndexFileReplace(index);
+                                    inputRef.current.click();
+                                  }}
+                                >
+                                  <FontAwesomeIcon icon="fa-solid fa-rotate" />
+                                </ActionIcon>
+                                <ActionIcon variant="light">
+                                  <FontAwesomeIcon icon="fa-solid fa-pen" />
+                                </ActionIcon>
+                                <ActionIcon
+                                  variant="light"
+                                  color="red"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setImages(
+                                      images.filter(
+                                        (image) => image.id !== img.id
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <FontAwesomeIcon icon="fa-solid fa-trash-can" />
+                                </ActionIcon>
+                              </div>
                             </div>
+
+                            <span className="text-xs font-medium truncate overflow-ellipsis">
+                              {img.name}
+                            </span>
+                            <span
+                              className="truncate overflow-ellipsis"
+                              style={{ fontSize: 10 }}
+                            >
+                              {`${img.size}`.length < 7
+                                ? `${Math.round(+img.size / 1024).toFixed(
+                                    2
+                                  )} KB`
+                                : `${Math.round(
+                                    +img.size / 1024 / 1024
+                                  ).toFixed(2)} MB`}
+                            </span>
                           </div>
-                        )}
-                      </AnimatePresence>
-                    </>
-                  ))}
-              </AnimateSharedLayout>
-            </div>
-          </div>
-        )}
-        {openedShareLocation && (
-          <MapBox
-            setEmbed={setEmbed}
-            setOpenedShareLocation={() => setOpenedShareLocation(false)}
-          />
-        )}
-        {openStaticToolbar && (
-          <Group
-            spacing="xs"
-            style={{
-              marginBottom: 4,
-            }}
-          >
-            <Group spacing={0}>
-              {renderMarkButton("Bold", "BOLD", <IconBold />)}
-              {renderMarkButton("Italic", "ITALIC", <IconItalic />)}
-              {renderMarkButton("Underline", "UNDERLINE", <IconUnderline />)}
-              {renderMarkButton(
-                "Strikethrough",
-                "STRIKETHROUGH",
-                <IconStrikeThrough />
-              )}
-              {/* <ActionIcon>
+                          <AnimatePresence>
+                            {selectedId !== null && (
+                              <div className="fixed inset-0 z-50">
+                                <motion.div
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 0.6 }}
+                                  exit={{ opacity: 0 }}
+                                  key="overlay"
+                                  className="overlay inset-0 z-50"
+                                  style={{
+                                    backgroundImage: `url(${images[selectedId].url})`,
+                                    backgroundSize: "100% 100%",
+                                    backgroundPosition: "50%",
+                                    backgroundRepeat: "no-repeat",
+                                    filter: "blur(7px) brightness(.7)",
+                                  }}
+                                  onClick={() => setSelectedId(null)}
+                                />
+                                <div
+                                  className="single-image-container"
+                                  // onClick={() => setSelectedId(null)}
+                                >
+                                  <motion.img
+                                    key="image"
+                                    index={images[selectedId].id}
+                                    className="single-image"
+                                    style={{ height: "auto" }}
+                                    layoutId={images[selectedId].id}
+                                    src={images[selectedId].url}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </AnimatePresence>
+                        </>
+                      ))}
+                  </AnimateSharedLayout>
+                </div>
+              </div>
+            )}
+            {openedShareLocation && (
+              <MapBox
+                setEmbed={setEmbed}
+                setOpenedShareLocation={() => setOpenedShareLocation(false)}
+              />
+            )}
+            {openStaticToolbar && (
+              <Group
+                spacing="xs"
+                style={{
+                  marginBottom: 4,
+                }}
+              >
+                <Group spacing={0}>
+                  {renderMarkButton("Bold", "BOLD", <IconBold />)}
+                  {renderMarkButton("Italic", "ITALIC", <IconItalic />)}
+                  {renderMarkButton(
+                    "Underline",
+                    "UNDERLINE",
+                    <IconUnderline />
+                  )}
+                  {renderMarkButton(
+                    "Strikethrough",
+                    "STRIKETHROUGH",
+                    <IconStrikeThrough />
+                  )}
+                  {/* <ActionIcon>
                       <IconBold />
                     </ActionIcon>
                     <ActionIcon>
                       <IconItalic />
                     </ActionIcon> */}
-              {/* <ActionIcon>
+                  {/* <ActionIcon>
                       <IconUnderline />
                     </ActionIcon> */}
-            </Group>
-            <Group spacing={0}>
-              {renderBlockButton(
-                "Bulleted List",
-                "unordered-list-item",
-                <IconList />
-              )}
-              {renderBlockButton(
-                "Numbered List",
-                "ordered-list-item",
-                <IconOrderedList />
-              )}
-            </Group>
-            <Group spacing={0}>
-              {renderBlockButton("Block Quote", "blockquote", <IconQuote />)}
-              <ActionIcon>
-                <IconCode />
-              </ActionIcon>
-              <ActionIcon>
-                <IconTerminal />
-              </ActionIcon>
-            </Group>
-          </Group>
-        )}
-        <div className="flex gap-1 items-center px-3 rounded-md flex-auto min-w-0">
-          <Menu
-            control={
-              <ActionIcon size="sm" radius="xl" variant="filled">
-                <FontAwesomeIcon icon="fa-solid fa-bolt" className="text-xs" />
-              </ActionIcon>
-            }
-          >
-            <Menu.Item
-              icon={<FontAwesomeIcon icon="fa-solid fa-upload" />}
-              onClick={() => {
-                setIsMultiSelect(true);
-                inputRef.current.click();
-              }}
-            >
-              Upload files
-            </Menu.Item>
-            <Menu.Item
-              icon={<FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />}
-            >
-              Priority Message
-            </Menu.Item>
-            <Menu.Item
-              icon={<FontAwesomeIcon icon="fa-solid fa-map-location-dot" />}
-              onClick={() => setOpenedShareLocation(!openedShareLocation)}
-            >
-              Location
-            </Menu.Item>
-            <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-microphone" />}>
-              Voice
-            </Menu.Item>
-            <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-video" />}>
-              Video
-            </Menu.Item>
-            <Menu.Item
-              icon={<FontAwesomeIcon icon="fa-solid fa-square-poll-vertical" />}
-            >
-              Create Polls
-            </Menu.Item>
-          </Menu>
-          <div
-            className="editor flex-auto min-w-0"
-            onClick={() => {
-              ref.current?.focus();
-            }}
-          >
-            <Editor
-              editorKey={"editor"}
-              editorState={editorState}
-              onChange={(state) => handleRichTextEditorChange(state)}
-              placeholder={
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span>Message</span>
-                  <Kbd className="py-0">Ctrl+R</Kbd>
-                </div>
-              }
-              plugins={plugins}
-              handleKeyCommand={handleKeyCommand}
-              handlePastedFiles={async (files) => {
-                // const fileLength = im;
-                if (files && files.length) {
-                  // const file = files[0];
-                  const results = await Promise.all(
-                    files.map(async (file) => {
-                      const fileContents = await handleFileChosen(file);
-                      return {
-                        id: uuid(),
-                        url: fileContents,
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        nsfw: false,
-                        watermark: "Neutral",
-                        createdAt: new Date(),
-                      };
-                    })
-                  );
-                  setImages([...images, ...results]);
+                </Group>
+                <Group spacing={0}>
+                  {renderBlockButton(
+                    "Bulleted List",
+                    "unordered-list-item",
+                    <IconList />
+                  )}
+                  {renderBlockButton(
+                    "Numbered List",
+                    "ordered-list-item",
+                    <IconOrderedList />
+                  )}
+                </Group>
+                <Group spacing={0}>
+                  {renderBlockButton(
+                    "Block Quote",
+                    "blockquote",
+                    <IconQuote />
+                  )}
+                  <ActionIcon>
+                    <IconCode />
+                  </ActionIcon>
+                  <ActionIcon>
+                    <IconTerminal />
+                  </ActionIcon>
+                </Group>
+              </Group>
+            )}
+            <div className="flex gap-1 items-center px-3 rounded-md flex-auto min-w-0 relative">
+              <Menu
+                control={
+                  <ActionIcon size="sm" radius="xl" variant="filled">
+                    <FontAwesomeIcon
+                      icon="fa-solid fa-bolt"
+                      className="text-xs"
+                    />
+                  </ActionIcon>
                 }
-              }}
-              handlePastedText={(text, html) => {
-                console.log(text, html);
-              }}
-              blockRenderMap={blockRenderMap}
-              keyBindingFn={(e) => {
-                if (e.keyCode === 13) {
-                  return false;
-                }
-                return getDefaultKeyBinding(e);
-              }}
-              ref={ref}
-            />
-            <EmojiSuggestions />
-            {!openStaticToolbar && <InlineToolbar />}
-            <MentionMembersSuggestions
-              open={openMembers}
-              onOpenChange={onOpenMembersChange}
-              suggestions={suggestionsMembers}
-              onSearchChange={onSearchChangeMembers}
-              onAddMention={(entry) => {
-                // get the mention object selected
-                console.log(entry);
-              }}
-              entryComponent={EntryMembers}
-              popoverContainer={({ children }) => (
-                <div
-                  className="bg-white z-50"
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    bottom: "calc(100% + 8px)",
-                    cursor: "pointer",
-                    border: "1px solid #d5d5d5",
-                    borderRadius: 6,
-                    padding: 8,
+              >
+                <Menu.Item
+                  icon={<FontAwesomeIcon icon="fa-solid fa-upload" />}
+                  onClick={() => {
+                    setIsMultiSelect(true);
+                    inputRef.current.click();
                   }}
                 >
-                  {children}
-                </div>
-              )}
-            />
-            <MentionChannelsSuggestions
-              open={openChannels}
-              onOpenChange={onOpenChannelsChange}
-              suggestions={suggestionsChannels}
-              onSearchChange={onSearchChangeChannels}
-              onAddMention={() => {
-                // get the mention object selected
-              }}
-              entryComponent={EntryChannels}
-              popoverContainer={({ children }) => (
-                <div
-                  className="bg-white z-50 shadow-md"
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    bottom: "calc(100% + 8px)",
-                    cursor: "pointer",
-                    border: "1px solid #d5d5d5",
-                    borderRadius: 8,
-                    padding: 8,
-                  }}
+                  Upload files
+                </Menu.Item>
+                <Menu.Item
+                  icon={
+                    <FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />
+                  }
                 >
-                  {children}
-                </div>
-              )}
-            />
-            {/* <MentionSlashSuggestions
+                  Priority Message
+                </Menu.Item>
+                <Menu.Item
+                  icon={<FontAwesomeIcon icon="fa-solid fa-map-location-dot" />}
+                  onClick={() => setOpenedShareLocation(!openedShareLocation)}
+                >
+                  Location
+                </Menu.Item>
+                <Menu.Item
+                  icon={<FontAwesomeIcon icon="fa-solid fa-microphone" />}
+                >
+                  Voice
+                </Menu.Item>
+                <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-video" />}>
+                  Video
+                </Menu.Item>
+                <Menu.Item
+                  icon={
+                    <FontAwesomeIcon icon="fa-solid fa-square-poll-vertical" />
+                  }
+                >
+                  Create Polls
+                </Menu.Item>
+              </Menu>
+              <div
+                className="editor flex-auto min-w-0"
+                onClick={() => {
+                  ref.current?.focus();
+                }}
+              >
+                <Editor
+                  editorKey={"editor"}
+                  editorState={editorState}
+                  onChange={(state) => handleRichTextEditorChange(state)}
+                  placeholder={<span>Message</span>}
+                  plugins={plugins}
+                  handleKeyCommand={handleKeyCommand}
+                  handlePastedFiles={async (files) => {
+                    // const fileLength = im;
+                    if (files && files.length) {
+                      // const file = files[0];
+                      const results = await Promise.all(
+                        files.map(async (file) => {
+                          const fileContents = await handleFileChosen(file);
+                          return {
+                            id: uuid(),
+                            url: fileContents,
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            nsfw: false,
+                            watermark: "Neutral",
+                            createdAt: new Date(),
+                          };
+                        })
+                      );
+                      setImages([...images, ...results]);
+                    }
+                  }}
+                  handlePastedText={(text, html) => {
+                    console.log(text, html);
+                  }}
+                  blockRenderMap={blockRenderMap}
+                  // keyBindingFn={(e) => {
+                  //   if (e.keyCode === 13) {
+                  //     return false;
+                  //   }
+                  //   return getDefaultKeyBinding(e);
+                  // }}
+                  ref={ref}
+                />
+                <EmojiSuggestions />
+                {/* {!openStaticToolbar && <InlineToolbar />} */}
+                <MentionMembersSuggestions
+                  // open={openMembers}
+                  open={true}
+                  onOpenChange={onOpenMembersChange}
+                  suggestions={suggestionsMembers}
+                  onSearchChange={onSearchChangeMembers}
+                  onAddMention={(entry) => {
+                    // get the mention object selected
+                    console.log(entry);
+                  }}
+                  entryComponent={EntryMembers}
+                  popoverContainer={({ children }) => (
+                    <div
+                      className="bg-white z-[1000]"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        bottom: "calc(100% + 8px)",
+                        cursor: "pointer",
+                        border: "1px solid #d5d5d5",
+                        borderRadius: 6,
+                        padding: 8,
+                      }}
+                    >
+                      <div>
+                        <div className="overflow-x-hidden overflow-y-scroll max-h-[490px] relative">
+                          {children}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                />
+                <MentionChannelsSuggestions
+                  open={openChannels}
+                  onOpenChange={onOpenChannelsChange}
+                  suggestions={suggestionsChannels}
+                  onSearchChange={onSearchChangeChannels}
+                  onAddMention={() => {
+                    // get the mention object selected
+                  }}
+                  entryComponent={EntryChannels}
+                  popoverContainer={({ children }) => (
+                    <div
+                      className="bg-white z-[1000] shadow-md"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        bottom: "calc(100% + 8px)",
+                        cursor: "pointer",
+                        border: "1px solid #d5d5d5",
+                        borderRadius: 8,
+                        padding: 8,
+                      }}
+                    >
+                      {children}
+                    </div>
+                  )}
+                />
+                {/* <MentionSlashSuggestions
                 open={openChannels}
                 onOpenChange={onOpenChannelsChange}
                 suggestions={suggestionsChannels}
@@ -1338,95 +1361,96 @@ export default function EditorDraft({ channel, user }) {
                   </div>
                 )}
               /> */}
-          </div>
-          <Group spacing="xs">
-            <ActionIcon
-              variant="transparent"
-              onClick={() => setOpenStaticToolbar((v) => !v)}
-            >
-              <VscCaseSensitive size={24} />
-            </ActionIcon>
-            <ActionIcon variant="transparent">
-              <span className="text-lg">😀</span>
-            </ActionIcon>
-            <Popover
-              opened={openedSticker}
-              onClose={() => setOpenedSticker(false)}
-              trapFocus={false}
-              placement="end"
-              spacing="sm"
-              width={425}
-              target={
+              </div>
+              <Group spacing="xs">
                 <ActionIcon
                   variant="transparent"
-                  onClick={() => setOpenedSticker((v) => !v)}
+                  onClick={() => setOpenStaticToolbar((v) => !v)}
                 >
-                  <FontAwesomeIcon
-                    icon="fa-solid fa-icons"
-                    className="text-lg"
-                  />
+                  <VscCaseSensitive size={24} />
                 </ActionIcon>
-              }
-            >
-              <Sticker />
-            </Popover>
-            <Popover
-              opened={openedGif}
-              onClose={() => setOpenedGif(false)}
-              trapFocus={false}
-              placement="end"
-              spacing="sm"
-              width={425}
-              target={
-                <ActionIcon
-                  variant="transparent"
-                  onClick={() => setOpenedGif((v) => !v)}
+                <ActionIcon variant="transparent">
+                  <span className="text-lg">😀</span>
+                </ActionIcon>
+                <Popover
+                  opened={openedSticker}
+                  onClose={() => setOpenedSticker(false)}
+                  trapFocus={false}
+                  placement="end"
+                  spacing="sm"
+                  width={425}
+                  target={
+                    <ActionIcon
+                      variant="transparent"
+                      onClick={() => setOpenedSticker((v) => !v)}
+                    >
+                      <FontAwesomeIcon
+                        icon="fa-solid fa-icons"
+                        className="text-lg"
+                      />
+                    </ActionIcon>
+                  }
                 >
-                  <IconGif className="w-6 h-6" />
-                </ActionIcon>
-              }
-            >
-              {openedGif && <Giphy setEmbed={setEmbed} />}
-            </Popover>
-            <Group
-              spacing={0}
-              style={{
-                background: "#fafafa",
-                borderRadius: 4,
-              }}
-            >
-              <ActionIcon onClick={() => handleSendMessage()}>
-                <FontAwesomeIcon icon="fa-solid fa-paper-plane" />
-              </ActionIcon>
-              <Menu
-                control={
-                  <ActionIcon>
-                    <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
+                  <Sticker />
+                </Popover>
+                <Popover
+                  opened={openedGif}
+                  onClose={() => setOpenedGif(false)}
+                  trapFocus={false}
+                  placement="end"
+                  spacing="sm"
+                  width={425}
+                  target={
+                    <ActionIcon
+                      variant="transparent"
+                      onClick={() => setOpenedGif((v) => !v)}
+                    >
+                      <IconGif className="w-6 h-6" />
+                    </ActionIcon>
+                  }
+                >
+                  {openedGif && <Giphy setEmbed={setEmbed} />}
+                </Popover>
+                <Group
+                  spacing={0}
+                  style={{
+                    background: "#fafafa",
+                    borderRadius: 4,
+                  }}
+                >
+                  <ActionIcon onClick={() => handleSendMessage()}>
+                    <FontAwesomeIcon icon="fa-solid fa-paper-plane" />
                   </ActionIcon>
-                }
-              >
-                <Menu.Item>Schedule for later</Menu.Item>
-                <Menu.Item>Save draft</Menu.Item>
-                <Menu.Item>Delete</Menu.Item>
-              </Menu>
-            </Group>
-          </Group>
-        </div>
-      </div>
-      <div
-        className="flex w-full h-6 justify-end items-center pl-3 pr-2 gap-3"
-        style={{
-          fontSize: 10,
-        }}
-      >
-        <div>
-          <span className="font-semibold">Enter</span> to send
-        </div>
-        <div>
-          <span className="font-semibold">Shift + Enter</span> to add a new line
-        </div>
-      </div>
-      {/* </>
+                  <Menu
+                    control={
+                      <ActionIcon>
+                        <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
+                      </ActionIcon>
+                    }
+                  >
+                    <Menu.Item>Schedule for later</Menu.Item>
+                    <Menu.Item>Save draft</Menu.Item>
+                    <Menu.Item>Delete</Menu.Item>
+                  </Menu>
+                </Group>
+              </Group>
+            </div>
+          </div>
+          <div
+            className="flex w-full h-6 justify-end items-center pl-3 pr-2 gap-3"
+            style={{
+              fontSize: 10,
+            }}
+          >
+            <div>
+              <span className="font-semibold">Enter</span> to send
+            </div>
+            <div>
+              <span className="font-semibold">Shift + Enter</span> to add a new
+              line
+            </div>
+          </div>
+        </>
       ) : (
         <div
           className="mb-6 flex flex-1 gap-1 text-sm overflow-hidden items-center justify-between cursor-pointer"
@@ -1455,7 +1479,7 @@ export default function EditorDraft({ channel, user }) {
             <Kbd>Ctrl+R</Kbd>
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 }
