@@ -1,5 +1,4 @@
 import "./App.css";
-import { useState, useEffect } from "react";
 import Login from "./pages/Login";
 import { AnimatePresence } from "framer-motion";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
@@ -15,10 +14,9 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Provider } from "react-redux";
 import store from "./store";
-import { MantineProvider } from "@mantine/core";
+import { Anchor, Group, MantineProvider, Text } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { SpotlightProvider } from "@mantine/spotlight";
 import {
   faUser as fasFaUser,
   faIdCard as fasFaIdCard,
@@ -109,6 +107,8 @@ import {
   faPaperPlane as fasFaPaperPlane,
   faIcons as fasFaIcons,
   faArrowUpRightFromSquare as fasFaArrowUpRightFromSquare,
+  faTicket as fasFaTicket,
+  faExpand as fasFaExpand,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -119,10 +119,18 @@ import {
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { NotificationsProvider } from "@mantine/notifications";
-import Friends from "./pages/Me/Friends";
 import Me from "./pages/Me";
+import { SpotlightProvider } from "@mantine/spotlight";
+import { Empty } from "@douyinfe/semi-ui";
+import { IllustrationNoResult } from "@douyinfe/semi-illustrations";
+
+/* The following is available after version 1.13.0 */
+import { IllustrationNoResultDark } from "@douyinfe/semi-illustrations";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 library.add(
+  fasFaExpand,
+  fasFaTicket,
   fasFaArrowUpRightFromSquare,
   fasFaIcons,
   fasFaPaperPlane,
@@ -228,13 +236,52 @@ const client = new QueryClient({
 });
 
 const actions = [
-  { title: "Home", group: "main" },
-  { title: "Docs", group: "main" },
-  { title: "Dashboard", group: "main" },
-  { title: "Component: Tabs", group: "search" },
-  { title: "Component: SegmentedControl", group: "search" },
-  { title: "Component: Button", group: "search" },
+  {
+    id: "home",
+    title: "Home",
+    group: "main",
+    icon: <FontAwesomeIcon icon="fa-solid fa-house" />,
+  },
+  {
+    id: "friends",
+    title: "Friends",
+    group: "main",
+    icon: <FontAwesomeIcon icon="fa-solid fa-user-group" />,
+  },
+  {
+    id: "invites",
+    title: "Invites",
+    group: "main",
+    icon: <FontAwesomeIcon icon="fa-solid fa-ticket" />,
+  },
 ];
+
+function ActionsWrapper({ children }) {
+  return (
+    <div>
+      {children}
+      <Group
+        position="apart"
+        px={15}
+        py="xs"
+        sx={(theme) => ({
+          borderTop: `1px solid ${
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[4]
+              : theme.colors.gray[2]
+          }`,
+        })}
+      >
+        <Text size="xs" color="dimmed">
+          Search powered by Textme
+        </Text>
+        <Anchor size="xs" href="#">
+          Learn more
+        </Anchor>
+      </Group>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -284,7 +331,27 @@ function App() {
               <ReactQueryDevtools />
               <AnimatePresence>
                 <MantineProvider>
-                  <SpotlightProvider actions={actions}>
+                  <SpotlightProvider
+                    actions={actions}
+                    highlightQuery
+                    nothingFoundMessage={
+                      <Empty
+                        image={
+                          <IllustrationNoResult
+                            style={{ width: 150, height: 150 }}
+                          />
+                        }
+                        darkModeImage={
+                          <IllustrationNoResultDark
+                            style={{ width: 150, height: 150 }}
+                          />
+                        }
+                        description={"No search results"}
+                      />
+                    }
+                    actionsWrapperComponent={ActionsWrapper}
+                    shortcut={["mod + P", "mod + K", "/"]}
+                  >
                     <ModalsProvider>
                       <NotificationsProvider>
                         <RecoilRoot>

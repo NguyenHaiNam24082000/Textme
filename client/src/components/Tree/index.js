@@ -10,9 +10,29 @@ import ModalChannelSettings from "../Modals/ModalChannelSettings";
 import { useHover } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import { voiceConnected } from "../../store/uiSlice";
+
+function updateTreeData(list, key, children) {
+  console.log(list, key, children);
+  return list.map((node) => {
+    if (node.key === key) {
+      return { ...node, children };
+    }
+    if (node.children) {
+      return {
+        ...node,
+        children: updateTreeData(node.children, key, children),
+      };
+    }
+
+    return node;
+  });
+}
 
 export default function TreeComponent({ server }) {
   const history = useNavigate();
+  const dispatch = useDispatch();
   const [openedModalCreateChannel, setOpenedModalCreateChannel] =
     useState(false);
   const [openedModalChannelSettings, setOpenedModalChannelSettings] =
@@ -22,7 +42,7 @@ export default function TreeComponent({ server }) {
   const [treeData, setTreeData] = useState([]);
   const [value, setValue] = useState(channelId);
   const [channel, setChannel] = useState(null);
-  const {t}= useTranslation();
+  const { t } = useTranslation();
   useEffect(() => {
     if (server?.channels) {
       setTreeData([
@@ -30,6 +50,7 @@ export default function TreeComponent({ server }) {
           label: "Channels",
           value: "Channels",
           key: "0",
+          channel: null,
           button: (
             <ActionIcon
               size="sm"
@@ -47,6 +68,7 @@ export default function TreeComponent({ server }) {
               label: channel.channel.name,
               value: channel.channel._id,
               key: `0-${channel.position}`,
+              channel: channel,
               icon:
                 channel.channel.type === "TEXT" ? (
                   <IconHash />
@@ -54,6 +76,18 @@ export default function TreeComponent({ server }) {
                   <FontAwesomeIcon icon="fa-solid fa-volume-high" />
                 ),
               click: () => {
+                if (channel.channel.type === "VOICE") {
+                  setTreeData((v) =>
+                    updateTreeData(v, `0-${channel.position}`, [
+                      {
+                        label: "Channels",
+                        value: "Channels",
+                        key: `0-${channel.position}-1`,
+                      },
+                    ])
+                  );
+                  dispatch(voiceConnected(true));
+                }
                 history(`/channel/${server._id}/${channel.channel._id}`);
               },
               button: (
@@ -76,7 +110,7 @@ export default function TreeComponent({ server }) {
     }
   }, [server]);
   const renderLabel = ({ className, onExpand, onClick, data, expandIcon }) => {
-    const { label, icon, button, click, value } = data;
+    const { label, icon, button, click, value, channel } = data;
     const isActive = value === channelId;
     const isLeaf = !(data.children && data.children.length);
     return (
@@ -89,7 +123,12 @@ export default function TreeComponent({ server }) {
                 typeof click === "function" && click();
                 typeof onClick === "function" && onClick();
               }
-            : onExpand
+            : () => {
+                if (channel.channel.type === "VOICE") {
+                  history(`/channel/${server._id}/${channel.channel._id}`);
+                }
+                onExpand();
+              }
         }
         style={{
           "--semi-tree-option-selected": isActive ? "#e1e1e1" : "",
@@ -166,6 +205,7 @@ export default function TreeComponent({ server }) {
           treeData={treeData}
           // defaultValue="Shanghai"
           // value={searchKey}
+          expandAll
           value={value || channelId}
           onChange={(value) => {
             setValue(value);

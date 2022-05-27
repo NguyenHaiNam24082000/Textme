@@ -13,6 +13,7 @@ const workspaceSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
+      default: null,
       // default: "https://i.imgur.com/X2JhY8y.png",
     },
     owner: {

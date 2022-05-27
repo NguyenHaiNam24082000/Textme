@@ -22,31 +22,36 @@ import Discover from "./Discover";
 import { GetAllWorkspaces } from "../../reactQuery/workspace";
 import { GetOpenChannels } from "../../reactQuery/channel";
 import Invite from "./Invite";
+import { registerSpotlightActions, useSpotlight } from "@mantine/spotlight";
+import { GetMe } from "../../store/userSlice";
+import { Avatar } from "@mantine/core";
 // import Server from "./Server";
 
-const MainBase = ({ location }) => {
-  // useEffect(() => {
-  //   switch (true) {
-  //     case useMatch("/channel/@me/:channelId"):
-  //       return <DMPage />;
-  //     case useMatch("/channel/:server/:channel"):
-  //       return <Server />;
-  //     case useMatch("/discover"):
-  //       return <Discover />;
-  //     case useMatch("/friends"):
-  //       return <Friends />;
-  //     default:
-  //       return <Home />;
-  //   }
-  // }, [location]);
-  return <Discover />;
-};
+// const MainBase = ({ location }) => {
+//   // useEffect(() => {
+//   //   switch (true) {
+//   //     case useMatch("/channel/@me/:channelId"):
+//   //       return <DMPage />;
+//   //     case useMatch("/channel/:server/:channel"):
+//   //       return <Server />;
+//   //     case useMatch("/discover"):
+//   //       return <Discover />;
+//   //     case useMatch("/friends"):
+//   //       return <Friends />;
+//   //     default:
+//   //       return <Home />;
+//   //   }
+//   // }, [location]);
+//   return <Discover />;
+// };
 
 export default function Me() {
   useMeSocket();
+  const me = GetMe();
   //   const match = useRouteMatch();
   const { data: channels } = GetOpenChannels();
   const { data: servers } = GetAllWorkspaces();
+  const spotlight = useSpotlight();
   const location = useLocation();
   const isVisibleChanel = useSelector(isVisibleChanelSelector);
   const [play] = useSound(sound, {
@@ -75,6 +80,106 @@ export default function Me() {
       setServer(null);
     }
   }, [params]);
+
+  useEffect(() => {
+    if (channels && servers && servers.length > 0 && channels.length > 0) {
+      const l = [
+        ...channels.map((channel) => {
+          let { name } = channel;
+          name =
+            channel.type === "GROUP"
+              ? channel.name === null
+                ? channel.members.map((member) => member.username).join(", ")
+                : channel.name
+              : channel.members[0]._id !== me._id
+              ? channel.members[0].username
+              : channel.members[1].username;
+          return {
+            id: channel.id,
+            title: name,
+            description: channel.topic,
+            icon:
+              channel.type === "GROUP" ? (
+                <div className="relative">
+                  <Avatar
+                    src={channel.owner.avatar_url}
+                    radius="xl"
+                    size={12}
+                    style={{
+                      height: "calc(100% * (2/3))",
+                      border: "2px solid #fff",
+                    }}
+                    className="absolute left-0 bottom-0 z-[1]"
+                    color={`#${channel.owner.accent_color.toString(16)}`}
+                  >
+                    {channel.owner.username[0]}
+                  </Avatar>
+                  <Avatar
+                    src={channel.members[0].avatar_url}
+                    radius="xl"
+                    size={12}
+                    style={{ height: "calc(100% * (2/3))" }}
+                    className="absolute right-0 top-0 z-0"
+                    color={`#${channel.members[0].accent_color.toString(16)}`}
+                  >
+                    {channel.members[0].username[0]}
+                  </Avatar>
+                </div>
+              ) : (
+                <Avatar
+                  src={
+                    channel.members[0]._id !== me._id
+                      ? channel.members[0].avatar_url
+                      : channel.members[1].avatar_url
+                  }
+                  radius="xl"
+                  size={20}
+                  color={`#${
+                    channel.members[0]._id !== me._id
+                      ? channel.members[0].accent_color.toString(16)
+                      : channel.members[1].accent_color.toString(16)
+                  }`}
+                >
+                  {channel.members[0]._id !== me._id
+                    ? channel.members[0].username[0]
+                    : channel.members[1].username[0]}
+                </Avatar>
+              ),
+            group: "Channel",
+            keywords: [...channel.members.map((member) => member.username)],
+          };
+        }),
+        ...servers.map((server) => {
+          return {
+            id: server.id,
+            title: server.name,
+            // description: server.description,
+            group: "Workspace",
+            icon: (
+              <Avatar src={server.avatar} radius="xl" size={20}>
+                {server.name[0]}
+              </Avatar>
+            ),
+            keywords: [...server.tags],
+          };
+        }),
+      ];
+      console.log(l);
+      // console.log(
+      //   servers.map((server) => {
+      //     return server.channels.map((channel) => {
+      //       return {
+      //         id: channel.channel.id,
+      //         title: channel.channel.name,
+      //         description: channel.channel.topic,
+      //         group: "Channel",
+      //       };
+      //     });
+      //   })
+      // );
+      spotlight.registerActions([...l]);
+    }
+  }, [channels, servers, me]);
 
   console.log("channel", channel, server);
 

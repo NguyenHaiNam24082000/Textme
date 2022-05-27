@@ -185,13 +185,9 @@ const userSchema = new mongoose.Schema(
     nickname: {
       type: String,
     },
-    avatar_urls: {
+    avatar_url: {
       type: String,
       default: null,
-    },
-    mfa_enabled: {
-      type: Boolean,
-      default: false,
     },
     banner: {
       type: String,
@@ -211,12 +207,6 @@ const userSchema = new mongoose.Schema(
     time_format: {
       type: Number,
       enum: [12, 24],
-    },
-    off_days: {
-      type: Array,
-      items: {
-        type: Number,
-      },
     },
   },
   {
@@ -265,6 +255,7 @@ userSchema.methods.isPasswordMatch = async function (password) {
 userSchema.pre("save", async function (next) {
   const user = this;
   if (user.isModified("password")) {
+    user.accent_color = Math.floor(Math.random() * 16777215);
     user.password = await bcrypt.hash(user.password, 8);
   }
   next();

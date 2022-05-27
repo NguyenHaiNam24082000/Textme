@@ -13,5 +13,5 @@ export const updateProfile = (id, payload) => {
 };
 
 export const getUsers = (payload) => {
-  return getRequest(`/api/v1/users/get-users`, payload);
+  return getRequest(`/api/v1/users/get-users?q=${payload}`);
 };

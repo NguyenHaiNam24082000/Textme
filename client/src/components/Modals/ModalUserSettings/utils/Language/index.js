@@ -17,7 +17,7 @@ export default function Language() {
       <div className="flex flex-col w-full">
         <div className="flex flex-col w-full gap-2 relative">
           <h3 className="text-xl font-semibold mb-3">Language</h3>
-          Định dạng vùng Van ban thanh giong noi
+          {/* Định dạng vùng Van ban thanh giong noi
           <Select
             label="Your favorite framework/library"
             placeholder="Pick one"
@@ -42,7 +42,7 @@ export default function Language() {
           <div className="flex flex-col w-full h-64 rounded-md gap-2 relative bg-slate-300">
             <Sound />
           </div>
-          phiên dich Choose your language
+          phiên dich Choose your language */}
           {langs &&
             langs.map((lang) => (
               <Checkbox

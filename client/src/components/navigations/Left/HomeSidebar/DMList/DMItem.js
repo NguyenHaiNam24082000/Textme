@@ -1,8 +1,4 @@
-import {
-  Avatar, Group,
-  Text,
-  UnstyledButton
-} from "@mantine/core";
+import { Avatar, Group, Text, UnstyledButton } from "@mantine/core";
 import moment from "moment";
 import React from "react";
 import { useNavigate } from "react-router";
@@ -25,27 +21,46 @@ export default function DMItem({ user, channel, match }) {
             {channel.type === "GROUP" ? (
               <>
                 <Avatar
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=250&amp;q=80"
+                  src={channel.owner.avatar_url}
                   radius="xl"
                   style={{
                     height: "calc(100% * (2/3))",
                     border: "2px solid #fff",
                   }}
                   className="absolute left-0 bottom-0 z-[1]"
-                />
+                  color={`#${channel.owner.accent_color.toString(16)}`}
+                >
+                  {channel.owner.username[0]}
+                </Avatar>
                 <Avatar
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=250&amp;q=80"
+                  src={channel.members[0].avatar_url}
                   radius="xl"
                   style={{ height: "calc(100% * (2/3))" }}
                   className="absolute right-0 top-0 z-0"
-                />
+                  color={`#${channel.members[0].accent_color.toString(16)}`}
+                >
+                  {channel.members[0].username[0]}
+                </Avatar>
               </>
             ) : (
               <Avatar
-                src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/grapefruit-slice-332-332.jpg"
+                src={
+                  channel.members[0]._id !== user._id
+                    ? channel.members[0].avatar_url
+                    : channel.members[1].avatar_url
+                }
                 radius="xl"
                 size="lg"
-              />
+                color={`#${
+                  channel.members[0]._id !== user._id
+                    ? channel.members[0].accent_color.toString(16)
+                    : channel.members[1].accent_color.toString(16)
+                }`}
+              >
+                {channel.members[0]._id !== user._id
+                  ? channel.members[0].username[0]
+                  : channel.members[1].username[0]}
+              </Avatar>
             )}
           </div>
 
@@ -67,7 +82,9 @@ export default function DMItem({ user, channel, match }) {
                   size="xs"
                   weight={500}
                 >
-                  {channel.lastMessage.content}
+                  {channel.lastMessage.systemMessage
+                    ? "Ban co tin nhan he thong"
+                    : channel.lastMessage.content}
                 </Text>
                 <Text color="dimmed" size="xs">
                   · {moment(channel.lastMessage.createdAt).fromNow()}

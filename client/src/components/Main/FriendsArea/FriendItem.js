@@ -99,8 +99,14 @@ export default function FriendItem({ user, friend }) {
         onClick={() => setOpenedModalUserProfile(true)}
       >
         <Group spacing="sm">
-          <Avatar size="lg" radius="xl">
-            Ab
+          <Avatar
+            color={`#${friendObject(user, friend).accent_color.toString(16)}`}
+            size="lg"
+            radius="xl"
+            src={friendObject(user, friend).avatar_url}
+          >
+            {!friendObject(user, friend).avatar_url &&
+              pendingUsername(user, friend)[0]}
           </Avatar>
           <div>
             <div className="flex items-center">

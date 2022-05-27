@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ActionIcon, Group, Text } from "@mantine/core";
+import { ActionIcon, Avatar, Group, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import getSocket from "../../../../apis/socket";
 import { useQueryClient } from "react-query";
@@ -10,6 +10,11 @@ import {
 } from "../../../../configs/queryKeys";
 import { ME_SOCKET } from "../../../../configs/socketRoute";
 import { unblockFriendRequestApi } from "../../../../apis/friend";
+import friendObject, {
+  pendingDiscriminator,
+  pendingStatus,
+  pendingUsername,
+} from "../../../../commons/friendObject";
 
 function BlockedFriendItem({ user, friend }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -42,19 +47,28 @@ function BlockedFriendItem({ user, friend }) {
       className="w-full p-2 rounded-md cursor-pointer hover:bg-slate-300 group"
     >
       <Group spacing="sm">
-        {/* <Avatar size={40} src={item.avatar} radius={40} /> */}
+        <Avatar
+          color={`#${friendObject(user, friend).accent_color.toString(16)}`}
+          size="lg"
+          radius="xl"
+          src={friendObject(user, friend).avatar_url}
+        >
+          {!friendObject(user, friend).avatar_url &&
+            pendingUsername(user, friend)[0]}
+        </Avatar>
         <div>
           <div className="flex items-center">
-            {/* <Text size="sm" weight={500}>
-                  {pendingUsername(user, friend)}
-                </Text>
-                <Text
-                  color="dimmed"
-                  className="group-hover:opacity-100 opacity-0"
-                >{`#${pendingDiscriminator(user, friend)}`}</Text> */}
+            <Text size="lg" weight={500}>
+              {pendingUsername(user, friend)}
+            </Text>
+            <Text
+              color="dimmed"
+              size="sm"
+              className="group-hover:opacity-100 opacity-0"
+            >{`#${pendingDiscriminator(user, friend)}`}</Text>
           </div>
           <Text color="dimmed" size="xs">
-            {/* {pendingStatus(user, friend)} */}
+            {pendingStatus(user, friend)}
           </Text>
         </div>
       </Group>

@@ -46,6 +46,8 @@ import Peer from "simple-peer";
 import { GetMe } from "../../store/userSlice";
 import getSocket from "../../apis/socket";
 import { CHANNEL_SOCKET } from "../../configs/socketRoute";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useFullscreen } from "@mantine/hooks";
 
 const backgrounds = [
   bg1,
@@ -93,6 +95,7 @@ const VideoBox = styled.div`
 
 export default function VideoCall({ channel }) {
   const me = GetMe();
+  const { ref, toggle, fullscreen } = useFullscreen();
   const [openedModalPreviewVideo, setOpenedModalPreviewVideo] = useState(false);
   const [audioInput, setAudioInput] = useState([]);
   const [videoInput, setVideoInput] = useState([]);
@@ -510,7 +513,7 @@ export default function VideoCall({ channel }) {
   };
 
   return (
-    <div className="bg-white flex w-full h-full relative">
+    <div ref={ref} className="bg-black flex w-full h-full relative">
       {/* <FloatingTrackContainer>
         <FloatingReactionItem />
       </FloatingTrackContainer>
@@ -557,6 +560,7 @@ export default function VideoCall({ channel }) {
         /> */}
       </div>
       <div className="px-2 w-full h-14 flex items-center justify-between absolute bottom-2 left-0">
+        <div></div>
         <Group spacing="xs">
           <ActionIcon
             size={56}
@@ -650,33 +654,25 @@ export default function VideoCall({ channel }) {
                 ))}
             </Menu>
           </div>
-          <Badge
-            count={<IconChevronDown />}
-            theme="solid"
-            position="rightBottom"
-            style={{
-              backgroundColor: "var(--semi-color-primary)",
-              borderRadius: "50%",
-              width: 20,
-              height: 20,
-              padding: 2,
-              bottom: 10,
-              right: 10,
-              cursor: "pointer",
-            }}
+          <ActionIcon
+            size={56}
+            radius="xl"
+            variant="light"
+            onClick={getDisplayMedia}
           >
-            <ActionIcon
-              size={56}
-              radius="xl"
-              variant="light"
-              onClick={getDisplayMedia}
-            >
-              <MdOutlineScreenShare className="w-6 h-auto" />
-            </ActionIcon>
-          </Badge>
+            <MdOutlineScreenShare className="w-6 h-auto" />
+          </ActionIcon>
+          <ActionIcon size={56} radius="xl" variant="light">
+            <FontAwesomeIcon
+              icon="fa-solid fa-phone"
+              className="rotate-[135deg]"
+            />
+          </ActionIcon>
         </Group>
         <Group>
-          <Button variant="light">Controls</Button>
+          <ActionIcon onClick={toggle}>
+            <FontAwesomeIcon icon="fa-solid fa-expand" />
+          </ActionIcon>
           <Button variant="light" color="red">
             Leave
           </Button>

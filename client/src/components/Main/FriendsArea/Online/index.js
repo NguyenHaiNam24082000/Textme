@@ -3,9 +3,12 @@ import { Empty } from "@douyinfe/semi-ui";
 import { TextInput } from "@mantine/core";
 import { Search } from "tabler-icons-react";
 import { GetAllUsersOnline } from "../../../../reactQuery/user";
+import { useSelector } from "react-redux";
+import FriendItem from "../FriendItem";
 
 export default function Online() {
-  const { data: users } = GetAllUsersOnline();
+  const { user } = useSelector((state) => state.user);
+  const { data: friends } = GetAllUsersOnline();
   return (
     <div>
       <TextInput
@@ -14,13 +17,16 @@ export default function Online() {
         placeholder="Search"
         // onChange={handleSearch}
       />
-      {users && Object.keys(users).length > 0 && (
+      {friends && Object.keys(friends).length > 0 && (
         <div className="flex flex-col">
-          {Object.keys(users).map((key) => (
-            <div className="flex flex-col" key={key}>
-              {key}
-            </div>
-          ))}
+          {Object.values(friends).map((friend) => {
+            if (friend.id !== user.id) {
+              return (
+                <FriendItem key={friend?.id} friend={friend} user={user} />
+              );
+            }
+            return null;
+          })}
         </div>
       )}
       <Empty

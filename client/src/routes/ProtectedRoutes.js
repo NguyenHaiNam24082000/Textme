@@ -1,6 +1,4 @@
-import { useEffect } from "react";
-import { Outlet } from "react-router";
-import { useNavigate } from "react-router";
+import { Outlet, useNavigate } from "react-router";
 
 const useAuth = () => {
   const user = localStorage.getItem("user");
@@ -10,10 +8,10 @@ const useAuth = () => {
 const ProtectedRoutes = () => {
   const history = useNavigate();
   const isAuth = useAuth();
-  // useEffect(() => {
-  //   !isAuth && history("/login");
-  // }, [isAuth]);
-  return !isAuth ? history("/login") : <Outlet />;
+  if (!isAuth) {
+    history("/login");
+  }
+  return <Outlet />;
 };
 
 export default ProtectedRoutes;

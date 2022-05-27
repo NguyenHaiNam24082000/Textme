@@ -3,8 +3,42 @@ import { Emoji } from "emoji-mart";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  BallSpinner, BarsSpinner, CircleSpinner, ClapSpinner, ClassicSpinner, CombSpinner, CubeSpinner, DominoSpinner, FillSpinner, FireworkSpinner, FlagSpinner, FlapperSpinner, GooSpinner, GridSpinner, GuardSpinner, HeartSpinner, HoopSpinner, ImpulseSpinner, JellyfishSpinner, MagicSpinner, MetroSpinner, PongSpinner, PulseSpinner, PushSpinner, RainbowSpinner,
-  RingSpinner, RotateSpinner, SequenceSpinner, SphereSpinner, SpiralSpinner, StageSpinner, SwapSpinner, SwishSpinner, TraceSpinner, WaveSpinner, WhisperSpinner
+  BallSpinner,
+  BarsSpinner,
+  CircleSpinner,
+  ClapSpinner,
+  ClassicSpinner,
+  CombSpinner,
+  CubeSpinner,
+  DominoSpinner,
+  FillSpinner,
+  FireworkSpinner,
+  FlagSpinner,
+  FlapperSpinner,
+  GooSpinner,
+  GridSpinner,
+  GuardSpinner,
+  HeartSpinner,
+  HoopSpinner,
+  ImpulseSpinner,
+  JellyfishSpinner,
+  MagicSpinner,
+  MetroSpinner,
+  PongSpinner,
+  PulseSpinner,
+  PushSpinner,
+  RainbowSpinner,
+  RingSpinner,
+  RotateSpinner,
+  SequenceSpinner,
+  SphereSpinner,
+  SpiralSpinner,
+  StageSpinner,
+  SwapSpinner,
+  SwishSpinner,
+  TraceSpinner,
+  WaveSpinner,
+  WhisperSpinner,
 } from "react-spinners-kit";
 import { themes } from "../../../../../configs/themes";
 import { setTheme, themeSelector } from "../../../../../store/uiSlice";
@@ -22,7 +56,7 @@ export default function Display() {
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col w-full">
         <h3 className="text-xl font-semibold mb-3">Hiển thị</h3>
-        <div className="flex flex-col w-full h-64 rounded-md gap-2 relative bg-slate-300"></div>
+        {/* <div className="flex flex-col w-full h-64 rounded-md gap-2 relative bg-slate-300"></div>
         <Select
           label="Your favorite framework/library"
           placeholder="Pick one"
@@ -160,7 +194,7 @@ export default function Display() {
             <span>Background</span>
             <ColorInput />
           </div>
-        </SimpleGrid>
+        </SimpleGrid> */}
         <SimpleGrid cols={3}>
           {themes.map((theme, i) => (
             <div onClick={() => dispatch(setTheme(theme))}>

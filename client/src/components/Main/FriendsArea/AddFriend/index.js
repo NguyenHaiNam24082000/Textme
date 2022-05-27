@@ -17,8 +17,7 @@ export default function AddFriend() {
   const handleSendFriendRequest = async (e) => {
     e.preventDefault();
     const [name, discriminator] = search.split("#");
-    let payload = {};
-    if (discriminator) {
+    if (discriminator !== undefined) {
       if (discriminator.length !== 5) {
         setAlertMessage("Please enter user Id correctly");
         return;
@@ -27,15 +26,8 @@ export default function AddFriend() {
         setAlertMessage("User Id must be a number");
         return;
       }
-      payload = {
-        discriminator,
-      };
     }
-    payload = JSON.parse(JSON.stringify({
-      username: name,
-      ...payload,
-    }))
-    const { data } = await getUsers(payload);
+    const { data } = await getUsers(search);
     if (data) {
       setListUsers(data.results);
     } else {

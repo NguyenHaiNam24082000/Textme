@@ -154,6 +154,12 @@ export default function HomeSidebar({ channels }) {
       notifications: pendingRequestsData?.length,
       to: "/friends",
     },
+    {
+      icon: <FontAwesomeIcon icon="fa-solid fa-ticket" />,
+      label: t("Invites"),
+      notifications: 0,
+      to: "/invites",
+    },
     // { icon: User, label: "Contacts" },
   ];
 

@@ -128,7 +128,7 @@ export default function Login() {
       password: values.password,
     });
     const { data } = await login(payload);
-    console.log(data)
+    console.log(data);
     // const actionResult = await dispatch(getMe());
     setTimeout(() => {
       setLoading(false);
@@ -170,7 +170,7 @@ export default function Login() {
                   ref={captchaRef}
                 />
               ) : ( */}
-                <Loader size="xl" />
+              <Loader size="xl" />
               {/* )} */}
             </>
           }
@@ -183,13 +183,13 @@ export default function Login() {
           variants={pageVariants}
           transition={pageTransition}
         >
-          <h1 className="text-2xl  font-bold">{t("login")}</h1>
+          <h1 className="text-2xl  font-bold">{t("Login")}</h1>
           <div className="my-3 text-sm">
             Tham gia hàng triệu máy chủ công cộng miễn phí lớn nhất
           </div>
-          {serverError && (<div>{serverError}</div>)}
+          {serverError && <div>{serverError}</div>}
           <Divider />
-          <Group position="apart" className="my-3">
+          {/* <Group position="apart" className="my-3">
             <span>{t("login_with")}</span>
             <Select
               value={type}
@@ -200,23 +200,23 @@ export default function Login() {
                 { value: "username", label: t("username") },
               ]}
             />
-          </Group>
+          </Group> */}
           <form
             className="flex flex-col"
             onSubmit={form.onSubmit(handleSubmit)}
           >
             {type && type === "username" ? (
               <TextInput
-                placeholder={t("username")}
-                label={t("username")}
+                placeholder={t("Username")}
+                label={t("Username")}
                 {...form.getInputProps("username")}
                 onBlur={() => form.validateField("username")}
                 required
               />
             ) : (
               <TextInput
-                label={t("email")}
-                placeholder={t("email")}
+                label={t("Email")}
+                placeholder={t("Email")}
                 {...form.getInputProps("email")}
                 onBlur={() => form.validateField("email")}
                 required
@@ -224,8 +224,8 @@ export default function Login() {
               />
             )}
             <PasswordInput
-              placeholder={t("password")}
-              label={t("password")}
+              placeholder={t("Password")}
+              label={t("Password")}
               {...form.getInputProps("password")}
               onBlur={() => form.validateField("password")}
               icon={<Lock size={16} />}
@@ -239,7 +239,7 @@ export default function Login() {
                 href="https://mantine.dev"
                 size="xs"
               >
-                {t("forgot_password")}
+                {t("Forgot Password")}
               </Text>
             </Group>
             <Group position="center" grow className="my-6">
@@ -251,17 +251,17 @@ export default function Login() {
                 type="submit"
                 style={{ backgroundColor: "#fab005" }}
               >
-                {t("login")}
+                {t("Login")}
               </Button>
             </Group>
           </form>
           <Group position="center">
-            <Tooltip label={t("login_with_facebook")} radius="md">
+            <Tooltip label={t("Login With Facebook")} radius="md">
               <ActionIcon size="xl" radius="md" variant="default">
                 <img src={Facebook} alt="Facebook" />
               </ActionIcon>
             </Tooltip>
-            <Tooltip label={t("login_with_google")} radius="md">
+            <Tooltip label={t("Login With Google")} radius="md">
               <ActionIcon size="xl" radius="md" variant="default">
                 <img src={Google} alt="Google" />
               </ActionIcon>

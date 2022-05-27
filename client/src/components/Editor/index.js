@@ -363,45 +363,45 @@ export default function EditorDraft({ channel, user }) {
       handleSendMessage();
     }
   }, [embed]);
-  useEffect(() => {
-    if (images && images.length > 0) {
-      const files = Promise.all(
-        images.map(async (image, i) => {
-          if (
-            IMAGE_MIME_TYPE.includes(image.type) ||
-            (image.name.match(/\.(?:jpeg|jpg|png|gif)$/i) &&
-              image.nsfw === false)
-          ) {
-            const img = document.getElementById(`image-${image.id}`);
-            if (img) {
-              const model = await nsfwjs.load();
-              const predictions = await model.classify(img, 1);
-              return {
-                ...image,
-                watermark: predictions[0].className,
-                nsfw: ["Hentai", "Sexy", "Porn"].includes(
-                  predictions[0].className
-                )
-                  ? true
-                  : image.nsfw,
-              };
-            }
-            return image;
-          }
-          return image;
-        })
-      );
-      files.then((files) => {
-        const filesClone = [...files].sort((a, b) => a.createdAt - b.createdAt);
-        const imagesClone = [...images].sort(
-          (a, b) => a.createdAt - b.createdAt
-        );
-        if (JSON.stringify(filesClone) === JSON.stringify(imagesClone)) return;
-        console.log(filesClone, "images");
-        setImages(filesClone);
-      });
-    }
-  }, [images]);
+  // useEffect(() => {
+  //   if (images && images.length > 0) {
+  //     const files = Promise.all(
+  //       images.map(async (image, i) => {
+  //         if (
+  //           IMAGE_MIME_TYPE.includes(image.type) ||
+  //           (image.name.match(/\.(?:jpeg|jpg|png|gif)$/i) &&
+  //             image.nsfw === false)
+  //         ) {
+  //           const img = document.getElementById(`image-${image.id}`);
+  //           if (img) {
+  //             const model = await nsfwjs.load();
+  //             const predictions = await model.classify(img, 1);
+  //             return {
+  //               ...image,
+  //               watermark: predictions[0].className,
+  //               nsfw: ["Hentai", "Sexy", "Porn"].includes(
+  //                 predictions[0].className
+  //               )
+  //                 ? true
+  //                 : image.nsfw,
+  //             };
+  //           }
+  //           return image;
+  //         }
+  //         return image;
+  //       })
+  //     );
+  //     files.then((files) => {
+  //       const filesClone = [...files].sort((a, b) => a.createdAt - b.createdAt);
+  //       const imagesClone = [...images].sort(
+  //         (a, b) => a.createdAt - b.createdAt
+  //       );
+  //       if (JSON.stringify(filesClone) === JSON.stringify(imagesClone)) return;
+  //       console.log(filesClone, "images");
+  //       setImages(filesClone);
+  //     });
+  //   }
+  // }, [images]);
   // connect to socket on component mount.
   useEffect(() => {
     const newSocket = getSocket(me?.tokens?.access?.token);
