@@ -18,16 +18,14 @@ export const useMeSocket = () => {
   const cache = useQueryClient();
   const history = useNavigate();
   useEffect(() => {
-    console.log("hello");
     let socket = null;
     const accessToken = me?.tokens?.access?.token;
     if (accessToken) {
       socket = getSocket(accessToken);
-      console.log(socket, "hello");
       socket.connect();
       if (socket) {
         socket.emit(ME_SOCKET.ONLINE, { userId: me?.user?.id });
-        socket.emit("userConnected", me?.user);
+        // socket.emit("userConnected", me?.user);
         socket.on("updateUserStatus", (data) => {
           cache.invalidateQueries(USERS_ONLINE);
           Object.keys(usersOnline).forEach((key) => delete usersOnline[key]);
@@ -58,7 +56,7 @@ export const useMeSocket = () => {
         socket.disconnect();
       }
     };
-  }, [me?.user._id, cache, me?.tokens?.access?.token, me?.user, history]);
+  }, [me?.user._id, cache, me?.tokens?.access?.token, me?.user]);
 };
 
 export default usersOnline;

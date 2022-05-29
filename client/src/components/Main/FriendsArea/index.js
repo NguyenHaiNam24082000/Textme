@@ -11,7 +11,11 @@ import {
 } from "@mantine/core";
 import React, { useState } from "react";
 import { Search } from "tabler-icons-react";
-import { OutGoingRequests, PendingRequests } from "../../../reactQuery/friend";
+import {
+  AllFriends,
+  OutGoingRequests,
+  PendingRequests,
+} from "../../../reactQuery/friend";
 import ModalUserProfile from "../../Modals/ModalUserProfile";
 import AddFriend from "./AddFriend";
 import All from "./All";
@@ -19,10 +23,14 @@ import Blocked from "./Blocked";
 import Online from "./Online";
 import Pending from "./Pending";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "react-query";
+import { PENDING_REQUESTS_KEY } from "../../../configs/queryKeys";
 
 export default function FriendsMain() {
   // const [data,setData]= useState(PendingRequests());
+  const cache = useQueryClient();
   const { data: pendingRequestsData } = PendingRequests();
+  const { data: friends } = AllFriends();
   const [activeTab, setActiveTab] = useState(0);
   const { t } = useTranslation();
   return (
@@ -40,13 +48,13 @@ export default function FriendsMain() {
           icon={<FontAwesomeIcon icon="fa-solid fa-earth-asia" />}
           label={t("Online")}
         >
-          <Online />
+          <Online friends={friends} />
         </Tabs.Tab>
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-users" />}
           label={t("All")}
         >
-          <All setActiveTab={setActiveTab} />
+          <All setActiveTab={setActiveTab} friends={friends} />
         </Tabs.Tab>
         <Tabs.Tab
           icon={<FontAwesomeIcon icon="fa-solid fa-user-clock" />}

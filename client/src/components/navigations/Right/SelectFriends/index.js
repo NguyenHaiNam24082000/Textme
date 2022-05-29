@@ -88,7 +88,7 @@ export default function SelectFriends({
   server = null,
 }) {
   const me = GetMe();
-  const { isLoading, data: allFriends } = AllFriends();
+  const { data: allFriends } = AllFriends();
   const { data: channels } = GetOpenChannels();
   const [groupChannels, setGroupChannels] = useState([]);
   const [openedModalCreateNewGroup, setOpenedModalCreateNewGroup] =

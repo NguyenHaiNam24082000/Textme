@@ -28,7 +28,7 @@ export default function DMItem({ user, channel, match }) {
                     border: "2px solid #fff",
                   }}
                   className="absolute left-0 bottom-0 z-[1]"
-                  color={`#${channel.owner.accent_color.toString(16)}`}
+                  color={`#${Math.floor(channel.owner.accent_color).toString(16)}`}
                 >
                   {channel.owner.username[0]}
                 </Avatar>
@@ -37,7 +37,7 @@ export default function DMItem({ user, channel, match }) {
                   radius="xl"
                   style={{ height: "calc(100% * (2/3))" }}
                   className="absolute right-0 top-0 z-0"
-                  color={`#${channel.members[0].accent_color.toString(16)}`}
+                  color={`#${Math.floor(channel.members[0].accent_color).toString(16)}`}
                 >
                   {channel.members[0].username[0]}
                 </Avatar>
@@ -53,8 +53,8 @@ export default function DMItem({ user, channel, match }) {
                 size="lg"
                 color={`#${
                   channel.members[0]._id !== user._id
-                    ? channel.members[0].accent_color.toString(16)
-                    : channel.members[1].accent_color.toString(16)
+                    ? Math.floor(channel.members[0].accent_color).toString(16)
+                    : Math.floor(channel.members[1].accent_color).toString(16)
                 }`}
               >
                 {channel.members[0]._id !== user._id

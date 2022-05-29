@@ -18,7 +18,11 @@ import {
   OUT_GOING_REQUESTS_KEY,
   PENDING_REQUESTS_KEY,
 } from "../../../configs/queryKeys";
-import { isIncoming, pendingUsername } from "../../../commons/friendObject";
+import {
+  isIncoming,
+  pendingDiscriminator,
+  pendingUsername,
+} from "../../../commons/friendObject";
 import { useQueryClient } from "react-query";
 
 export default function ModalUserProfile({ opened, onClose, user, pending }) {
@@ -82,7 +86,7 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
                 @{user && pending && pendingUsername(user, pending)}
               </span>
               <span className="text-slate-300 text-2xl font-medium">
-                #12345
+                #{user && pending && pendingDiscriminator(user, pending)}
               </span>
             </div>
             <div className="flex w-full text-black text-sm font-medium items-center">

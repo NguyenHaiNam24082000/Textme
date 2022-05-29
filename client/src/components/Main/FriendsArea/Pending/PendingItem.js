@@ -75,7 +75,9 @@ export default function PendingItem({ user, pending }) {
     >
       <Group spacing="sm">
         <Avatar
-          color={`#${friendObject(user, pending).accent_color.toString(16)}`}
+          color={`#${Math.floor(
+            friendObject(user, pending).accent_color
+          ).toString(16)}`}
           size="lg"
           radius="xl"
           src={friendObject(user, pending).avatar_url}

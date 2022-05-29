@@ -7,21 +7,37 @@ const SOCKET_ID_IN_ROOM = "socketIdInRoom-";
 const USER = "user-";
 const ONLINE_USER = "online-user-";
 const USERS_IN_ROOM = "usersInRoom-";
+let listUsersCall = {};
+let usersOnline = {};
 
 module.exports = [
   {
     name: ME_SOCKET.ONLINE,
-    controller: async (socket, { userId, onlineUser }) => {
+    controller: async (socket, io, { userId, onlineUser }) => {
       await redis.set(`${ONLINE_USER}${socket.id}`, userId);
       // usersOnline.push(userId);
       // socket.emit("userOnline", usersOnline);
       // console.log("user online", usersOnline);
+      // socket.on("userConnected", (user) => {
+      //   usersOnline[user.id] = { user: user, socketId: socket.id };
+      //   console.log("user connected", usersOnline);
+      //   io.emit("updateUserStatus", usersOnline);
+      // });
+      const user = await userService.updateUserById(userId, {
+        status: {
+          ...this.status,
+          online: true,
+        },
+      });
+      console.log("user connected", user);
+      usersOnline[user.id] = { user, socketId: socket.id };
+      io.emit("updateUserStatus", usersOnline);
       socket.join(userId);
     },
   },
   {
     name: CHANNEL_SOCKET.JOIN_CHANNEL,
-    controller: async (socket, { userId, channelId }) => {
+    controller: async (socket, io, { userId, channelId }) => {
       const userObject = await userService.getUserById(userId);
       if (!userObject) {
         throw new Error("User not found");
@@ -41,7 +57,7 @@ module.exports = [
   },
   {
     name: CHANNEL_SOCKET.CHANNEL_SEND_MESSAGE,
-    controller: async (socket, { msg, receiverId }) => {
+    controller: async (socket, io, { msg, receiverId }) => {
       const [channelId, userObject] = await Promise.all([
         redis.get(`${SOCKET_ID_IN_ROOM}${socket.id}`),
         redis.get(`${USER}${socket.id}`),
@@ -63,7 +79,7 @@ module.exports = [
   },
   {
     name: ME_SOCKET.SEND_FRIEND_REQUEST,
-    controller: async (socket, { receiverId }) => {
+    controller: async (socket, io, { receiverId }) => {
       if (receiverId) {
         socket.to(receiverId).emit("friendRequest");
       }
@@ -71,7 +87,7 @@ module.exports = [
   },
   {
     name: ME_SOCKET.SEND_CANCEL_FRIEND_REQUEST,
-    controller: async (socket, { receiverId }) => {
+    controller: async (socket, io, { receiverId }) => {
       if (receiverId) {
         socket.to(receiverId).emit("cancelFriendRequest");
       }
@@ -79,7 +95,7 @@ module.exports = [
   },
   {
     name: ME_SOCKET.SEND_ACCEPT_FRIEND_REQUEST,
-    controller: async (socket, { receiverId }) => {
+    controller: async (socket, io, { receiverId }) => {
       console.log(receiverId, "receiverId");
       if (receiverId) {
         socket.to(receiverId).emit("friendAcceptRequest");
@@ -88,7 +104,7 @@ module.exports = [
   },
   {
     name: CHANNEL_SOCKET.CHANNEL_SEND_DELETE_MESSAGE,
-    controller: async (socket, { channelId, messageId }) => {
+    controller: async (socket, io, { channelId, messageId }) => {
       if (channelId) {
         socket
           .to(channelId)
@@ -98,7 +114,7 @@ module.exports = [
   },
   {
     name: CHANNEL_SOCKET.CHANNEL_SEND_EDIT_MESSAGE,
-    controller: async (socket, message) => {
+    controller: async (socket, io, message) => {
       if (message) {
         socket.to(message.channelId).emit("roomEditMessage", message);
       }
@@ -106,26 +122,106 @@ module.exports = [
   },
   {
     name: CHANNEL_SOCKET.CALL,
-    controller: async (socket, { to, signalData, from }) => {
-      console.log(to, signalData, from, "call");
+    controller: async (socket, io, { to, from }) => {
       if (to) {
-        socket.to(to).emit("callAccepted", { signalData, from });
+        listUsersCall[socket.id] = { user: from, video: true, audio: true };
+        const rooms = io.adapter.rooms;
+        try {
+          console.log(to);
+          const users = [];
+          rooms.get(to).forEach((client) => {
+            users.push({
+              id: listUsersCall[client].user.id,
+              info: listUsersCall[client],
+            });
+          });
+          console.log(from.id, users);
+          socket.to(to).emit("join-call", users);
+        } catch (e) {
+          socket.to(to).emit("error-join-call", { err: true });
+        }
       }
     },
   },
   {
+    name: "call-user",
+    controller: async (socket, io, { to, from, signal }) => {
+      console.log(
+        {
+          id: listUsersCall[from].user.id,
+          // signal,
+          from,
+          info: listUsersCall[from],
+        },
+        "users-call-user"
+      );
+      socket.to(to).emit("receive-call", {
+        id: listUsersCall[from].user.id,
+        signal,
+        from,
+        info: listUsersCall[from],
+      });
+    },
+  },
+  {
+    name: "accept-call",
+    controller: async (socket, io, { signal, to, from }) => {
+      console.log("accept-call");
+      socket.to(to).emit("call-accepted", {
+        id: listUsersCall[socket.id].user.id,
+        signal,
+        from,
+        info: listUsersCall[socket.id],
+      });
+    },
+  },
+  {
     name: CHANNEL_SOCKET.LEAVE_CHANNEL,
-    controller: async (socket, channelId) => {
+    controller: async (socket, io, channelId) => {
       redis.del(`${SOCKET_ID_IN_ROOM}${socket.id}`);
       socket.leave(channelId);
     },
   },
   {
     name: ME_SOCKET.LOGOUT,
-    controller: async (socket, userId) => {
+    controller: async (socket, io, userId) => {
       redis.del(`${ONLINE_USER}${socket.id}`);
       redis.del(`${SOCKET_ID_IN_ROOM}${socket.id}`);
 
+      await userService.updateUserStatus(userId, {
+        status: {
+          ...this.status,
+          online: false,
+          last_online: Date.now(),
+        },
+      });
+
+      socket.leave(userId);
+    },
+  },
+  {
+    name: "disconnect",
+    controller: async (socket, io) => {
+      let userId = "";
+      Object.values(usersOnline).forEach((value) => {
+        if (value.socketId === socket.id) {
+          userId = value.user.id;
+          console.log(userId, "userId");
+          delete usersOnline[value.user.id];
+        }
+      });
+      redis.del(`${ONLINE_USER}${socket.id}`);
+      redis.del(`${SOCKET_ID_IN_ROOM}${socket.id}`);
+
+      await userService.updateUserById(userId, {
+        status: {
+          ...this.status,
+          online: false,
+          last_online: Date.now(),
+        },
+      });
+      io.emit("updateUserStatus", usersOnline);
+      console.log("socket disconnected", socket.id);
       socket.leave(userId);
     },
   },

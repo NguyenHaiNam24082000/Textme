@@ -2,7 +2,7 @@ const CHANNEL_SOCKET = {
   CHANNEL_SEND_MESSAGE: "channelSendMessage",
   CHANNEL_NEW_MESSAGE: "channelNewMessage",
   JOIN_CHANNEL: "joinChannel",
-  SEND_CHANNEL_DELETE_MESSAGE: "sendChannelDeleteMessage",
+  CHANNEL_SEND_DELETE_MESSAGE: "sendChannelDeleteMessage",
   CHANNEL_DELETE_MESSAGE: "channelDeleteMessage",
   CHANNEL_SEND_EDIT_MESSAGE: "channelSendEditMessage",
   CHANNEL_EDIT_MESSAGE: "channelEditMessage",

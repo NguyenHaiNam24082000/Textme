@@ -100,7 +100,9 @@ export default function FriendItem({ user, friend }) {
       >
         <Group spacing="sm">
           <Avatar
-            color={`#${friendObject(user, friend).accent_color.toString(16)}`}
+            color={`#${Math.floor(
+              friendObject(user, friend).accent_color
+            ).toString(16)}`}
             size="lg"
             radius="xl"
             src={friendObject(user, friend).avatar_url}

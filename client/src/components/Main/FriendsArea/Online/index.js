@@ -1,14 +1,17 @@
 import { IllustrationConstruction } from "@douyinfe/semi-illustrations";
 import { Empty } from "@douyinfe/semi-ui";
 import { TextInput } from "@mantine/core";
-import { Search } from "tabler-icons-react";
-import { GetAllUsersOnline } from "../../../../reactQuery/user";
+import { useQueryClient } from "react-query";
 import { useSelector } from "react-redux";
+import { Search } from "tabler-icons-react";
+import { AllFriends } from "../../../../reactQuery/friend";
+import { GetAllUsersOnline } from "../../../../reactQuery/user";
 import FriendItem from "../FriendItem";
 
-export default function Online() {
+export default function Online({ friends }) {
   const { user } = useSelector((state) => state.user);
-  const { data: friends } = GetAllUsersOnline();
+  const { data: usersOnline } = GetAllUsersOnline();
+  let friendsIds = friends && friends.map((friend) => friend.id);
   return (
     <div>
       <TextInput
@@ -17,23 +20,32 @@ export default function Online() {
         placeholder="Search"
         // onChange={handleSearch}
       />
-      {friends && Object.keys(friends).length > 0 && (
-        <div className="flex flex-col">
-          {Object.values(friends).map((friend) => {
-            if (friend.id !== user.id) {
-              return (
-                <FriendItem key={friend?.id} friend={friend} user={user} />
-              );
-            }
-            return null;
-          })}
-        </div>
-      )}
-      <Empty
-        image={<IllustrationConstruction style={{ width: 200, height: 200 }} />}
-        title="Everyone went to sleep"
-        description="😴😴😴"
-      ></Empty>
+      <div className="flex flex-col">
+        {/* {usersOnline &&
+        Object.keys(usersOnline).filter((friend) => {
+          return friend.user.id === user.id;
+        }).length > 0 ? (
+          Object.values(usersOnline)
+            .filter((friend) => {
+              return friend.user.id === user.id;
+            })
+            .map((friend) => (
+              <FriendItem
+                key={friend.user.id}
+                friend={friend.user}
+                user={user}
+              />
+            ))
+        ) : ( */}
+        <Empty
+          image={
+            <IllustrationConstruction style={{ width: 200, height: 200 }} />
+          }
+          title="Everyone went to sleep"
+          description="😴😴😴"
+        ></Empty>
+        {/* )} */}
+      </div>
     </div>
   );
 }

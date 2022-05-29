@@ -10,13 +10,20 @@ const allUsers = catchAsync(async (req, res, next) => {
 
 const getUsers = catchAsync(async (req, res) => {
   // console.log("aaaaaa",req);
-  const [name, discriminator] = req.params.split("#");
+  // const [name, discriminator] = req.params.split("#");
+  // const filter = {
+  //   username: name,
+  //   discriminator: discriminator,
+  // };
+  // const options = pick(req.body, ["sortBy", "limit", "page"]);
+  // const users = await userService.queryUsers(filter, options);
+  const { q } = req.query;
+  const [name, discriminator] = q.split("#");
   const filter = {
     username: name,
     discriminator: discriminator,
   };
-  const options = pick(req.body, ["sortBy", "limit", "page"]);
-  const users = await userService.queryUsers(filter, options);
+  const users = await userService.queryUsers(req.user, filter);
   res.status(httpStatus.OK).send(users);
 });
 

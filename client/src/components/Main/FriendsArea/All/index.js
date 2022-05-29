@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 import { AllFriends } from "../../../../reactQuery/friend";
 import { Search } from "tabler-icons-react";
 import FriendItem from "../FriendItem";
+import { useQueryClient } from "react-query";
+import { ALL_FRIENDS_KEY } from "../../../../configs/queryKeys";
 
 function PendingHeader({ allFriends }) {
   const pendingCount = allFriends?.length ?? 0;
@@ -18,7 +20,7 @@ function PendingHeader({ allFriends }) {
   );
 }
 
-const EmptyState = ({setActiveTab}) => {
+const EmptyState = ({ setActiveTab }) => {
   return (
     <Center className="flex-auto">
       <Empty
@@ -40,9 +42,9 @@ const EmptyState = ({setActiveTab}) => {
   );
 };
 
-export default function All({setActiveTab}) {
+export default function All({ setActiveTab, friends }) {
   const { user } = useSelector((state) => state.user);
-  const { data: friends } = AllFriends();
+  const cache = useQueryClient();
   const [allFriends, setAllFriends] = useState(friends);
 
   useEffect(() => {
@@ -77,6 +79,6 @@ export default function All({setActiveTab}) {
       </div>
     </div>
   ) : (
-    <EmptyState setActiveTab={setActiveTab}/>
+    <EmptyState setActiveTab={setActiveTab} />
   );
 }

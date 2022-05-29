@@ -1,6 +1,11 @@
-.video-background
-{
-    --video-background-src: url(https://raw.githubusercontent.com/yuikoito/tensorflow-bodypix-sample/master/assets/argentina.jpg);
-    background-image: var(--video-background-src);
-    background-size: cover;
+.video-background {
+  --video-background-src: url(https://raw.githubusercontent.com/yuikoito/tensorflow-bodypix-sample/master/assets/argentina.jpg);
+  background-image: var(--video-background-src);
+  background-size: cover;
+}
+
+.fullscreen {
+  width: 100%;
+  /* height: calc(100vh - 80px); */
+  /* background-color: black; */
 }

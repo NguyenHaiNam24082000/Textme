@@ -110,7 +110,9 @@ export default function Me() {
                       border: "2px solid #fff",
                     }}
                     className="absolute left-0 bottom-0 z-[1]"
-                    color={`#${channel.owner.accent_color.toString(16)}`}
+                    color={`#${Math.floor(channel.owner.accent_color).toString(
+                      16
+                    )}`}
                   >
                     {channel.owner.username[0]}
                   </Avatar>
@@ -120,7 +122,9 @@ export default function Me() {
                     size={12}
                     style={{ height: "calc(100% * (2/3))" }}
                     className="absolute right-0 top-0 z-0"
-                    color={`#${channel.members[0].accent_color.toString(16)}`}
+                    color={`#${Math.floor(
+                      channel.members[0].accent_color
+                    ).toString(16)}`}
                   >
                     {channel.members[0].username[0]}
                   </Avatar>
@@ -136,8 +140,8 @@ export default function Me() {
                   size={20}
                   color={`#${
                     channel.members[0]._id !== me._id
-                      ? channel.members[0].accent_color.toString(16)
-                      : channel.members[1].accent_color.toString(16)
+                      ? Math.floor(channel.members[0].accent_color).toString(16)
+                      : Math.floor(channel.members[1].accent_color).toString(16)
                   }`}
                 >
                   {channel.members[0]._id !== me._id

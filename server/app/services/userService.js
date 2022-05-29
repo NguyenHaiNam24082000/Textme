@@ -2,6 +2,7 @@ const httpStatus = require("http-status");
 const ShortUniqueId = require("short-unique-id");
 const { User } = require("../models");
 const ApiError = require("../utils/ApiError");
+const { removeAccents } = require("../commons/removeAccents");
 // const {COLORS}=
 const uid = new ShortUniqueId({
   length: 5,
@@ -37,8 +38,14 @@ const createUser = async (userBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryUsers = async (filter, options) => {
-  const users = await User.paginate(filter, options);
+//TODO: xxx
+const queryUsers = async (user, filter) => {
+  const { username, discriminator } = filter;
+  console.log(username, discriminator);
+  const users = await User.find({
+    username: { $regex: `.*${removeAccents(username)}.*`, $options: "i" },
+    ...(discriminator && { discriminator }),
+  });
   return users;
 };
 
@@ -95,7 +102,7 @@ const deleteUserById = async (userId) => {
 
 const getAllUsers = async () => {
   return User.find();
-}
+};
 
 module.exports = {
   createUser,

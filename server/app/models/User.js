@@ -112,26 +112,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     email: {
-      type: Object,
-      properties: {
-        verified: {
-          type: Boolean,
-        },
-        verified_at: {
-          type: String,
-          format: "date-time",
-        },
-      },
-      additionalProperties: false,
-      patternProperties: {
-        address: {
-          type: String,
-          format: "email",
-        },
-      },
+      type: String,
     },
     username: {
       type: String,
+    },
+    description: {
+      type: String,
+      default: null,
     },
     password: {
       type: String,
@@ -181,20 +169,23 @@ const userSchema = new mongoose.Schema(
     birthday: {
       type: String,
       format: "date-time",
+      default: null,
     },
-    nickname: {
-      type: String,
-    },
+    // nickname: {
+    //   type: String,
+    //   default: null,
+    // },
     avatar_url: {
       type: String,
       default: null,
     },
     banner: {
       type: String,
+      default: null,
     },
     accent_color: {
       type: Number,
-      default: 0,
+      default: Math.floor(Math.random() * 16777215),
     },
     locale: {
       type: String,
@@ -207,6 +198,37 @@ const userSchema = new mongoose.Schema(
     time_format: {
       type: Number,
       enum: [12, 24],
+    },
+    status: {
+      type: Object,
+      properties: {
+        online: {
+          type: Boolean,
+          default: false,
+        },
+        last_online: {
+          type: String,
+          format: "date-time",
+        },
+        text: {
+          type: String,
+          default: null,
+        },
+        presence: {
+          type: String,
+          enum: ["online", "idle", "dnd", "offline"],
+          default: "offline",
+        },
+        type: {
+          type: String,
+          enum: ["online", "idle", "dnd", "offline", "custom"],
+          default: "offline",
+        },
+        emoji: {
+          type: String,
+          default: null,
+        },
+      },
     },
   },
   {

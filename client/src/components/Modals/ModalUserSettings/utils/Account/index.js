@@ -7,11 +7,13 @@ import {
   Divider,
   Group,
   Text,
+  TextInput,
 } from "@mantine/core";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Modal from "../../../Modal";
 
-export default function Account() {
+export default function Account({ user }) {
   const [showPhone, setShowPhone] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const { t } = useTranslation();
@@ -20,6 +22,9 @@ export default function Account() {
     email: "nghainam2000@gmail.com",
     phone: "0989898989",
     password: "********",
+    accent_color: Math.random() * 16777215,
+    banner: null,
+    discriminator: 12345,
   });
   return (
     <div className="flex flex-col w-full h-full">
@@ -27,7 +32,10 @@ export default function Account() {
         <h3 className="text-xl font-semibold mb-3">{t("My Account")}</h3>
         <div className="flex flex-col w-full h-auto bg-gray-200 rounded-lg overflow-hidden">
           <BackgroundImage
-            src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=720&q=80"
+            sx={{
+              background: `#${Math.floor(info.accent_color).toString(16)}`,
+            }}
+            src={info.banner}
             radius="xs"
             className="h-40"
           />
@@ -50,7 +58,7 @@ export default function Account() {
               <Group
                 grow
                 direction="column"
-                className="flex-auto h-32 items-start py-3"
+                className="flex-auto h-32 justify-center"
               >
                 <div className="flex items-end w-full">
                   <span className="text-white text-2xl font-bold">
@@ -58,19 +66,19 @@ export default function Account() {
                     @{info.username}
                   </span>
                   <span className="text-slate-300 text-2xl font-medium">
-                    #12345
+                    #{info.discriminator}
                   </span>
                 </div>
-                <div className="flex w-full text-black text-sm font-medium items-center">
+                {/* <div className="flex w-full text-black text-sm font-medium items-center">
                   <div className="desc">
-                    {/* <span className="desc">
+                    {<span className="desc">
                       💜When you're screaming💜 💜When you're screaming💜 💜When
                       you're screaming💜 💜When you're screaming💜 💜When you're
                       screaming💜💜When you're screaming💜 💜When you're
                       screaming💜
-                    </span> */}
+                    </span>
                   </div>
-                </div>
+                </div> */}
               </Group>
               <div className="flex flex-col justify-end h-32 py-5">
                 <div className="flex items-center gap-2">
@@ -95,20 +103,20 @@ export default function Account() {
                   className="text-3xl contrast-0"
                 />
                 <div className="flex flex-col">
-                  <div className="flex uppercase text-xs font-semibold mb-1">
+                  <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Username")}
                   </div>
                   <div className="flex">{info.username}</div>
                 </div>
               </div>
-              <div className="flex">
+              {/* <div className="flex">
                 <Button
                   leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                   variant="white"
                 >
                   {t("Edit")}
                 </Button>
-              </div>
+              </div> */}
             </div>
             <div className="flex w-full h-full justify-between items-center">
               <div className="flex justify-center items-center gap-3">
@@ -117,7 +125,7 @@ export default function Account() {
                   className="text-3xl contrast-0"
                 />
                 <div className="flex flex-col">
-                  <div className="flex uppercase text-xs font-semibold mb-1">
+                  <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Email")}
                   </div>
                   <div className="flex items-center">
@@ -130,6 +138,28 @@ export default function Account() {
                       {showEmail ? t("Hide") : t("Show")}
                     </Text>
                   </div>
+                </div>
+              </div>
+              {/* <div className="flex">
+                <Button
+                  leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
+                  variant="white"
+                >
+                  {t("Edit")}
+                </Button>
+              </div> */}
+            </div>
+            <div className="flex w-full h-full justify-between items-center">
+              <div className="flex justify-center items-center gap-3">
+                <FontAwesomeIcon
+                  icon="fa-solid fa-user"
+                  className="text-3xl contrast-0"
+                />
+                <div className="flex flex-col">
+                  <div className="flex uppercase text-xs font-bold mb-1">
+                    {t("Name")}
+                  </div>
+                  <div className="flex">{info.username}</div>
                 </div>
               </div>
               <div className="flex">
@@ -148,7 +178,7 @@ export default function Account() {
                   className="text-3xl contrast-0"
                 />
                 <div className="flex flex-col">
-                  <div className="flex uppercase text-xs font-semibold mb-1">
+                  <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Phone Number")}
                   </div>
                   <div className="flex items-center">
@@ -179,7 +209,7 @@ export default function Account() {
                   className="text-3xl contrast-0"
                 />
                 <div className="flex flex-col">
-                  <div className="flex uppercase text-xs font-semibold mb-1">
+                  <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Password")}
                   </div>
                   <div className="flex">{info.password}</div>
@@ -197,7 +227,7 @@ export default function Account() {
           </div>
         </div>
       </div>
-      <Divider className="my-6" />
+      {/* <Divider className="my-6" />
       <div className="flex flex-col w-full">
         <h3 className="text-xl font-semibold mb-3">Bảo mật hai lớp</h3>
         <h6 className="text-xs font-medium">
@@ -215,7 +245,26 @@ export default function Account() {
           sẽ đăng xuất và xoá hoàn toàn tài khoản của bạn, bao gồm lịch sử trò
           chuyện và bạn bè.
         </h6>
-      </div>
+      </div> */}
+      <Modal
+        title={"Change Password"}
+        zIndex={9999}
+        opened={false}
+        onClose={() => {}}
+      >
+        <form className="flex flex-col gap-2">
+          <TextInput label={"Old Password"} placeholder={"Old Password"} />
+          <TextInput label={"New Password"} placeholder={"New Password"} />
+          <TextInput
+            label={"Confirm New Password"}
+            placeholder={"Confirm New Password"}
+          />
+          <Group position="apart">
+            <Button>Cancel</Button>
+            <Button type="submit">Update</Button>
+          </Group>
+        </form>
+      </Modal>
     </div>
   );
 }
