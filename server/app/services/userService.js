@@ -1,6 +1,6 @@
 const httpStatus = require("http-status");
 const ShortUniqueId = require("short-unique-id");
-const { User } = require("../models");
+const { User, Friend, Channel, Workspace } = require("../models");
 const ApiError = require("../utils/ApiError");
 const { removeAccents } = require("../commons/removeAccents");
 // const {COLORS}=
@@ -104,6 +104,114 @@ const getAllUsers = async () => {
   return User.find();
 };
 
+const getMutualUserIds = async (userAId, userBId) => {
+  // const users = await Friend.find({
+  //   $and: [
+  //     {
+  //       $or: [
+  //         {
+  //           sender: userAId,
+  //         },
+  //         {
+  //           receiver: userAId,
+  //         },
+  //       ],
+  //       status: "FRIEND",
+  //     },
+  //     {
+  //       $or: [
+  //         {
+  //           sender: userBId,
+  //         },
+  //         {
+  //           receiver: userBId,
+  //         },
+  //       ],
+  //       status: "FRIEND",
+  //     },
+  //   ],
+  // });
+  const userA = await Friend.find({
+    $or: [
+      {
+        sender: userAId,
+      },
+      {
+        receiver: userAId,
+      },
+    ],
+    status: "FRIEND",
+  });
+  const userB = await Friend.find({
+    $or: [
+      {
+        sender: userBId,
+      },
+      {
+        receiver: userBId,
+      },
+    ],
+    status: "FRIEND",
+  });
+  const mutualFriends = userA.filter((friend) => {
+    return userB.some((friend2) => {
+      return (
+        friend.sender.equals(friend2.sender) ||
+        friend.receiver.equals(friend2.receiver)
+      );
+    });
+  });
+  const mutualFriendIds = mutualFriends.map((friend) => {
+    if (friend.sender.equals(userAId)) {
+      return friend.receiver;
+    }
+    return friend.sender;
+  });
+  return mutualFriendIds;
+  // return users;
+};
+
+const getMutualChannelIds = async (userAId, userBId) => {
+  const channels = await Channel.find({
+    type: {
+      $in: ["DM", "GROUP"],
+    },
+    $or: [
+      {
+        members: userAId,
+        owner: userBId,
+      },
+      {
+        members: userBId,
+        owner: userAId,
+      },
+      {
+        members: [userAId, userBId],
+      },
+    ],
+  });
+  return channels;
+};
+
+const getMutualServerIds = async (userAId, userBId) => {
+  const servers = await Workspace.find({
+    $or: [
+      {
+        members: userAId,
+        owner: userBId,
+      },
+      {
+        members: userBId,
+        owner: userAId,
+      },
+      {
+        members: [userAId, userBId],
+      },
+    ],
+  });
+  return servers;
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -112,4 +220,7 @@ module.exports = {
   updateUserById,
   deleteUserById,
   getAllUsers,
+  getMutualUserIds,
+  getMutualChannelIds,
+  getMutualServerIds,
 };

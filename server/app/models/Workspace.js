@@ -46,8 +46,7 @@ const workspaceSchema = new mongoose.Schema(
           ref: "Channel",
         },
         position: {
-          type: Number,
-          min: [0, "Position must be greater than 0"],
+          type: String,
         },
       },
     ],

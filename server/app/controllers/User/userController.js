@@ -27,7 +27,37 @@ const getUsers = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send(users);
 });
 
+const getMutualUserIds = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userIds = await userService.getMutualUserIds(req.user.id, id);
+  res.status(httpStatus.OK).send(userIds);
+});
+
+const getMutualChannelIds = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const channelIds = await userService.getMutualChannelIds(req.user.id, id);
+  res.status(httpStatus.OK).send(channelIds);
+});
+
+const getMutualServerIds = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const serverIds = await userService.getMutualServerIds(req.user.id, id);
+  res.status(httpStatus.OK).send(serverIds);
+});
+
+const getMutual = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const user = await userService.getMutualUserIds(req.user.id, id);
+  const channel = await userService.getMutualChannelIds(req.user.id, id);
+  const server = await userService.getMutualServerIds(req.user.id, id);
+  res.status(httpStatus.OK).send({ user, channel, server });
+});
+
 module.exports = {
   allUsers,
   getUsers,
+  getMutualUserIds,
+  getMutualChannelIds,
+  getMutualServerIds,
+  getMutual,
 };

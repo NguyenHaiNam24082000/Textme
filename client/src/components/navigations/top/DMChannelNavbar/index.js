@@ -81,7 +81,8 @@ export default function DMChannelNavbar({ channel, user }) {
           className="flex w-full h-12 items-center justify-between px-2"
           style={{ borderBottom: "2px solid #e1e1e1" }}
         >
-          <Group
+          <VideoCall channel={channel} />
+          {/* <Group
             className="cursor-pointer"
             onClick={() => setShowUserProfile(true)}
           >
@@ -161,7 +162,7 @@ export default function DMChannelNavbar({ channel, user }) {
                 !isVisibleRightSidebar && dispatch(expandedComplement());
               }}
             />
-          </Group>
+          </Group> */}
         </div>
         {(voiceCall || videoCall) && (
           <div

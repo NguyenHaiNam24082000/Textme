@@ -15,3 +15,7 @@ export const createWorkspaceChannel = (payload) => {
 export const inviteMember = (payload) => {
   return postRequest(`/api/v1/server/${payload.severId}/invite`, payload);
 };
+
+export const getDiscoverServers = () => {
+  return getRequest(`/api/v1/server/discover`);
+};

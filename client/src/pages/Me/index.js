@@ -9,6 +9,7 @@ import sound from "../../assets/sounds/audio.ogg";
 import Friends from "./Friends";
 import DMPage from "./DMPage";
 import Server from "./Server";
+import Invites from "./Invites";
 
 import {
   ChannelListSidebar,
@@ -25,6 +26,7 @@ import Invite from "./Invite";
 import { registerSpotlightActions, useSpotlight } from "@mantine/spotlight";
 import { GetMe } from "../../store/userSlice";
 import { Avatar } from "@mantine/core";
+import VideoCall from "../../components/VideoCall";
 // import Server from "./Server";
 
 // const MainBase = ({ location }) => {
@@ -204,7 +206,9 @@ export default function Me() {
       //   play({ id: e.keyCode.toString() });
       // }}
     >
-      {useMatch("/invite/:serverId") ? (
+      {useMatch("/channel/:channel/videoCall") ? (
+        <VideoCall channel={channel} />
+      ) : location.pathname.includes("/invite/") ? (
         <Invite />
       ) : (
         <>
@@ -212,12 +216,14 @@ export default function Me() {
           <div className="flex flex-auto">
             {location.pathname.includes("/channel/@me") ||
             location.pathname === "/friends" ||
+            location.pathname === "/invites" ||
             location.pathname === "/discover" ? (
               <HomeSidebar channels={channels} />
             ) : (
               <ChannelListSidebar server={server} />
             )}
             {location.pathname === "/friends" && <Friends />}
+            {location.pathname === "/invites" && <Invites />}
             {location.pathname === "/channel/@me" && <Home />}
             {location.pathname === "/discover" && <Discover />}
             {!server && channel && <DMPage channel={channel} />}

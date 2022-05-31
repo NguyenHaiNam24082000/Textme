@@ -10,7 +10,7 @@ import {
   Tabs,
   Text,
 } from "@mantine/core";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "../Modal";
 import "./index.css";
 import { cancelPendingRequestApi } from "../../../apis/friend";
@@ -24,10 +24,12 @@ import {
   pendingUsername,
 } from "../../../commons/friendObject";
 import { useQueryClient } from "react-query";
+import { getMutualIds } from "../../../apis/account";
 
 export default function ModalUserProfile({ opened, onClose, user, pending }) {
   const cache = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const [profile, setProfile] = useState({});
 
   const cancelPending = async () => {
     setIsLoading(true);
@@ -44,6 +46,15 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (opened) {
+      const { data } = getMutualIds(
+        pending.sender.id === user.id ? pending.receiver.id : pending.sender.id
+      );
+      setProfile(data);
+    }
+  }, [opened]);
 
   return (
     <Modal
@@ -137,12 +148,13 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
           classNames={{ body: "p-5 overflow-y-auto" }}
         >
           <Tabs.Tab label="Profile">
-            <Empty
+            {JSON.stringify(profile)}
+            {/* <Empty
               image={
                 <IllustrationConstruction style={{ width: 150, height: 150 }} />
               }
               description={"under construction"}
-            />
+            /> */}
           </Tabs.Tab>
           <Tabs.Tab label="Mutual Friends">
             <Empty

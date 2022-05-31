@@ -1,19 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled from "@emotion/styled";
-import { ActionIcon, AspectRatio, Drawer, Grid } from "@mantine/core";
-// import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
-// import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
-// import { Player } from "@lottiefiles/react-lottie-player";
+import { ActionIcon, AspectRatio, Drawer, Grid, Popover } from "@mantine/core";
+import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
+import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
+import { Player } from "@lottiefiles/react-lottie-player";
 import {
   BsMicMuteFill,
   BsMicFill,
   BsCameraVideoOffFill,
   BsCameraVideoFill,
 } from "react-icons/bs";
-import "@tensorflow/tfjs-core";
-import "@tensorflow/tfjs-converter";
-import "@tensorflow/tfjs-backend-webgl";
+// import "@tensorflow/tfjs-core";
+// import "@tensorflow/tfjs-conferer";
+// import "@tensorflow/tfjs-backend-webgl";
 import { Modal } from "@mantine/core";
+import * as Kalidokit from "kalidokit";
 import { Badge } from "@douyinfe/semi-ui";
 import * as bodyPix from "@tensorflow-models/body-pix";
 import Webcam from "react-webcam";
@@ -95,6 +96,11 @@ const VideoBox = styled.div`
   }
 `;
 
+const selfieSegmentation = new SelfieSegmentation({
+  locateFile: (file) =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
+});
+
 export default function VideoCall({ channel }) {
   const me = GetMe();
   const socket = getSocket(me?.tokens?.access?.token);
@@ -114,6 +120,7 @@ export default function VideoCall({ channel }) {
   const [background, setBackground] = useState("none");
   const [stream, setStream] = useState();
   const [callerSignal, setCallerSignal] = useState();
+  const screenTrackRef = useRef();
   const [userVideoAudio, setUserVideoAudio] = useState({
     localUser: { video: true, audio: true },
   });
@@ -122,6 +129,8 @@ export default function VideoCall({ channel }) {
   const userStream = useRef();
   const [aspectRatio, setAspectRatio] = useState(1);
   const updateLayoutRef = useRef();
+  const webcamCanvasRef = useRef();
+  const webcamContextRef = useRef();
 
   const onResults = (results) => {
     contextRef.current.save();
@@ -177,41 +186,10 @@ export default function VideoCall({ channel }) {
   };
 
   useEffect(() => {
-    if (openedSetting && userVideoRef.current) {
-      if (canvasRef.current) {
-        contextRef.current = canvasRef.current.getContext("2d");
-        const constraints = {
-          video: { width: { min: 1280 }, height: { min: 720 } },
-        };
-        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-          userVideoRef.current.srcObject = stream;
-          sendToMediaPipe();
-        });
-
-        const selfieSegmentation = new SelfieSegmentation({
-          locateFile: (file) =>
-            `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
-        });
-
-        selfieSegmentation.setOptions({
-          modelSelection: 1,
-          selfieMode: true,
-        });
-
-        selfieSegmentation.onResults(onResults);
-
-        const sendToMediaPipe = async () => {
-          if (!userVideoRef.current.videoWidth) {
-            console.log(userVideoRef.current.videoWidth);
-            requestAnimationFrame(sendToMediaPipe);
-          } else {
-            await selfieSegmentation.send({ image: userVideoRef.current });
-            requestAnimationFrame(sendToMediaPipe);
-          }
-        };
-      }
+    if (background !== "none") {
+      selfieSegmentation.onResults(onResults);
     }
-  }, [openedSetting, background]);
+  }, [background]);
 
   useEffect(() => {
     // const newSocket = getSocket(me?.tokens?.access?.token);
@@ -256,8 +234,10 @@ export default function VideoCall({ channel }) {
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
+        contextRef.current = canvasRef.current.getContext("2d");
         userVideoRef.current.srcObject = stream;
         userStream.current = stream;
+        sendToMediaPipe();
         socket.emit(CHANNEL_SOCKET.CALL, {
           to: channel.id,
           from: me.user,
@@ -321,6 +301,24 @@ export default function VideoCall({ channel }) {
           peerIndex.peer.signal(user.signal);
         });
       });
+
+    selfieSegmentation.setOptions({
+      modelSelection: 1,
+      selfieMode: true,
+    });
+
+    if (background !== "none") {
+      selfieSegmentation.onResults(onResults);
+    }
+    const sendToMediaPipe = async () => {
+      if (!userVideoRef.current.videoWidth) {
+        // console.log(userVideoRef.current.videoWidth);
+        requestAnimationFrame(sendToMediaPipe);
+      } else {
+        await selfieSegmentation.send({ image: userVideoRef.current });
+        requestAnimationFrame(sendToMediaPipe);
+      }
+    };
   }, [channel.id, me.user, socket]);
 
   console.log(peers, "listPeers");
@@ -549,6 +547,48 @@ export default function VideoCall({ channel }) {
     });
   };
 
+  // const clickScreenSharing = () => {
+  //   if (!screenShare) {
+  //     navigator.mediaDevices
+  //       .getDisplayMedia({ cursor: true })
+  //       .then((stream) => {
+  //         const screenTrack = stream.getTracks()[0];
+
+  //         peersRef.current.forEach(({ peer }) => {
+  //           // replaceTrack (oldTrack, newTrack, oldStream);
+  //           peer.replaceTrack(
+  //             peer.streams[0]
+  //               .getTracks()
+  //               .find((track) => track.kind === "video"),
+  //             screenTrack,
+  //             userStream.current
+  //           );
+  //         });
+
+  //         // Listen click end
+  //         screenTrack.onended = () => {
+  //           peersRef.current.forEach(({ peer }) => {
+  //             peer.replaceTrack(
+  //               screenTrack,
+  //               peer.streams[0]
+  //                 .getTracks()
+  //                 .find((track) => track.kind === "video"),
+  //               userStream.current
+  //             );
+  //           });
+  //           userVideoRef.current.srcObject = userStream.current;
+  //           setScreenShare(false);
+  //         };
+
+  //         userVideoRef.current.srcObject = stream;
+  //         screenTrackRef.current = screenTrack;
+  //         setScreenShare(true);
+  //       });
+  //   } else {
+  //     screenTrackRef.current.onended();
+  //   }
+  // };
+
   const clickCameraDevice = (id) => {
     if (id) {
       const deviceId = id;
@@ -583,7 +623,7 @@ export default function VideoCall({ channel }) {
 
   return (
     <div ref={ref} className="bg-black flex w-full h-full relative">
-      {/* <FloatingTrackContainer>
+      <FloatingTrackContainer>
         <FloatingReactionItem />
       </FloatingTrackContainer>
       <GiantReactionMotionWrapper
@@ -597,27 +637,19 @@ export default function VideoCall({ channel }) {
             style={{ height: "250px", width: "auto", marginRight: "8px" }}
           ></Player>
         }
-      /> */}
-      {/* <img
-        ref={imgRef}
-        id="scream"
-        src="https://magazine.artstation.com/wp-content/uploads/2022/04/FG6.jpg"
-        alt="The Scream"
-        width="220"
-        height="277"
-      ></img> */}
+      />
       <PackedGrid
         boxAspectRatio={aspectRatio}
         className="fullscreen"
         updateLayoutRef={updateLayoutRef}
       >
-        <div className="bg-white flex relative w-full h-full rounded-md overflow-hidden">
+        <div className="flex justify-center items-center relative w-full h-full rounded-md overflow-hidden">
           <video
             autoPlay
             muted
             playsInline
             ref={userVideoRef}
-            className="absolute inset-0 z-10 w-full h-auto rounded-md"
+            className="absolute inset-0 z-10 w-full h-auto rounded-md top-auto bottom-auto"
           />
           {/* <video
           autoPlay
@@ -626,7 +658,7 @@ export default function VideoCall({ channel }) {
         /> */}
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 z-10 rounded-md"
+            className="absolute inset-0 z-10 rounded-md top-auto bottom-auto"
             style={{
               width: userVideoRef.current?.clientWidth || "100%",
               height: userVideoRef.current?.clientHeight || "100%",
@@ -637,18 +669,73 @@ export default function VideoCall({ channel }) {
           peers.map((peer, index, arr) => createUserVideo(peer, index, arr))}
       </PackedGrid>
       <div className="px-2 w-full h-14 flex items-center justify-between absolute bottom-2 left-0">
-        <div></div>
-        <Group spacing="xs">
-          <ActionIcon
-            size={56}
-            radius="xl"
-            variant="light"
-            onClick={() => {
-              setOpenedSetting(!openedSetting);
-            }}
+        <div>
+          <Popover
+            opened={true}
+            // onClose={() => setOpenedMenuReactions(false)}
+            target={
+              <ActionIcon
+                size="xl"
+                radius="xl"
+                variant="filled"
+                // onClick={() => setOpenedMenuReactions((v) => !v)}
+              >
+                <FontAwesomeIcon icon="fa-solid fa-phone-volume" />
+              </ActionIcon>
+            }
+            width={365}
+            position="bottom"
+            withArrow
+            radius="md"
           >
-            <BsMicFill className="w-6 h-auto" />
-          </ActionIcon>
+            <div className="flex flex-col gap-2">
+              <Text weight={600}>Reactions</Text>
+              <Group direction="column" grow spacing="xs">
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={"🧠"}>
+                    I agree
+                  </Button>
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    I disagree
+                  </Button>
+                </Group>
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    Hahahahaha
+                  </Button>
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    I LOVE THIS
+                  </Button>
+                </Group>
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    Wooohooo!
+                  </Button>
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    Excellent!
+                  </Button>
+                </Group>
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    Hmmm...
+                  </Button>
+                  <Button variant="subtle" leftIcon={"🤫"}>
+                    Shhh...
+                  </Button>
+                </Group>
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={""}>
+                    I don't get it?
+                  </Button>
+                  <Button variant="subtle" leftIcon={"🧠"}>
+                    Big brain!
+                  </Button>
+                </Group>
+              </Group>
+            </div>
+          </Popover>
+        </div>
+        <Group spacing="xs">
           <div className="w-auto h-auto relative">
             <ActionIcon
               size={56}
@@ -752,6 +839,16 @@ export default function VideoCall({ channel }) {
           >
             <MdOutlineScreenShare className="w-6 h-auto" />
           </ActionIcon>
+          <ActionIcon
+            size={56}
+            radius="xl"
+            variant="light"
+            onClick={() => {
+              setOpenedSetting(!openedSetting);
+            }}
+          >
+            <FontAwesomeIcon icon="fa-solid fa-ellipsis-vertical" />
+          </ActionIcon>
           <ActionIcon size={56} radius="xl" variant="light">
             <FontAwesomeIcon
               icon="fa-solid fa-phone"
@@ -760,12 +857,9 @@ export default function VideoCall({ channel }) {
           </ActionIcon>
         </Group>
         <Group>
-          <ActionIcon onClick={toggle}>
+          <ActionIcon onClick={toggle} size={56} radius="xl" variant="light">
             <FontAwesomeIcon icon="fa-solid fa-expand" />
           </ActionIcon>
-          <Button variant="light" color="red">
-            Leave
-          </Button>
         </Group>
       </div>
       <Drawer
@@ -775,23 +869,23 @@ export default function VideoCall({ channel }) {
         padding="xl"
         size="xl"
       >
-        <AspectRatio ratio={16 / 9}>
+        {/* <AspectRatio ratio={16 / 9}>
           <div className="flex relative w-full rounded-md overflow-hidden">
             <video
               autoPlay
               ref={webcamRef}
               className="absolute inset-0 z-10 w-full h-auto rounded-md"
             />
-            {/* <canvas
-              ref={canvasRef}
+            <canvas
+              ref={webcamCanvasRef}
               className="absolute inset-0 z-10 rounded-md"
               style={{
                 width: webcamRef.current?.clientWidth || "100%",
                 height: webcamRef.current?.clientHeight || "100%",
               }}
-            /> */}
+            />
           </div>
-        </AspectRatio>
+        </AspectRatio> */}
         <div className="flex flex-col gap-2 mt-2">
           <Text weight={500}>Semibold</Text>
           <Grid>
@@ -827,6 +921,9 @@ export default function VideoCall({ channel }) {
                   <img
                     onClick={() => {
                       setBackground(bg);
+                    }}
+                    style={{
+                      border: background === bg && "2px solid #000",
                     }}
                     className="rounded"
                     src={bg}

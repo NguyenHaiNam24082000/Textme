@@ -392,7 +392,12 @@ function App() {
                                 path="/channel/@me/:channel"
                                 element={<Me />}
                               />
+                              {/* <Route
+                                path="/channel/:channel/videoCall"
+                                element={<Me />}
+                              /> */}
                               <Route path="/discover" element={<Me />} />
+                              <Route path="/invites" element={<Me />} />
                               <Route path="/invite/:server" element={<Me />} />
                               <Route path="/friends" element={<Me />} />
                               {/* <Route path="/app" element={<Workspace />} />

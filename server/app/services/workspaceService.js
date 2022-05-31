@@ -51,9 +51,15 @@ const createWorkspaceChannel = async (user, params, body) => {
     owner: user.id,
   });
   const workspace = await Workspace.findById(params.serverId);
+  const position =
+    Math.max(
+      workspace.channels.map((channel) =>
+        Number(channel.position.split("-")[0])
+      )
+    ) + 1;
   workspace.channels.push({
     channel: channel._id,
-    position: workspace.channels.length,
+    position: `${position}`,
   });
   await workspace.save();
   return channel;
@@ -225,4 +231,5 @@ module.exports = {
   getAllWorkspaces,
   createWorkspaceChannel,
   inviteMember,
+  getDiscoverServers,
 };

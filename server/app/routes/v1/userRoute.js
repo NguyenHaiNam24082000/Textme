@@ -6,5 +6,6 @@ const userController = require("../../controllers/User/userController");
 router.get("/all-users", userController.allUsers);
 // router.get('/get-users',auth("getUsers"),userController.getUsers);
 router.get("/get-users", auth(), userController.getUsers);
+router.get("/:id/mutual", auth(), userController.getMutual);
 
 module.exports = router;

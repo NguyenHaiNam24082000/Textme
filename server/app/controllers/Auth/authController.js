@@ -7,9 +7,14 @@ const {
   serverErrorResponses,
 } = require("../../configs/statusCodes");
 
-const httpStatus = require('http-status');
-const catchAsync = require('../../utils/catchAsync');
-const { authService, userService, tokenService, emailService } = require('../../services');
+const httpStatus = require("http-status");
+const catchAsync = require("../../utils/catchAsync");
+const {
+  authService,
+  userService,
+  tokenService,
+  emailService,
+} = require("../../services");
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -37,7 +42,9 @@ const refreshTokens = catchAsync(async (req, res) => {
 });
 
 const forgotPassword = catchAsync(async (req, res) => {
-  const resetPasswordToken = await tokenService.generateResetPasswordToken(req.body.email);
+  const resetPasswordToken = await tokenService.generateResetPasswordToken(
+    req.body.email
+  );
   res.status(httpStatus.NO_CONTENT).send(resetPasswordToken);
 });
 
@@ -53,9 +60,11 @@ const resetPassword = catchAsync(async (req, res) => {
 // });
 
 const sendVerificationEmail = catchAsync(async (req, res) => {
-  console.log(req,"req");
-  const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user);
-  console.log("hahah",verifyEmailToken);
+  console.log(req, "req");
+  const verifyEmailToken = await tokenService.generateVerifyEmailToken(
+    req.user
+  );
+  console.log("hahah", verifyEmailToken);
   await emailService.sendVerificationEmail(req.user.email, verifyEmailToken);
   res.status(httpStatus.NO_CONTENT).send();
 });
@@ -63,6 +72,15 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 const verifyEmail = catchAsync(async (req, res) => {
   await authService.verifyEmail(req.query.token);
   res.status(httpStatus.NO_CONTENT).send();
+});
+
+const changePassword = catchAsync(async (req, res) => {
+  await authService.changePassword(
+    req.user.id,
+    req.body.oldPassword,
+    req.body.newPassword
+  );
+  res.status(httpStatus.OK).send({ status: "success" });
 });
 
 module.exports = {
@@ -74,4 +92,5 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  changePassword,
 };

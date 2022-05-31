@@ -14,14 +14,18 @@ import {
   isVisibleComplement,
   setActiveComplement,
 } from "../../../../store/uiSlice";
+import ModalCreateChannel from "../../../Modals/ModalCreateChannel";
 
 export default function ChannelListSidebar({ server }) {
   const [openedModalWorkspaceSettings, setOpenedModalWorkspaceSettings] =
+    useState(false);
+  const [openedModalCreateChannel, setOpenedModalCreateChannel] =
     useState(false);
   const [style, trigger] = useBoop({ y: 2 });
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const isVisibleRightSidebar = useSelector(isVisibleComplement);
+  const [type, setType] = useState("channel");
   return (
     <SidebarBase>
       <Menu
@@ -63,13 +67,28 @@ export default function ChannelListSidebar({ server }) {
         <Menu.Item onClick={() => setOpenedModalWorkspaceSettings(true)}>
           Workspace Settings
         </Menu.Item>
-        <Menu.Item>Create Channel</Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            setType("channel");
+            setOpenedModalCreateChannel(true);
+          }}
+        >
+          Create Channel
+        </Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            setType("category");
+            setOpenedModalCreateChannel(true);
+          }}
+        >
+          Create Category
+        </Menu.Item>
         {/* <Menu.Item>Create Category</Menu.Item>
         <Menu.Item>Create Event</Menu.Item> */}
-        <Divider />
+        {/* <Divider />
         <Menu.Item>Notification Settings</Menu.Item>
         <Menu.Item>Privacy Settings</Menu.Item>
-        <Menu.Item>Security Settings</Menu.Item>
+        <Menu.Item>Security Settings</Menu.Item> */}
         {/* <Divider />
         <Menu.Item>Edit Workspace Profile</Menu.Item>
         <Menu.Item>Hide Muted Channels</Menu.Item> */}
@@ -153,9 +172,20 @@ export default function ChannelListSidebar({ server }) {
             </div>
           </div>
 
-          <Tree server={server} />
+          <Tree
+            server={server}
+            setOpenedModalCreateChannel={setOpenedModalCreateChannel}
+          />
         </div>
       </div>
+      <ModalCreateChannel
+        opened={openedModalCreateChannel}
+        onClose={() => {
+          setOpenedModalCreateChannel(false);
+        }}
+        server={server}
+        type={type}
+      />
       <ModalWorkspaceSettings
         opened={openedModalWorkspaceSettings}
         onClose={() => {

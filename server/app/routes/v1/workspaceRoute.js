@@ -11,5 +11,6 @@ router.post(
   workspaceController.createWorkspaceChannel
 );
 router.post("/:serverId/invite", auth(), workspaceController.inviteMember);
+router.get("/discover", auth(), workspaceController.getDiscoverServers);
 
 module.exports = router;

@@ -11,21 +11,48 @@ import {
 } from "@mantine/core";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { changePassword } from "../../../../../apis/auth";
+import { GetMe } from "../../../../../store/userSlice";
 import Modal from "../../../Modal";
+import { useForm } from "@mantine/form";
 
 export default function Account({ user }) {
+  const me = GetMe();
   const [showPhone, setShowPhone] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
+  const [openedModalChangePassword, setOpenedModalChangePassword] =
+    useState(false);
   const { t } = useTranslation();
-  const [info, setInfo] = useState({
-    username: "NguyenHaiNam",
-    email: "nghainam2000@gmail.com",
-    phone: "0989898989",
-    password: "********",
-    accent_color: Math.random() * 16777215,
-    banner: null,
-    discriminator: 12345,
+  const [serverError, setServerError] = useState(null);
+  const form = useForm({
+    initialValues: {
+      oldPassword: "",
+      newPassword: "",
+    },
+
+    validationRules: {
+      oldPassword: (value) =>
+        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/.test(
+          value
+        ),
+      newPassword: (value) =>
+        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/.test(
+          value
+        ),
+    },
   });
+  const handleSubmit = async (values) => {
+    const { data } = await changePassword({
+      ...values,
+    });
+    console.log(data);
+    if (data.error) {
+      setServerError(data.error.password);
+    } else {
+      setServerError(null);
+      setOpenedModalChangePassword(false);
+    }
+  };
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col w-full">
@@ -33,9 +60,9 @@ export default function Account({ user }) {
         <div className="flex flex-col w-full h-auto bg-gray-200 rounded-lg overflow-hidden">
           <BackgroundImage
             sx={{
-              background: `#${Math.floor(info.accent_color).toString(16)}`,
+              background: `#${Math.floor(me.user?.accent_color).toString(16)}`,
             }}
-            src={info.banner}
+            // src={me.user?.banner}
             radius="xs"
             className="h-40"
           />
@@ -63,10 +90,10 @@ export default function Account({ user }) {
                 <div className="flex items-end w-full">
                   <span className="text-white text-2xl font-bold">
                     {/* @{user && pending && pendingUsername(user, pending)} */}
-                    @{info.username}
+                    @{me.user?.username}
                   </span>
                   <span className="text-slate-300 text-2xl font-medium">
-                    #{info.discriminator}
+                    #{me.user?.discriminator}
                   </span>
                 </div>
                 {/* <div className="flex w-full text-black text-sm font-medium items-center">
@@ -106,7 +133,7 @@ export default function Account({ user }) {
                   <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Username")}
                   </div>
-                  <div className="flex">{info.username}</div>
+                  <div className="flex">{me.user?.username}</div>
                 </div>
               </div>
               {/* <div className="flex">
@@ -129,7 +156,9 @@ export default function Account({ user }) {
                     {t("Email")}
                   </div>
                   <div className="flex items-center">
-                    {showEmail ? info.email : info.email.replace(/[^@.]/g, "*")}
+                    {showEmail
+                      ? me.user?.email
+                      : me.user?.email.replace(/[^@.]/g, "*")}
                     <Text
                       variant="link"
                       className="ml-1 cursor-pointer"
@@ -159,7 +188,7 @@ export default function Account({ user }) {
                   <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Name")}
                   </div>
-                  <div className="flex">{info.username}</div>
+                  <div className="flex">{me.user?.username}</div>
                 </div>
               </div>
               <div className="flex">
@@ -182,7 +211,9 @@ export default function Account({ user }) {
                     {t("Phone Number")}
                   </div>
                   <div className="flex items-center">
-                    {showPhone ? info.phone : info.phone.replace(/./g, "*")}
+                    {showPhone
+                      ? me.user?.phone
+                      : me.user?.phone.replace(/./g, "*")}
                     <Text
                       variant="link"
                       className="ml-1 cursor-pointer"
@@ -212,13 +243,14 @@ export default function Account({ user }) {
                   <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Password")}
                   </div>
-                  <div className="flex">{info.password}</div>
+                  <div className="flex">{me.user?.password}</div>
                 </div>
               </div>
               <div className="flex">
                 <Button
                   leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                   variant="white"
+                  onClick={() => setOpenedModalChangePassword(true)}
                 >
                   {t("Edit")}
                 </Button>
@@ -249,18 +281,40 @@ export default function Account({ user }) {
       <Modal
         title={"Change Password"}
         zIndex={9999}
-        opened={false}
-        onClose={() => {}}
+        opened={openedModalChangePassword}
+        onClose={() => {
+          setOpenedModalChangePassword(false);
+        }}
       >
-        <form className="flex flex-col gap-2">
-          <TextInput label={"Old Password"} placeholder={"Old Password"} />
-          <TextInput label={"New Password"} placeholder={"New Password"} />
+        <form
+          className="flex flex-col gap-2"
+          onSubmit={form.onSubmit(handleSubmit)}
+        >
           <TextInput
+            label={"Old Password"}
+            placeholder={"Old Password"}
+            error={serverError}
+            {...form.getInputProps("oldPassword")}
+          />
+          <TextInput
+            label={"New Password"}
+            placeholder={"New Password"}
+            error={serverError}
+            {...form.getInputProps("newPassword")}
+          />
+          {/* <TextInput
             label={"Confirm New Password"}
             placeholder={"Confirm New Password"}
-          />
+            {...form.getInputProps('oldPassword')}
+          /> */}
           <Group position="apart">
-            <Button>Cancel</Button>
+            <Button
+              onClick={() => {
+                setOpenedModalChangePassword(false);
+              }}
+            >
+              Cancel
+            </Button>
             <Button type="submit">Update</Button>
           </Group>
         </form>

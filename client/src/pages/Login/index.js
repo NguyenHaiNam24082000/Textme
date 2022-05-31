@@ -132,7 +132,7 @@ export default function Login() {
     // const actionResult = await dispatch(getMe());
     setTimeout(() => {
       setLoading(false);
-      if (data.error?.email || data.error?.username) {
+      if (data.error) {
         setServerError(data.error);
       } else {
         dispatch(loginSuccess(data));

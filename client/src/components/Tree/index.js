@@ -14,7 +14,6 @@ import { useDispatch } from "react-redux";
 import { voiceConnected } from "../../store/uiSlice";
 
 function updateTreeData(list, key, children) {
-  console.log(list, key, children);
   return list.map((node) => {
     if (node.key === key) {
       return { ...node, children };
@@ -30,11 +29,9 @@ function updateTreeData(list, key, children) {
   });
 }
 
-export default function TreeComponent({ server }) {
+export default function TreeComponent({ server, setOpenedModalCreateChannel }) {
   const history = useNavigate();
   const dispatch = useDispatch();
-  const [openedModalCreateChannel, setOpenedModalCreateChannel] =
-    useState(false);
   const [openedModalChannelSettings, setOpenedModalChannelSettings] =
     useState(false);
   const { channel: channelId } = useParams();
@@ -46,67 +43,108 @@ export default function TreeComponent({ server }) {
   useEffect(() => {
     if (server?.channels) {
       setTreeData([
-        {
-          label: "Channels",
-          value: "Channels",
-          key: "0",
-          channel: null,
-          button: (
-            <ActionIcon
-              size="sm"
-              variant="transparent"
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpenedModalCreateChannel(true);
-              }}
-            >
-              <IconPlus />
-            </ActionIcon>
-          ),
-          children: [
-            ...server.channels?.map((channel) => ({
-              label: channel.channel.name,
-              value: channel.channel._id,
-              key: `0-${channel.position}`,
-              channel: channel,
-              icon:
-                channel.channel.type === "TEXT" ? (
-                  <IconHash />
-                ) : (
-                  <FontAwesomeIcon icon="fa-solid fa-volume-high" />
-                ),
-              click: () => {
-                if (channel.channel.type === "VOICE") {
-                  setTreeData((v) =>
-                    updateTreeData(v, `0-${channel.position}`, [
-                      {
-                        label: "Channels",
-                        value: "Channels",
-                        key: `0-${channel.position}-1`,
-                      },
-                    ])
-                  );
-                  dispatch(voiceConnected(true));
-                }
-                history(`/channel/${server._id}/${channel.channel._id}`);
+        ...server.channels
+          .sort((a, b) => a.position.localeCompare(b.position))
+          .reduce((acc, item) => {
+            // if parentId is 0, add to acc.
+            if (!item.position.includes("-")) {
+              return [
+                ...acc,
+                {
+                  label: item.channel.name,
+                  value: item.channel.id,
+                  channel: item.channel,
+                  key: item.position,
+                },
+              ];
+            }
+
+            // else find the parent.
+            const parentIndex = acc.findIndex(
+              (parent) => item.position.split("-")[0] === parent.position
+            );
+            const parent = acc[parentIndex];
+            const children = parent?.children ?? [];
+
+            // update the array item at index.
+            return Object.assign([], acc, {
+              [parentIndex]: {
+                ...parent,
+                children: [
+                  ...children,
+                  {
+                    label: item.channel.name,
+                    value: item.channel.id,
+                    channel: item.channel,
+                    key: item.position,
+                  },
+                ], // add the item as a child.
               },
-              button: (
-                <ActionIcon
-                  size="sm"
-                  variant="transparent"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setChannel(channel.channel);
-                    setOpenedModalChannelSettings(true);
-                  }}
-                >
-                  <IconSetting />
-                </ActionIcon>
-              ),
-            })),
-          ],
-        },
+            });
+          }, []),
       ]);
+      // setTreeData([
+      //   {
+      //     label: "Channels",
+      //     value: "Channels",
+      //     key: "0",
+      //     channel: null,
+      //     button: (
+      //       <ActionIcon
+      //         size="sm"
+      //         variant="transparent"
+      //         onClick={(e) => {
+      //           e.stopPropagation();
+      //           setOpenedModalCreateChannel(true);
+      //         }}
+      //       >
+      //         <IconPlus />
+      //       </ActionIcon>
+      //     ),
+      //     children: [
+      //       ...server.channels?.map((channel) => ({
+      //         label: channel.channel.name,
+      //         value: channel.channel._id,
+      //         key: `0-${channel.position}`,
+      //         channel: channel,
+      //         icon:
+      //           channel.channel.type === "TEXT" ? (
+      //             <IconHash />
+      //           ) : (
+      //             <FontAwesomeIcon icon="fa-solid fa-volume-high" />
+      //           ),
+      //         click: () => {
+      //           if (channel.channel.type === "VOICE") {
+      //             setTreeData((v) =>
+      //               updateTreeData(v, `0-${channel.position}`, [
+      //                 {
+      //                   label: "Channels",
+      //                   value: "Channels",
+      //                   key: `0-${channel.position}-1`,
+      //                 },
+      //               ])
+      //             );
+      //             dispatch(voiceConnected(true));
+      //           }
+      //           history(`/channel/${server._id}/${channel.channel._id}`);
+      //         },
+      //         button: (
+      //           <ActionIcon
+      //             size="sm"
+      //             variant="transparent"
+      //             onClick={(e) => {
+      //               e.stopPropagation();
+      //               setChannel(channel.channel);
+      //               setOpenedModalChannelSettings(true);
+      //             }}
+      //           >
+      //             <IconSetting />
+      //           </ActionIcon>
+      //         ),
+      //       })),
+      //     ],
+      //   },
+      // ]);
     }
   }, [server]);
   const renderLabel = ({ className, onExpand, onClick, data, expandIcon }) => {
@@ -217,12 +255,6 @@ export default function TreeComponent({ server }) {
           renderFullLabel={renderLabel}
           draggable
           onDrop={onDrop}
-        />
-        <ModalCreateChannel
-          opened={openedModalCreateChannel}
-          onClose={() => {
-            setOpenedModalCreateChannel(false);
-          }}
         />
       </div>
       <ModalChannelSettings

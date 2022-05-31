@@ -109,7 +109,10 @@ const loginUserWithEmailAndPassword = async (email, password) => {
 const loginUserWithUsernameAndPassword = async (username, password) => {
   const user = await userService.getUserByUsername(username);
   if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect username or password");
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      "Incorrect username or password"
+    );
   }
   return user;
 };
@@ -198,10 +201,32 @@ const verifyEmail = async (verifyEmailToken) => {
   }
 };
 
+const changePassword = async (userId, oldPassword, newPassword) => {
+  try {
+    const user = await userService.getUserById(userId);
+    if (!user) {
+      throw new Error();
+    }
+    if (!(await user.isPasswordMatch(oldPassword))) {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        JSON.stringify({ password: "Incorrect password" })
+      );
+    }
+    await userService.updateUserById(user.id, { password: newPassword });
+  } catch (error) {
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      JSON.stringify({ password: "Password change failed" })
+    );
+  }
+};
+
 module.exports = {
   loginUserWithEmailAndPassword,
   logout,
   refreshAuth,
   resetPassword,
   verifyEmail,
+  changePassword,
 };

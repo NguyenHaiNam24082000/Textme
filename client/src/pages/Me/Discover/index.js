@@ -9,8 +9,10 @@ import {
   Group,
   Badge,
 } from "@mantine/core";
+import { getDiscoverServers } from "../../../apis/workspace";
 
 export default function Discover() {
+  const { data } = getDiscoverServers();
   return (
     <Box sx={{ height: 400, width: "100%" }}>
       <BackgroundImage
@@ -45,6 +47,7 @@ export default function Discover() {
           </Stack>
         </Center>
       </BackgroundImage>
+      {JSON.stringify(data)}
     </Box>
   );
 }
