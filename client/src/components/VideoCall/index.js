@@ -14,20 +14,23 @@ import {
 // import "@tensorflow/tfjs-conferer";
 // import "@tensorflow/tfjs-backend-webgl";
 import { Modal } from "@mantine/core";
-import * as Kalidokit from "kalidokit";
-import { Badge } from "@douyinfe/semi-ui";
-import * as bodyPix from "@tensorflow-models/body-pix";
-import Webcam from "react-webcam";
+// import * as Kalidokit from "kalidokit";
+// import { Badge } from "@douyinfe/semi-ui";
+// import * as bodyPix from "@tensorflow-models/body-pix";
+// import Webcam from "react-webcam";
 import {
   MdBlurOff,
   MdBlurOn,
   MdOutlineScreenShare,
-  MdOutlineStopScreenShare,
+  // MdOutlineStopScreenShare,
 } from "react-icons/md";
-import { HiOutlineDesktopComputer } from "react-icons/hi";
+// import { HiOutlineDesktopComputer } from "react-icons/hi";
 import { Group } from "@mantine/core";
 import { Button } from "@mantine/core";
-import { IconCaretdown, IconChevronDown } from "@douyinfe/semi-icons";
+import {
+  // IconCaretdown,
+  IconChevronDown,
+} from "@douyinfe/semi-icons";
 import { Menu, Divider, Text } from "@mantine/core";
 import { SelfieSegmentation } from "@mediapipe/selfie_segmentation";
 import "./index.css";
@@ -113,14 +116,14 @@ export default function VideoCall({ channel }) {
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const webcamRef = useRef(null);
-  const imgRef = useRef(null);
-  const [bodypixnet, setBodypixnet] = useState();
-  const [prevClassName, setPrevClassName] = useState();
+  // const imgRef = useRef(null);
+  // const [bodypixnet, setBodypixnet] = useState();
+  // const [prevClassName, setPrevClassName] = useState();
   const [openedSetting, setOpenedSetting] = useState(false);
   const [background, setBackground] = useState("none");
-  const [stream, setStream] = useState();
-  const [callerSignal, setCallerSignal] = useState();
-  const screenTrackRef = useRef();
+  // const [stream, setStream] = useState();
+  // const [callerSignal, setCallerSignal] = useState();
+  // const screenTrackRef = useRef();
   const [userVideoAudio, setUserVideoAudio] = useState({
     localUser: { video: true, audio: true },
   });
@@ -129,8 +132,8 @@ export default function VideoCall({ channel }) {
   const userStream = useRef();
   const [aspectRatio, setAspectRatio] = useState(1);
   const updateLayoutRef = useRef();
-  const webcamCanvasRef = useRef();
-  const webcamContextRef = useRef();
+  // const webcamCanvasRef = useRef();
+  // const webcamContextRef = useRef();
 
   const onResults = (results) => {
     contextRef.current.save();

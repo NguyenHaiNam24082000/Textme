@@ -42,7 +42,7 @@ export default function RightSidebar({ channel = null, messages = [] }) {
         unmountOnExit
       >
         <div className="flex flex-col w-full h-full">
-          <Info messages={messages} />
+          <Info messages={messages} channel={channel} />
         </div>
       </CSSTransition>
       <CSSTransition

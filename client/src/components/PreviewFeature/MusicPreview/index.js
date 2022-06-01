@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Paper, Slider } from "@mantine/core";
 import React, { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
-import music from "../../../assets/sounds/Scratch_song.mp3";
+// import music from "../../../assets/sounds/Scratch_song.mp3";
 const proxyUrl = "https://cors-anywhere.herokuapp.com/";
 
 const formWaveSurferOptions = (ref) => ({

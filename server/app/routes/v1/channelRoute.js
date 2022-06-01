@@ -37,5 +37,7 @@ router.put(
   auth(),
   channelController.inviteMembersToChannel
 );
+router.get("/:channelId/attachments", auth(), channelController.getAttachments);
+router.get("/:channelId/links", auth(), channelController.getLinks);
 
 module.exports = router;

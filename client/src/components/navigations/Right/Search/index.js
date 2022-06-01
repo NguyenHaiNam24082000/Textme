@@ -1,26 +1,24 @@
+import { IconChevronLeft, IconClose } from "@douyinfe/semi-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ActionIcon,
   Button,
-  CloseButton,
   Input,
+  Pagination,
   SegmentedControl,
+  Stack,
   Text,
   Tooltip,
-  Pagination,
-  ScrollArea,
-  Stack,
 } from "@mantine/core";
-import { IconClose, IconChevronLeft } from "@douyinfe/semi-icons";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setActiveComplement } from "../../../../store/uiSlice";
 import { getHotkeyHandler } from "@mantine/hooks";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { searchMessages } from "../../../../apis/messages";
 import {
   chatMainTime,
   getMoreDetailsTime,
 } from "../../../../commons/dateUtils";
+import { setActiveComplement } from "../../../../store/uiSlice";
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,

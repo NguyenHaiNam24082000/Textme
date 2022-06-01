@@ -61,6 +61,19 @@ const inviteMembersToChannel = catchAsync(async (req, res, next) => {
   res.status(httpStatus.OK).send(result);
 });
 
+const getAttachments = catchAsync(async (req, res, next) => {
+  const result = await channelService.getAttachments(
+    req.user,
+    req.params.channelId
+  );
+  res.status(httpStatus.OK).send(result);
+});
+
+const getLinks = catchAsync(async (req, res, next) => {
+  const result = await channelService.getLinks(req.user, req.params.channelId);
+  res.status(httpStatus.OK).send(result);
+});
+
 module.exports = {
   getOrCreateDMChannel,
   getDMChannels,
@@ -71,4 +84,6 @@ module.exports = {
   pinnedMessage,
   reactionMessage,
   inviteMembersToChannel,
+  getAttachments,
+  getLinks,
 };

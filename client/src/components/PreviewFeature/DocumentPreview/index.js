@@ -49,12 +49,20 @@ export default function DocumentPreview({ attachment }) {
           frameBorder="0"
         ></iframe> */}
         {/* <embed src={attachment.url} width="100%" height="500px" /> */}
-        <iframe
+        {/* <iframe
           scrolling="yes"
           width="100%"
           height="500px"
           className="flex-auto"
           src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(attachment.url)}`}
+          frameBorder="0"
+        ></iframe> */}
+        <iframe
+          scrolling="yes"
+          width="100%"
+          height="500px"
+          className="flex-auto"
+          src={`https://docs.google.com/viewer?url=https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Ftextme-chat.appspot.com%2Fo%2F6246fcd83a244d34511f79ea%252F6296e548f3b39f5762adc655%252FC%25C3%2594NG%2520TY%2520TNHH%2520KINH%2520DOANH.docx%3Falt%3Dmedia`}
           frameBorder="0"
         ></iframe>
       </Modal>

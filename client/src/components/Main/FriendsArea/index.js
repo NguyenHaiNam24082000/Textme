@@ -1,22 +1,22 @@
-import { Avatar } from "@douyinfe/semi-ui";
+// import { Avatar } from "@douyinfe/semi-ui";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  ActionIcon,
-  Badge,
-  Button,
-  Group,
+  // ActionIcon,
+  // Badge,
+  // Button,
+  // Group,
   Tabs,
-  Text,
-  TextInput,
+  // Text,
+  // TextInput,
 } from "@mantine/core";
 import React, { useState } from "react";
-import { Search } from "tabler-icons-react";
+// import { Search } from "tabler-icons-react";
 import {
   AllFriends,
-  OutGoingRequests,
+  // OutGoingRequests,
   PendingRequests,
 } from "../../../reactQuery/friend";
-import ModalUserProfile from "../../Modals/ModalUserProfile";
+// import ModalUserProfile from "../../Modals/ModalUserProfile";
 import AddFriend from "./AddFriend";
 import All from "./All";
 import Blocked from "./Blocked";
@@ -24,7 +24,7 @@ import Online from "./Online";
 import Pending from "./Pending";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "react-query";
-import { PENDING_REQUESTS_KEY } from "../../../configs/queryKeys";
+// import { PENDING_REQUESTS_KEY } from "../../../configs/queryKeys";
 
 export default function FriendsMain() {
   // const [data,setData]= useState(PendingRequests());

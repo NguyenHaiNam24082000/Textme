@@ -1,5 +1,9 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { BackgroundImage, Divider, Menu } from "@mantine/core";
+import {
+  BackgroundImage,
+  // Divider,
+  Menu,
+} from "@mantine/core";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 // import "react-bubble-ui/dist/index.css";

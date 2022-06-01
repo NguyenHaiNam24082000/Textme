@@ -1,20 +1,32 @@
+import { IconClose } from "@douyinfe/semi-icons";
 import { Button } from "@douyinfe/semi-ui";
 import {
+  Accordion,
   ActionIcon,
   Avatar,
-  Accordion,
-  Text,
-  SimpleGrid,
   Image,
+  SimpleGrid,
+  Text,
 } from "@mantine/core";
-import { IconClose } from "@douyinfe/semi-icons";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-export default function Info({ setActiveMenu, messages }) {
-  const [images, setImages] = useState([]);
-  useEffect(() => {
-    console.log(messages);
-  }, [messages]);
+export default function Info({ messages, channel }) {
+  const [attachments, setAttachments] = useState([
+    ...messages.filter((message) => message.attachments.length === 0),
+  ]);
+  // const [links, setLinks] = useState([
+  //   ...messages.filter((message) =>
+  //     ...message.embed.map((embed) => {
+  //       ogUrl:embed.ogUrl)
+  //   ),
+  // ]);
+  console.log(
+    messages.filter((message) => message.attachments.length === 0),
+    "attachments"
+  );
+  // useEffect(() => {
+  //   console.log(messages);
+  // }, [messages]);
   console.log(messages, "images");
   return (
     <div className="flex flex-col w-full h-full">
@@ -38,6 +50,10 @@ export default function Info({ setActiveMenu, messages }) {
       </div>
       <Accordion className="w-full" offsetIcon={false} multiple>
         <Accordion.Item label="Members">
+          {channel &&
+            channel.members.map((member) => (
+              <div>{JSON.stringify(member)}</div>
+            ))}
           <Button
             className="w-full bg-yellow-400"
             onClick={() => {
@@ -49,13 +65,15 @@ export default function Info({ setActiveMenu, messages }) {
           </Button>
         </Accordion.Item>
         <Accordion.Item label="Images/Videos">
-          {images.length && (
+          {attachments && (
             <SimpleGrid cols={4} spacing="xs">
-              {images.map((image) => (
+              {attachments.map((image) => (
                 <Image
                   key={image}
                   radius="sm"
-                  src={image}
+                  src={
+                    "https://firebasestorage.googleapis.com/v0/b/textme-chat.appspot.com/o/62380034d4b2be0e54a64da8%2F62512d0b70a197adfccbfd7e%2Fleague-of-legends-penguin-uhdpaper.com-4K-5.3306.jpg?alt=media"
+                  }
                   alt="Random unsplash image"
                 />
               ))}

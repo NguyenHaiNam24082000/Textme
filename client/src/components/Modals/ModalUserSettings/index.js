@@ -14,7 +14,7 @@ import { ME_SOCKET } from "../../../configs/socketRoute";
 import Account from "./utils/Account";
 import AudioVideo from "./utils/AudioVideo";
 import Display from "./utils/Display";
-import Hotkeys from "./utils/Hotkeys";
+// import Hotkeys from "./utils/Hotkeys";
 import Language from "./utils/Language";
 import Sessions from "./utils/Sessions";
 import { useTranslation } from "react-i18next";

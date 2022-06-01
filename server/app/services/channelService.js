@@ -352,7 +352,7 @@ const reactionMessage = async (user, body) => {
   ]);
 };
 
-const getImagesGallery = async (user, channelId) => {
+const getAttachments = async (user, channelId) => {
   const channel = await Channel.findOne({
     _id: channelId,
     $or: [{ owner: user._id }, { members: user._id }],
@@ -362,8 +362,13 @@ const getImagesGallery = async (user, channelId) => {
   }
   const messages = await Message.find({
     channel: channelId,
-    image: { $ne: null },
-  }).populate("sender");
+    attachments: { $exists: true, $ne: [] },
+  }).populate("attachments");
+  // const messages = await Message.find({
+  //   channel: channelId,
+  //   attachments: { $ne: [] },
+  // });
+  return messages;
 };
 
 const getLinks = async (user, channelId) => {
@@ -376,27 +381,30 @@ const getLinks = async (user, channelId) => {
   }
   const messages = await Message.find({
     channel: channelId,
-    message: { $regex: /(https?:\/\/[^\s]+)/g },
+    content: {
+      $regex:
+        /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_,\+.~#?&\/=]*)/gm,
+    },
   });
 
   return messages;
 };
 
-const getFiles = async (user, channelId) => {
-  const channel = await Channel.findOne({
-    _id: channelId,
-    $or: [{ owner: user._id }, { members: user._id }],
-  });
-  if (!channel) {
-    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
-  }
-  const messages = await Message.find({
-    channel: channelId,
-    file: { $ne: null },
-  }).populate("sender");
+// const getFiles = async (user, channelId) => {
+//   const channel = await Channel.findOne({
+//     _id: channelId,
+//     $or: [{ owner: user._id }, { members: user._id }],
+//   });
+//   if (!channel) {
+//     throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
+//   }
+//   const messages = await Message.find({
+//     channel: channelId,
+//     file: { $ne: null },
+//   }).populate("sender");
 
-  return messages;
-};
+//   return messages;
+// };
 
 const inviteMembersToChannel = async (user, params, data) => {
   const { members, type } = data;
@@ -434,7 +442,7 @@ module.exports = {
   pinnedMessage,
   reactionMessage,
   getLinks,
-  getImagesGallery,
-  getFiles,
+  getAttachments,
+  // getFiles,
   inviteMembersToChannel,
 };

@@ -3,11 +3,11 @@ import { IllustrationNoContent } from "@douyinfe/semi-illustrations";
 import { Empty } from "@douyinfe/semi-ui";
 import { Button, Center, TextInput } from "@mantine/core";
 import { useSelector } from "react-redux";
-import { AllFriends } from "../../../../reactQuery/friend";
+// import { AllFriends } from "../../../../reactQuery/friend";
 import { Search } from "tabler-icons-react";
 import FriendItem from "../FriendItem";
 import { useQueryClient } from "react-query";
-import { ALL_FRIENDS_KEY } from "../../../../configs/queryKeys";
+// import { ALL_FRIENDS_KEY } from "../../../../configs/queryKeys";
 
 function PendingHeader({ allFriends }) {
   const pendingCount = allFriends?.length ?? 0;

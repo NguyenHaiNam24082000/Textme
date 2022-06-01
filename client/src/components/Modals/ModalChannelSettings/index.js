@@ -1,5 +1,5 @@
 import { IconClose } from "@douyinfe/semi-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ActionIcon, Transition } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import React, { useState } from "react";

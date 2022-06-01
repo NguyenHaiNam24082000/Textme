@@ -1,3 +1,4 @@
+import { IconClose } from "@douyinfe/semi-icons";
 import {
   ActionIcon,
   Avatar,
@@ -5,28 +6,25 @@ import {
   Button,
   CloseButton,
   Group,
-  Highlight,
-  Input,
   MultiSelect,
   Text,
 } from "@mantine/core";
-import { AnimateSharedLayout, motion, AnimatePresence } from "framer-motion";
-import { IconClose, IconChevronLeft } from "@douyinfe/semi-icons";
+import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
 import React, { forwardRef, useState } from "react";
-import Checkbox from "../../../Checkbox";
-import { AllFriends } from "../../../../reactQuery/friend";
-import { GetMe } from "../../../../store/userSlice";
-import friendObject from "../../../../commons/friendObject";
-import ModalCreateNewGroup from "../../../Modals/ModalCreateNewGroup";
+import { useQueryClient } from "react-query";
+import { useNavigate, useParams } from "react-router";
 import {
-  getOrCreateDMChannel,
   createGroupChannel,
+  getOrCreateDMChannel,
   inviteFriendsToChannel,
 } from "../../../../apis/channel";
+import friendObject from "../../../../commons/friendObject";
 import { OPEN_CHANNEL } from "../../../../configs/queryKeys";
 import { GetOpenChannels } from "../../../../reactQuery/channel";
-import { useNavigate, useParams } from "react-router";
-import { useQueryClient } from "react-query";
+import { AllFriends } from "../../../../reactQuery/friend";
+import { GetMe } from "../../../../store/userSlice";
+import Checkbox from "../../../Checkbox";
+import ModalCreateNewGroup from "../../../Modals/ModalCreateNewGroup";
 
 const Item = forwardRef(({ value, label, ...others }, ref) => {
   // const Flag = flags[value];

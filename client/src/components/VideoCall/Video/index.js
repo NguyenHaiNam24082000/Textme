@@ -13,6 +13,21 @@ import bg10 from "../../../assets/images/backgrounds/bg10.webp";
 import bg11 from "../../../assets/images/backgrounds/bg11.webp";
 import bg12 from "../../../assets/images/backgrounds/bg12.jpg";
 
+const backgrounds = [
+  bg1,
+  bg2,
+  bg3,
+  bg4,
+  bg5,
+  bg6,
+  bg7,
+  bg8,
+  bg9,
+  bg10,
+  bg11,
+  bg12,
+];
+
 const VideoCard = (props) => {
   const ref = useRef();
   const canvasRef = useRef();
@@ -44,7 +59,7 @@ const VideoCard = (props) => {
     //   canvasRef.current.height
     // );
     const image = new Image();
-    image.src = bg1;
+    image.src = backgrounds[0];
     if (bg1 === "blur(5px)") {
       contextRef.current.filter = "blur(5px)";
     } else if (bg1 === "blur(10px)") {

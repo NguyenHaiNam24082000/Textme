@@ -1,12 +1,12 @@
 import { IllustrationConstruction } from "@douyinfe/semi-illustrations";
 import { Empty } from "@douyinfe/semi-ui";
 import { TextInput } from "@mantine/core";
-import { useQueryClient } from "react-query";
+// import { useQueryClient } from "react-query";
 import { useSelector } from "react-redux";
 import { Search } from "tabler-icons-react";
-import { AllFriends } from "../../../../reactQuery/friend";
+// import { AllFriends } from "../../../../reactQuery/friend";
 import { GetAllUsersOnline } from "../../../../reactQuery/user";
-import FriendItem from "../FriendItem";
+// import FriendItem from "../FriendItem";
 
 export default function Online({ friends }) {
   const { user } = useSelector((state) => state.user);

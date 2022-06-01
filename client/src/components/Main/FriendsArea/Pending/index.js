@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { IllustrationNoAccess } from "@douyinfe/semi-illustrations";
-import { Empty } from "@douyinfe/semi-ui";
+// import { IllustrationNoAccess } from "@douyinfe/semi-illustrations";
+// import { Empty } from "@douyinfe/semi-ui";
 import { useSelector } from "react-redux";
-import { ActionIcon, Group, Text, TextInput } from "@mantine/core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  // ActionIcon, Group, Text,
+  TextInput,
+} from "@mantine/core";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   OutGoingRequests,
-  PendingRequests,
+  //   PendingRequests,
 } from "../../../../reactQuery/friend";
 import { Search } from "tabler-icons-react";
 import PendingItem from "./PendingItem";

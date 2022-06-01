@@ -1,6 +1,6 @@
 import { Upload } from "@douyinfe/semi-ui";
 import {
-  Avatar,
+  // Avatar,
   Button,
   Card,
   Collapse,
@@ -32,7 +32,7 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
   }, [opened]);
 
   const createServer = async () => {
-    const { data } = await createWorkspace({...payload,typeWorkspace});
+    const { data } = await createWorkspace({ ...payload, typeWorkspace });
     console.log(data);
   };
 
@@ -132,20 +132,25 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
                 <UploadImage />
               </Upload>
             </Group>
-            <TextInput placeholder="Name" label="Name" required onChange={(e)=>{
-              setPayload({
-                ...payload,
-                name: e.target.value
-              })
-            }}/>
+            <TextInput
+              placeholder="Name"
+              label="Name"
+              required
+              onChange={(e) => {
+                setPayload({
+                  ...payload,
+                  name: e.target.value,
+                });
+              }}
+            />
             <TextInput
               placeholder="Topic (optional)"
               label="Topic (optional)"
-              onChange={(e)=>{
+              onChange={(e) => {
                 setPayload({
                   ...payload,
-                  topic: e.target.value
-                })
+                  topic: e.target.value,
+                });
               }}
             />
             <Group grow className="my-4">

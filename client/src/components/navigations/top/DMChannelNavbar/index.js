@@ -5,7 +5,7 @@ import {
   ActionIcon,
   Popover,
   Text,
-  Kbd,
+  // Kbd,
   Button,
 } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,12 +13,12 @@ import ringBack from "../../../../assets/sounds/ringback.ogg";
 import callEnd from "../../../../assets/sounds/callend.ogg";
 import useSound from "use-sound";
 import { MdScreenShare } from "react-icons/md";
-import VideoCall from "../../../VideoCall";
+// import VideoCall from "../../../VideoCall";
 import ModalUserProfile from "../../../Modals/ModalUserProfile";
 import { useDispatch, useSelector } from "react-redux";
 import {
   mute,
-  deafen,
+  // deafen,
   voiceConnected,
   expandedComplement,
   setActiveComplement,
@@ -81,8 +81,8 @@ export default function DMChannelNavbar({ channel, user }) {
           className="flex w-full h-12 items-center justify-between px-2"
           style={{ borderBottom: "2px solid #e1e1e1" }}
         >
-          <VideoCall channel={channel} />
-          {/* <Group
+          {/* <VideoCall channel={channel} /> */}
+          <Group
             className="cursor-pointer"
             onClick={() => setShowUserProfile(true)}
           >
@@ -162,7 +162,7 @@ export default function DMChannelNavbar({ channel, user }) {
                 !isVisibleRightSidebar && dispatch(expandedComplement());
               }}
             />
-          </Group> */}
+          </Group>
         </div>
         {(voiceCall || videoCall) && (
           <div

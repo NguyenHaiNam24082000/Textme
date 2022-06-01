@@ -8,7 +8,7 @@ import {
   Button,
   Group,
   Tabs,
-  Text,
+  // Text,
 } from "@mantine/core";
 import React, { useState, useEffect } from "react";
 import Modal from "../Modal";

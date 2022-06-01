@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { UnstyledButton, Group, Image, Text, Select } from "@mantine/core";
-import langs from "../../../../../configs/langs";
-import Sound from "./Sound";
-import Checkbox from "../../../../Checkbox";
+import { Button, Group, Image, Text } from "@mantine/core";
 import i18next from "i18next";
+import React, { useEffect, useState } from "react";
+import langs from "../../../../../configs/langs";
+import Checkbox from "../../../../Checkbox";
 
 export default function Language() {
   // const [languages, setLanguages] = useState(langs);
@@ -16,7 +15,10 @@ export default function Language() {
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col w-full">
         <div className="flex flex-col w-full gap-2 relative">
-          <h3 className="text-xl font-semibold mb-3">Language</h3>
+          <Group position="apart">
+            <h3 className="text-xl font-semibold mb-3">Language</h3>
+            <Button>aaa</Button>
+          </Group>
           {/* Định dạng vùng Van ban thanh giong noi
           <Select
             label="Your favorite framework/library"
@@ -67,6 +69,8 @@ export default function Language() {
                 </Group>
               </Checkbox>
             ))}
+          <br />
+          <br />
         </div>
       </div>
     </div>

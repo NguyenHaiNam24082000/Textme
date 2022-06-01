@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { Avatar, Badge } from "@douyinfe/semi-ui";
+import {
+  Avatar,
+  // Badge
+} from "@douyinfe/semi-ui";
 import { Popover, Text } from "@mantine/core";
 import "./index.css";
 
-export default function SpaceAvatar({ onClick, image, title,active }) {
+export default function SpaceAvatar({ onClick, image, title, active }) {
   const [opened, setOpened] = useState(false);
   return (
     <Popover
@@ -23,7 +26,9 @@ export default function SpaceAvatar({ onClick, image, title,active }) {
           onMouseEnter={() => setOpened(true)}
           onMouseLeave={() => setOpened(false)}
           // className={`${active ? "space-active" : ""} relative`}
-          className={`relative flex justify-center items-center select-none ${active ? "space-active" : ""}`}
+          className={`relative flex justify-center items-center select-none ${
+            active ? "space-active" : ""
+          }`}
           style={{ height: "58px" }}
         >
           {/* <pre></pre>

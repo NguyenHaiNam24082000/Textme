@@ -1,23 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { AnimateSharedLayout, motion, AnimatePresence } from "framer-motion";
-import {
-  ActionIcon,
-  Button,
-  CloseButton,
-  Group,
-  Highlight,
-  Input,
-  MultiSelect,
-  Text,
-  Tooltip,
-  UnstyledButton,
-} from "@mantine/core";
 import { IconClose } from "@douyinfe/semi-icons";
+import { ActionIcon, Button, CloseButton, Text, Tooltip } from "@mantine/core";
+import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { getPinnedMessage } from "../../../../apis/channel";
 import {
   chatMainTime,
   getMoreDetailsTime,
 } from "../../../../commons/dateUtils";
-import { getPinnedMessage } from "../../../../apis/channel";
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,
@@ -81,32 +70,32 @@ const format = (content) =>
     );
 
 export default function PinnedList({ channel }) {
-    const [messages, setMessages] = useState([]);
-    useEffect(async () => {
-        const {data}=await getPinnedMessage(channel._id);
-        setMessages(data);
-    }, [channel]);
-//   const message = {
-//     content: "hello world",
-//     systemMessage: false,
-//     sender: {
-//       email: "test@gmail.com",
-//       username: "Test",
-//       discriminator: "62637",
-//       accounts: [],
-//       mfa_enabled: false,
-//       accent_color: 0,
-//       locale: "en-US",
-//       timezone: "UTC",
-//       off_days: [],
-//       id: "6234bcf0819377cc2ffe0b29",
-//     },
-//     embed: [],
-//     messagesEdited: [],
-//     reactions: [],
-//     channel: "62380034d4b2be0e54a64da8",
-//     id: "6239e5fc459f12d9ed64ae1a",
-//   };
+  const [messages, setMessages] = useState([]);
+  useEffect(async () => {
+    const { data } = await getPinnedMessage(channel._id);
+    setMessages(data);
+  }, [channel]);
+  //   const message = {
+  //     content: "hello world",
+  //     systemMessage: false,
+  //     sender: {
+  //       email: "test@gmail.com",
+  //       username: "Test",
+  //       discriminator: "62637",
+  //       accounts: [],
+  //       mfa_enabled: false,
+  //       accent_color: 0,
+  //       locale: "en-US",
+  //       timezone: "UTC",
+  //       off_days: [],
+  //       id: "6234bcf0819377cc2ffe0b29",
+  //     },
+  //     embed: [],
+  //     messagesEdited: [],
+  //     reactions: [],
+  //     channel: "62380034d4b2be0e54a64da8",
+  //     id: "6239e5fc459f12d9ed64ae1a",
+  //   };
   const ShowEditedLabel = (message) => {
     if (message.messagesEdited.length === 0) {
       return null;

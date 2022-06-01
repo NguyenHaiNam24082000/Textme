@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useSpotlight } from "@mantine/spotlight";
-import { useState } from "react";
+// import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "tabler-icons-react";
 import { PendingRequests } from "../../../../reactQuery/friend";

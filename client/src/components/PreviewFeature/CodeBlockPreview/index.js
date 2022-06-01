@@ -17,8 +17,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Modal from "../../Modals/Modal";
 import axios from "axios";
-import Highlighter from "react-highlight-words";
-import { useClickOutside } from "@mantine/hooks";
+// import Highlighter from "react-highlight-words";
+// import { useClickOutside } from "@mantine/hooks";
 import IconOther from "../../../assets/images/icons/files-other.svg";
 
 const languages = [
@@ -1463,10 +1463,12 @@ export default function CodeBlockPreview({ attachment }) {
   const [selectedTheme, setSelectedTheme] = useState(codeThemes[0].value);
   useEffect(async () => {
     // if (attachment.url.includes(".js")) {
-    const hl = await axios
-      .get(attachment.url)
-      .then((response) => response.data);
-    setInputCode(hl);
+    if (attachment) {
+      const hl = await axios
+        .get(attachment.url)
+        .then((response) => response.data);
+      setInputCode(hl);
+    }
     // }
   }, [attachment]);
   useEffect(() => {

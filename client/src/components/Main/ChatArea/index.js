@@ -1,9 +1,9 @@
-import { useIdle } from "@mantine/hooks";
+// import { useIdle } from "@mantine/hooks";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "react-bubble-ui/dist/index.css";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useInfiniteQuery } from "react-query";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
 import { getMessages } from "../../../apis/messages";
 import { CHANNEL_MESSAGES_KEY } from "../../../configs/queryKeys";
 import Editor from "../../Editor";
@@ -69,37 +69,37 @@ const users = [
   },
 ];
 
-const spring = {
-  type: "spring",
-  stiffness: 500,
-  damping: 30,
-};
+// const spring = {
+//   type: "spring",
+//   stiffness: 500,
+//   damping: 30,
+// };
 
-function ChatArea({ channel, user }) {
-  const [activeMenu, setActiveMenu] = useState("main");
-  const [openedSearchBar, setOpenedSearchBar] = useState(false);
-  const [degree, setDegree] = useState(0);
-  const [newScale, setNewScale] = useState(1);
-  const [[page, direction], setPage] = useState([0, 0]);
-  const [selectedId, setSelectedId] = useState(null);
+function ChatArea({ channel, user, setMessages = null }) {
+  // const [activeMenu, setActiveMenu] = useState("main");
+  // const [openedSearchBar, setOpenedSearchBar] = useState(false);
+  // const [degree, setDegree] = useState(0);
+  // const [newScale, setNewScale] = useState(1);
+  // const [[page, direction], setPage] = useState([0, 0]);
+  // const [selectedId, setSelectedId] = useState(null);
   const [searchMessage, setSearchMessage] = useState("");
-  const ref = useRef(null);
+  // const ref = useRef(null);
   const inputRef = useRef(null);
   const viewportRef = useRef(null);
-  const idle = useIdle(2000, { events: ["scroll"] });
-  const [items, setItems] = useState(Array.from({ length: 20 }));
-  const [pageMessage, setPageMessage] = useState(1);
+  // const idle = useIdle(2000, { events: ["scroll"] });
+  // const [items, setItems] = useState(Array.from({ length: 20 }));
+  // const [pageMessage, setPageMessage] = useState(1);
   // const [data, setData] = useState([]);
   const [menuHeight, setMenuHeight] = useState(null);
-  const dropdownRef = useRef(null);
-  const [tabKey, setTabKey] = useState(1);
+  // const dropdownRef = useRef(null);
+  // const [tabKey, setTabKey] = useState(1);
   const [searchMember, setSearchMember] = useState("");
   const [members, setMembers] = useState([]);
-  const [previousIdMember, setPreviousIdMember] = useState(null);
+  // const [previousIdMember, setPreviousIdMember] = useState(null);
   // const [messages, setMessages] = useState([]);
   const [currentEditMessageId, setCurrentEditMessageId] = useState(null);
   const [currentMessageSelected, setCurrentMessageSelected] = useState(null);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const messagesEndRef = useRef(null);
   const observer = useRef();
   console.log(channel, "aAaaaaa");
@@ -138,6 +138,7 @@ function ChatArea({ channel, user }) {
   useEffect(() => {
     // const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
     // setMessages(msg.reverse());
+    typeof setMessages === "function" && setMessages(msg);
     scrollToBottom();
   }, [data]);
 
