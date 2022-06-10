@@ -5,10 +5,10 @@
   padding: 8px 8px;
   border-radius: 4px;
   /* position: relative; */
-  z-index: 1000;
+  /* z-index: 1000; */
   /* margin-bottom: 2em; */
   /* box-shadow: inset 0px 1px 8px -3px #ababab; */
-  background: red;
+  /* background: red; */
 }
 
 .editor :global(.public-DraftEditor-content) {

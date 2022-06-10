@@ -13,14 +13,21 @@ import {
   createStyles,
   Anchor,
   Popover,
+  Indicator,
 } from "@mantine/core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { changePassword } from "../../../../../apis/auth";
 // import { GetMe } from "../../../../../store/userSlice";
 import Modal from "../../../Modal";
 import { useForm } from "@mantine/form";
 import { useMediaQuery } from "@mantine/hooks";
+import { Me } from "../../../../../reactQuery/user";
+import { updateProfile } from "../../../../../apis/account";
+import { useQueryClient } from "react-query";
+import { ACCOUNT_KEY } from "../../../../../configs/queryKeys";
+import { useDispatch } from "react-redux";
+import { updateUser } from "../../../../../store/userSlice";
 
 const useStyles = createStyles((theme) => ({
   button: {
@@ -42,45 +49,48 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-function UserEditForm({ initialValues, onSubmit, onCancel }) {
+function UserEditForm({ initialValues, onSubmit, onCancel, type }) {
   const isMobile = useMediaQuery("(max-width: 755px");
 
   const form = useForm({
     initialValues,
     validationRules: {
-      name: (value) => value.trim().length > 2,
-      email: (value) => value.trim().length > 2,
+      name: (value) => value.trim().length > 3,
+      phone: (value) => value.trim().length === 10,
     },
   });
 
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
-      <TextInput
-        required
-        label="Name"
-        placeholder="Name"
-        style={{ minWidth: isMobile ? 220 : 300 }}
-        value={form.values.name}
-        onChange={(event) =>
-          form.setFieldValue("name", event.currentTarget.value)
-        }
-        error={form.errors.name}
-        variant="default"
-      />
-
-      <TextInput
-        required
-        label="Email"
-        placeholder="Email"
-        style={{ minWidth: isMobile ? 220 : 300, marginTop: 15 }}
-        value={form.values.email}
-        onChange={(event) =>
-          form.setFieldValue("email", event.currentTarget.value)
-        }
-        error={form.errors.email}
-        variant="default"
-      />
-
+      {type === "name" && (
+        <TextInput
+          required
+          label="Name"
+          placeholder="Name"
+          style={{ minWidth: isMobile ? 220 : 300 }}
+          value={form.values.name}
+          onChange={(event) =>
+            form.setFieldValue("name", event.currentTarget.value)
+          }
+          error={form.errors.name}
+          variant="default"
+        />
+      )}
+      {type === "phone" && (
+        <TextInput
+          required
+          type="number"
+          label="Phone"
+          placeholder="Phone"
+          style={{ minWidth: isMobile ? 220 : 300 }}
+          value={form.values.phone}
+          onChange={(event) =>
+            form.setFieldValue("phone", event.currentTarget.value)
+          }
+          error={form.errors.phone}
+          variant="default"
+        />
+      )}
       <Group position="apart" style={{ marginTop: 15 }}>
         <Anchor component="button" color="gray" size="sm" onClick={onCancel}>
           Cancel
@@ -93,22 +103,15 @@ function UserEditForm({ initialValues, onSubmit, onCancel }) {
   );
 }
 
-export default function Account({ user }) {
-  const [values, setValues] = useState({
-    name: "Bob Handsome",
-    email: "bob@handsome.inc",
-  });
+export default function Account({ me }) {
+  const dispatch = useDispatch();
+  const cache = useQueryClient();
+  const [values, setValues] = useState(me);
   const { classes } = useStyles();
-  const me = {
-    user: {
-      banner: "",
-      email: "",
-      accent_color: 123456,
-      discriminator: 123,
-      avatar: "",
-    },
-  };
-  const [opened, setOpened] = useState(false);
+  const [openedPopoverPhoneNumber, setOpenedPopoverPhoneNumber] =
+    useState(false);
+  const [openedPopoverName, setOpenedPopoverName] = useState(false);
+  const [type, setType] = useState("name");
   const [showPhone, setShowPhone] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [openedModalChangePassword, setOpenedModalChangePassword] =
@@ -132,6 +135,14 @@ export default function Account({ user }) {
         ),
     },
   });
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const data = await Me(user.user);
+  //     setValues(data);
+  //   }
+  //   fetchData();
+  // }, []);
+  // console.log("user", values);
   const handleSubmit = async (values) => {
     const { data } = await changePassword({
       ...values,
@@ -144,6 +155,7 @@ export default function Account({ user }) {
       setOpenedModalChangePassword(false);
     }
   };
+  console.log(openedPopoverPhoneNumber, "phone onpen");
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col w-full">
@@ -151,9 +163,9 @@ export default function Account({ user }) {
         <div className="flex flex-col w-full h-auto bg-gray-200 rounded-lg overflow-hidden">
           <BackgroundImage
             sx={{
-              background: `#${Math.floor(me.user?.accent_color).toString(16)}`,
+              background: `#${Math.floor(me.accent_color).toString(16)}`,
             }}
-            // src={me.user?.banner}
+            src={me.banner}
             radius="xs"
             className="h-40"
           />
@@ -173,18 +185,31 @@ export default function Account({ user }) {
                 delay={500}
                 control={
                   <div className="flex items-center relative">
-                    <Avatar
-                      size={128}
-                      radius="50%"
-                      style={{ border: "8px solid #fff" }}
-                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
-                    />
-                    <div
-                      className="rounded-full w-8 h-8 justify-center items-center flex absolute bottom-3 right-3"
-                      style={{ border: "8px solid #fff" }}
+                    <Indicator
+                      inline
+                      size={28}
+                      offset={20}
+                      position="bottom-end"
+                      color={me?.status?.online ? "green" : "gray"}
+                      withBorder
                     >
-                      😀
-                    </div>
+                      <Avatar
+                        src={me.avatar_url}
+                        radius={"50%"}
+                        size={128}
+                        styles={{
+                          border: "8px solid #fff",
+                          placeholder: {
+                            color: "#fff",
+                            backgroundColor: `#${Math.floor(
+                              me.accent_color
+                            ).toString(16)}`,
+                          },
+                        }}
+                      >
+                        {me.username[0]}
+                      </Avatar>
+                    </Indicator>
                   </div>
                 }
               >
@@ -194,15 +219,15 @@ export default function Account({ user }) {
               <Group
                 grow
                 direction="column"
-                className="flex-auto h-32 justify-center"
+                className="flex-auto justify-center mt-12"
               >
                 <div className="flex items-end w-full">
-                  <span className="text-white text-2xl font-bold">
+                  <span className="text-2xl font-bold">
                     {/* @{user && pending && pendingUsername(user, pending)} */}
-                    {/* @{me.user?.username} */}
+                    @{me?.username}
                   </span>
                   <span className="text-slate-300 text-2xl font-medium">
-                    {/* #{me.user?.discriminator} */}
+                    #{me?.discriminator}
                   </span>
                 </div>
                 {/* <div className="flex w-full text-black text-sm font-medium items-center">
@@ -218,32 +243,27 @@ export default function Account({ user }) {
               </Group>
               <div className="flex flex-col justify-end h-32 py-5">
                 <div className="flex items-center gap-2">
-                  <Popover
-                    opened={opened}
-                    onClose={() => setOpened(false)}
-                    position="bottom"
-                    placement="end"
-                    withCloseButton
-                    title="Edit user"
-                    transition="pop-top-right"
-                    target={
-                      <Button
-                        disabled
-                        leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
-                      >
-                        {t("Edit User Profile")}
-                      </Button>
+                  <Button
+                    disabled={
+                      values.phone === me.phone && values.name === me.name
                     }
+                    leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
+                    onClick={async () => {
+                      const { data } = await updateProfile(me.id, {
+                        ...(values.phone !== me.phone && {
+                          phone: values.phone,
+                        }),
+                        ...(values.name !== me.name && { name: values.name }),
+                      });
+                      console.log(data, "update");
+                      if (data) {
+                        cache.invalidateQueries(ACCOUNT_KEY);
+                        dispatch(updateUser(data));
+                      }
+                    }}
                   >
-                    <UserEditForm
-                      initialValues={values}
-                      onCancel={() => setOpened(false)}
-                      onSubmit={(data) => {
-                        setValues(data);
-                        setOpened(false);
-                      }}
-                    />
-                  </Popover>
+                    {t("Edit User Profile")}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -262,7 +282,7 @@ export default function Account({ user }) {
                   <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Username")}
                   </div>
-                  <div className="flex">{/* {me.user?.username} */}</div>
+                  <div className="flex">{me?.username}</div>
                 </div>
               </div>
               {/* <div className="flex">
@@ -285,15 +305,15 @@ export default function Account({ user }) {
                     {t("Email")}
                   </div>
                   <div className="flex items-center">
-                    {/* {showEmail
-                      ? me.user?.email
-                      : me.user?.email.replace(/[^@.]/g, "*")} */}
+                    {me.email && showEmail
+                      ? me.email
+                      : me.email && me.email.replace(/[^@.]/g, "*")}
                     <Text
                       variant="link"
                       className="ml-1 cursor-pointer"
                       onClick={() => setShowEmail((v) => !v)}
                     >
-                      {/* {showEmail ? t("Hide") : t("Show")} */}
+                      {showEmail ? t("Hide") : t("Show")}
                     </Text>
                   </div>
                 </div>
@@ -317,17 +337,46 @@ export default function Account({ user }) {
                   <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Name")}
                   </div>
-                  <div className="flex">{/* {me.user?.username} */}</div>
+                  <div className="flex">{values?.name || me.username}</div>
                 </div>
               </div>
-              <div className="flex">
-                <Button
-                  leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
-                  variant="white"
-                >
-                  {t("Edit")}
-                </Button>
-              </div>
+              <Popover
+                opened={openedPopoverName}
+                onClose={() => setOpenedPopoverName(false)}
+                position="bottom"
+                placement="end"
+                withCloseButton
+                title="Edit user"
+                transition="pop-top-right"
+                zIndex={1000}
+                withinPortal={false}
+                target={
+                  <div className="flex">
+                    <Button
+                      leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
+                      variant="white"
+                      onClick={() => {
+                        setType("name");
+                        setOpenedPopoverName(!openedPopoverName);
+                      }}
+                    >
+                      {t("Edit")}
+                    </Button>
+                  </div>
+                }
+              >
+                <div className="flex">
+                  <UserEditForm
+                    initialValues={values}
+                    onCancel={() => setOpenedPopoverName(false)}
+                    onSubmit={(data) => {
+                      setValues(data);
+                      setOpenedPopoverName(false);
+                    }}
+                    type={type}
+                  />
+                </div>
+              </Popover>
             </div>
             <div className="flex w-full h-full justify-between items-center">
               <div className="flex justify-center items-center gap-3">
@@ -340,27 +389,60 @@ export default function Account({ user }) {
                     {t("Phone Number")}
                   </div>
                   <div className="flex items-center">
-                    {/* {showPhone
-                      ? me.user?.phone
-                      : me.user?.phone.replace(/./g, "*")} */}
-                    <Text
-                      variant="link"
-                      className="ml-1 cursor-pointer"
-                      onClick={() => setShowPhone((v) => !v)}
-                    >
-                      {/* {showPhone ? t("Hide") : t("Show")} */}
-                    </Text>
+                    {values.phone
+                      ? showPhone
+                        ? values.phone
+                        : values.phone.replace(/./g, "*")
+                      : "Ban chua cap nhat"}
+                    {values.phone && (
+                      <Text
+                        variant="link"
+                        className="ml-1 cursor-pointer"
+                        onClick={() => setShowPhone((v) => !v)}
+                      >
+                        {showPhone ? t("Hide") : t("Show")}
+                      </Text>
+                    )}
                   </div>
                 </div>
               </div>
-              <div className="flex">
-                <Button
-                  leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
-                  variant="white"
-                >
-                  {t("Edit")}
-                </Button>
-              </div>
+              <Popover
+                opened={openedPopoverPhoneNumber}
+                onClose={() => setOpenedPopoverPhoneNumber(false)}
+                position="bottom"
+                placement="end"
+                withCloseButton
+                title="Edit user"
+                transition="pop-top-right"
+                zIndex={1000}
+                withinPortal={false}
+                target={
+                  <div className="flex">
+                    <Button
+                      leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
+                      variant="white"
+                      onClick={() => {
+                        setType("phone");
+                        setOpenedPopoverPhoneNumber(!openedPopoverPhoneNumber);
+                      }}
+                    >
+                      {t("Edit")}
+                    </Button>
+                  </div>
+                }
+              >
+                <div className="flex">
+                  <UserEditForm
+                    initialValues={values}
+                    onCancel={() => setOpenedPopoverPhoneNumber(false)}
+                    onSubmit={(data) => {
+                      setValues(data);
+                      setOpenedPopoverPhoneNumber(false);
+                    }}
+                    type={type}
+                  />
+                </div>
+              </Popover>
             </div>
             <div className="flex w-full h-full justify-between items-center">
               <div className="flex justify-center items-center gap-3">
@@ -372,7 +454,7 @@ export default function Account({ user }) {
                   <div className="flex uppercase text-xs font-bold mb-1">
                     {t("Password")}
                   </div>
-                  <div className="flex">{me.user?.password}</div>
+                  <div className="flex">******</div>
                 </div>
               </div>
               <div className="flex">

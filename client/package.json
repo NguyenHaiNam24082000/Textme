@@ -184,7 +184,7 @@
     "electron-build": "electron-builder",
     "electron-release": "npm run build && electron-builder --linux --win --mac --x64 --ia32 --publish never",
     "react-electron-build": "npm run react-build && npm run electron-build",
-    "electron-start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\""
+    "electron-start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000/login && electron .\""
   },
   "eslintConfig": {
     "extends": [

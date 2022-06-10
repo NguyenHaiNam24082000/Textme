@@ -1,5 +1,12 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Avatar, ActionIcon, Group, Menu, Text } from "@mantine/core";
+import {
+  Avatar,
+  ActionIcon,
+  Group,
+  Menu,
+  Text,
+  Indicator,
+} from "@mantine/core";
 import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { useNavigate } from "react-router";
@@ -99,7 +106,33 @@ export default function FriendItem({ user, friend }) {
         onClick={() => setOpenedModalUserProfile(true)}
       >
         <Group spacing="sm">
-          <Avatar
+          <Indicator
+            inline
+            size={16}
+            offset={7}
+            position="bottom-end"
+            color={
+              friendObject(user, friend)?.status?.online ? "green" : "gray"
+            }
+            withBorder
+          >
+            <Avatar
+              src={friendObject(user, friend).avatar_url}
+              radius="xl"
+              size="lg"
+              styles={{
+                placeholder: {
+                  color: "#fff",
+                  backgroundColor: `#${Math.floor(
+                    friendObject(user, friend).accent_color
+                  ).toString(16)}`,
+                },
+              }}
+            >
+              {friendObject(user, friend).username[0].toUpperCase()}
+            </Avatar>
+          </Indicator>
+          {/* <Avatar
             color={`#${Math.floor(
               friendObject(user, friend).accent_color
             ).toString(16)}`}
@@ -109,7 +142,7 @@ export default function FriendItem({ user, friend }) {
           >
             {!friendObject(user, friend).avatar_url &&
               pendingUsername(user, friend)[0]}
-          </Avatar>
+          </Avatar> */}
           <div>
             <div className="flex items-center">
               <Text size="lg" weight={500}>
@@ -122,7 +155,11 @@ export default function FriendItem({ user, friend }) {
               >{`#${pendingDiscriminator(user, friend)}`}</Text>
             </div>
             <Text color="dimmed" size="xs">
-              {pendingStatus(user, friend)}
+              {friend.sender.id === me.id
+                ? friend.receiver?.status?.online
+                : friend.sender.status?.online
+                ? "Online"
+                : "Offline"}
             </Text>
           </div>
         </Group>

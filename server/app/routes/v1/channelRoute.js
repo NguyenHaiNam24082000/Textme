@@ -39,5 +39,6 @@ router.put(
 );
 router.get("/:channelId/attachments", auth(), channelController.getAttachments);
 router.get("/:channelId/links", auth(), channelController.getLinks);
+router.get("/:channelId", auth(), channelController.getChannelById);
 
 module.exports = router;

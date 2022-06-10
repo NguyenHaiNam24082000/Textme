@@ -26,7 +26,11 @@ const slice = createSlice({
       state.isVisibleChanel = value;
     },
     expandedComplement: (state, action) => {
-      state.isVisibleComplement = !state.isVisibleComplement;
+      if (action.payload === null || action.payload === undefined) {
+        state.isVisibleComplement = !state.isVisibleComplement;
+      } else {
+        state.isVisibleComplement = action.payload;
+      }
     },
     setActiveComplement: (state, action) => {
       state.activeComplement = action.payload;

@@ -1,17 +1,17 @@
 import "./index.css";
 import { useEffect, useState } from "react";
-import { Tree } from "@douyinfe/semi-ui";
-// import { ActionIcon } from "@mantine/core";
-// import { IconPlus, IconHash, IconSetting } from "@douyinfe/semi-icons";
+// import { Tree } from "@douyinfe/semi-ui";
+import { ActionIcon } from "@mantine/core";
+import { IconPlus, IconHash, IconSetting } from "@douyinfe/semi-icons";
 import { Highlight } from "@mantine/core";
 import { useNavigate, useParams } from "react-router";
 // import ModalCreateChannel from "../Modals/ModalCreateChannel";
 import ModalChannelSettings from "../Modals/ModalChannelSettings";
 // import { useHover } from "@mantine/hooks";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-// import { voiceConnected } from "../../store/uiSlice";
+import { voiceConnected } from "../../store/uiSlice";
 
 function updateTreeData(list, key, children) {
   return list.map((node) => {
@@ -238,8 +238,8 @@ export default function TreeComponent({ server, setOpenedModalCreateChannel }) {
 
   return (
     <>
-      <div className="flex flex-col flex-shrink-0 flex-auto w-64">
-        <Tree
+      <div className="flex flex-col flex-shrink-0 flex-auto w-64 p-2">
+        {/* <Tree
           treeData={treeData}
           // defaultValue="Shanghai"
           // value={searchKey}
@@ -255,7 +255,56 @@ export default function TreeComponent({ server, setOpenedModalCreateChannel }) {
           renderFullLabel={renderLabel}
           draggable
           onDrop={onDrop}
-        />
+        />*/}
+        {server?.channels &&
+          server.channels
+            .sort((a, b) => a.position.localeCompare(b.position))
+            .map((channel) => (
+              <div
+                key={channel.channel.id}
+                className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200 
+          `}
+                style={{ marginBottom: 2, borderRadius: 4 }}
+                onClick={() => {
+                  // setActive(it.value);
+                  if (channel.channel.type === "VOICE") {
+                    //             setTreeData((v) =>
+                    //               updateTreeData(v, `0-${channel.position}`, [
+                    //                 {
+                    //                   label: "Channels",
+                    //                   value: "Channels",
+                    //                   key: `0-${channel.position}-1`,
+                    //                 },
+                    //               ])
+                    //             );
+                    dispatch(voiceConnected(true));
+                  }
+                  history(`/channel/${server._id}/${channel.channel._id}`);
+                }}
+              >
+                <div className="flex items-center justify-center w-5 contrast-50">
+                  {channel.channel.type === "TEXT" ? (
+                    <IconHash />
+                  ) : (
+                    <FontAwesomeIcon icon="fa-solid fa-volume-high" />
+                  )}
+                </div>
+                <div className="text-sm font-semibold">
+                  {channel.channel.name}
+                </div>
+                {/* <ActionIcon
+                  size="sm"
+                  variant="transparent"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setChannel(channel.channel);
+                    setOpenedModalChannelSettings(true);
+                  }}
+                >
+                  <IconSetting />
+                </ActionIcon> */}
+              </div>
+            ))}
       </div>
       <ModalChannelSettings
         opened={openedModalChannelSettings}

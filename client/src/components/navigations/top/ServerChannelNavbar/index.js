@@ -28,8 +28,9 @@ import {
 import getSocket from "../../../../apis/socket";
 import { GetMe } from "../../../../store/userSlice";
 import { useNavigate } from "react-router-dom";
+import { IconHash } from "@douyinfe/semi-icons";
 
-export default function DMChannelNavbar({ channel, user }) {
+export default function ServerChannelNavbar({ channel, user }) {
   const me = GetMe();
   const socket = getSocket(me?.tokens?.access?.token);
   const [voiceCall, setVoiceCall] = useState(false);
@@ -106,7 +107,12 @@ export default function DMChannelNavbar({ channel, user }) {
             className="cursor-pointer"
             onClick={() => setShowUserProfile(true)}
           >
-            {channel.type === "GROUP" ? (
+            {channel.type === "TEXT" ? (
+              <IconHash />
+            ) : (
+              <FontAwesomeIcon icon="fa-solid fa-volume-high" />
+            )}
+            {/* {channel.type === "GROUP" ? (
               <Indicator
                 inline
                 size={16}
@@ -206,20 +212,11 @@ export default function DMChannelNavbar({ channel, user }) {
                     : channel.members[1].username[0]}
                 </Avatar>
               </Indicator>
-            )}
+            )} */}
+
             <div className="flex flex-col">
-              <span className="font-bold">
-                {channel?.type === "GROUP"
-                  ? channel?.name === null
-                    ? channel?.members
-                        .map((member) => member?.username)
-                        .join(", ")
-                    : channel?.name
-                  : channel?.members[0]._id !== user._id
-                  ? channel?.members[0].username
-                  : channel?.members[1].username}
-              </span>
-              <span className="text-xs">
+              <span className="font-bold">{channel.name}</span>
+              {/* <span className="text-xs">
                 {channel?.type === "GROUP"
                   ? channel.owner?.status?.online
                     ? "Online"
@@ -231,7 +228,7 @@ export default function DMChannelNavbar({ channel, user }) {
                   : channel?.members[1].status?.online
                   ? "Online"
                   : "Offline"}
-              </span>
+              </span> */}
             </div>
           </Group>
           <Group>

@@ -34,7 +34,8 @@ export default function DMPage({ channel }) {
         <>
           <DMChannelNavbar channel={channel} user={user} />
           <div className="flex flex-auto min-w-0 min-h-0 relative overflow-hidden ">
-            <ChatArea channel={channel} user={user} setMessages={setMessages} />
+            {/* <ChatArea channel={channel} user={user} setMessages={setMessages} /> */}
+            <VideoCall channel={channel} />
             {isVisibleRightSidebar && (
               <RightSidebar channel={channel} messages={messages} />
             )}

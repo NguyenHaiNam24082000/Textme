@@ -6,13 +6,14 @@ import { useSelector } from "react-redux";
 import { Search } from "tabler-icons-react";
 // import { AllFriends } from "../../../../reactQuery/friend";
 import { GetAllUsersOnline } from "../../../../reactQuery/user";
+import FriendItem from "../FriendItem";
 // import FriendItem from "../FriendItem";
 
 export default function Online({ friends }) {
   const { user } = useSelector((state) => state.user);
   const { data: usersOnline } = GetAllUsersOnline();
   let friendsIds = friends && friends.map((friend) => friend.id);
-  return (
+  return friends?.length > 0 ? (
     <div>
       <TextInput
         icon={<Search size={18} />}
@@ -21,31 +22,24 @@ export default function Online({ friends }) {
         // onChange={handleSearch}
       />
       <div className="flex flex-col">
-        {/* {usersOnline &&
-        Object.keys(usersOnline).filter((friend) => {
-          return friend.user.id === user.id;
-        }).length > 0 ? (
-          Object.values(usersOnline)
-            .filter((friend) => {
-              return friend.user.id === user.id;
-            })
-            .map((friend) => (
-              <FriendItem
-                key={friend.user.id}
-                friend={friend.user}
-                user={user}
-              />
-            ))
-        ) : ( */}
-        <Empty
-          image={
-            <IllustrationConstruction style={{ width: 200, height: 200 }} />
-          }
-          title="Everyone went to sleep"
-          description="😴😴😴"
-        ></Empty>
+        {friends &&
+          friends.map((friend) =>
+            friend.sender.id === user.user.id ? (
+              friend.receiver?.status?.online ? (
+                <FriendItem key={friend?.id} friend={friend} user={user} />
+              ) : null
+            ) : friend.sender?.status?.online ? (
+              <FriendItem key={friend?.id} friend={friend} user={user} />
+            ) : null
+          )}
         {/* )} */}
       </div>
     </div>
+  ) : (
+    <Empty
+      image={<IllustrationConstruction style={{ width: 200, height: 200 }} />}
+      title="Everyone went to sleep"
+      description="😴😴😴"
+    ></Empty>
   );
 }

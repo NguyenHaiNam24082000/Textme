@@ -25,8 +25,12 @@ import { GetOpenChannels } from "../../reactQuery/channel";
 import Invite from "./Invite";
 import { registerSpotlightActions, useSpotlight } from "@mantine/spotlight";
 import { GetMe } from "../../store/userSlice";
-import { Avatar } from "@mantine/core";
+import { Avatar, Button, Group, Stack, Text } from "@mantine/core";
 import VideoCall from "../../components/VideoCall";
+import getSocket from "../../apis/socket";
+import Modal from "../../components/Modals/Modal";
+import { useDispatch } from "react-redux";
+import { expandedComplement } from "../../store/uiSlice";
 // import Server from "./Server";
 
 // const MainBase = ({ location }) => {
@@ -50,6 +54,7 @@ import VideoCall from "../../components/VideoCall";
 export default function Me() {
   useMeSocket();
   const me = GetMe();
+  const socket = getSocket(me.tokens.access.token);
   //   const match = useRouteMatch();
   const { data: channels } = GetOpenChannels();
   const { data: servers } = GetAllWorkspaces();
@@ -63,6 +68,14 @@ export default function Me() {
   const [channel, setChannel] = useState(null);
   const [server, setServer] = useState(null);
   const params = useParams();
+  const [call, setCall] = useState(false);
+  const dispatch = useDispatch();
+  const [channelCall, setChannelCall] = useState(null);
+
+  socket.on("startedCall", ({ call, channel }) => {
+    setCall(call);
+    setChannelCall(channel);
+  });
 
   useEffect(() => {
     const { channel: channelId, server: serverId } = params;
@@ -80,8 +93,11 @@ export default function Me() {
     if (!serverId && !channelId) {
       setChannel(null);
       setServer(null);
+    } else {
+      dispatch(expandedComplement(false));
     }
   }, [params]);
+  console.log(params);
 
   useEffect(() => {
     if (channels && servers && servers.length > 0 && channels.length > 0) {
@@ -171,23 +187,11 @@ export default function Me() {
         }),
       ];
       console.log(l);
-      // console.log(
-      //   servers.map((server) => {
-      //     return server.channels.map((channel) => {
-      //       return {
-      //         id: channel.channel.id,
-      //         title: channel.channel.name,
-      //         description: channel.channel.topic,
-      //         group: "Channel",
-      //       };
-      //     });
-      //   })
-      // );
       spotlight.registerActions([...l]);
     }
   }, [channels, servers, me]);
 
-  console.log("channel", channel, server);
+  console.log("channelme", me);
 
   // LogRocket.init('emr1fu/textme');
 
@@ -232,6 +236,33 @@ export default function Me() {
           </div>
         </>
       )}
+      <Modal
+        zIndex={10000}
+        opened={call}
+        onClose={() => {}}
+        withCloseButton={false}
+      >
+        <Group>
+          <Avatar />
+          <Stack>
+            <Text>Abc Dang goi ban</Text>
+            <Text>Abc Dang goi ban</Text>
+          </Stack>
+        </Group>
+        <Button
+          onClick={() => {
+            window.open(
+              `/channel/${channelCall.id}/videoCall`,
+              "Video Call",
+              `width=${window.innerWidth - 50},height=${
+                window.innerHeight - 50
+              },left=${window.screenX + 25},top=${window.screenY + 25}`
+            );
+          }}
+        >
+          Accept Call
+        </Button>
+      </Modal>
     </div>
   );
 }

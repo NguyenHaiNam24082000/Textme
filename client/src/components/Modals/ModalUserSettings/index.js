@@ -2,7 +2,7 @@ import { IconClose } from "@douyinfe/semi-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ActionIcon, Box, Divider, Transition } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQueryClient } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -18,6 +18,8 @@ import Display from "./utils/Display";
 import Language from "./utils/Language";
 import Sessions from "./utils/Sessions";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
+import { Me } from "../../../reactQuery/user";
 
 // const sidebar = [
 //   {
@@ -143,10 +145,13 @@ export default function ModalUsersSetting({ opened, onClose }) {
   useHotkeys([["escape", () => onClose()]]);
   const theme = useSelector(themeSelector);
   const user = GetMe();
+  // console.log(user, "aaaa");
+  const { data: me } = Me(user.user);
+  console.log("user", me);
   const history = useNavigate();
   const dispatch = useDispatch();
   const cache = useQueryClient();
-  const socket = getSocket(user?.user?.tokens?.access?.token);
+  const socket = getSocket(user?.tokens?.access?.token);
   const { t } = useTranslation();
   const sidebar = [
     {
@@ -373,7 +378,7 @@ export default function ModalUsersSetting({ opened, onClose }) {
           >
             <div className="w-full h-full">
               {/* Tài khoản người dùng */}
-              {active && active === "account" && <Account />}
+              {active && active === "account" && <Account me={me} />}
 
               {/* Quản lý phiên */}
               {active && active === "sessions" && <Sessions />}
@@ -403,10 +408,16 @@ export default function ModalUsersSetting({ opened, onClose }) {
               {/* {active && active === "hotkeys" && <Hotkeys />} */}
 
               {/* Ngôn ngữ */}
-              {active && active === "language" && <Language />}
+              {active && active === "language" && <Language me={me} />}
             </div>
             <div className="ml-5 relative w-16" style={{ flex: "0 0 36px" }}>
-              <ActionIcon className="fixed" onClick={onClose}>
+              <ActionIcon
+                className="fixed"
+                onClick={() => {
+                  i18next.changeLanguage(me.locale.replace("-", "_"));
+                  onClose();
+                }}
+              >
                 <IconClose />
               </ActionIcon>
             </div>

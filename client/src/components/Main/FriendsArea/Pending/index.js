@@ -9,7 +9,7 @@ import {
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   OutGoingRequests,
-  //   PendingRequests,
+  PendingRequests,
 } from "../../../../reactQuery/friend";
 import { Search } from "tabler-icons-react";
 import PendingItem from "./PendingItem";
@@ -32,7 +32,7 @@ export default function Pending() {
   const { user } = useSelector((state) => state.user);
   const [pendingProfile, setPendingProfile] = useState(null);
   const cache = useQueryClient();
-  const { data: pendingRequests } = cache.getQueryData(PENDING_REQUESTS_KEY);
+  const { data: pendingRequests } = PendingRequests();
   const { data: outGoingRequests } = OutGoingRequests();
   const [pendingList, setPendingList] = useState(pendingRequests);
   const [outGoingList, setOutGoingList] = useState(outGoingRequests);

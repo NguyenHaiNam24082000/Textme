@@ -103,6 +103,22 @@ module.exports = [
     },
   },
   {
+    name: "start-call",
+    controller: async (socket, io, { receiverId, channel }) => {
+      console.log(usersOnline, "receiverId");
+      if (receiverId) {
+        receiverId.forEach((id) => {
+          if (usersOnline[id]) {
+            io.to(usersOnline[id].socketId).emit("startedCall", {
+              call: true,
+              channel,
+            });
+          }
+        });
+      }
+    },
+  },
+  {
     name: CHANNEL_SOCKET.CHANNEL_SEND_DELETE_MESSAGE,
     controller: async (socket, io, { channelId, messageId }) => {
       if (channelId) {

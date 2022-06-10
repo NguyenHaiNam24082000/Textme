@@ -1264,19 +1264,20 @@ export default function EditorDraft({ channel, user }) {
                     console.log(text, html);
                   }}
                   blockRenderMap={blockRenderMap}
-                  // keyBindingFn={(e) => {
-                  //   if (e.keyCode === 13) {
-                  //     return false;
-                  //   }
-                  //   return getDefaultKeyBinding(e);
-                  // }}
+                  keyBindingFn={(e) => {
+                    if (e.keyCode === 13) {
+                      handleSendMessage();
+                      return false;
+                    }
+                    return getDefaultKeyBinding(e);
+                  }}
                   ref={ref}
                 />
                 <EmojiSuggestions />
                 {/* {!openStaticToolbar && <InlineToolbar />} */}
                 <MentionMembersSuggestions
                   // open={openMembers}
-                  open={true}
+                  open={false}
                   onOpenChange={onOpenMembersChange}
                   suggestions={suggestionsMembers}
                   onSearchChange={onSearchChangeMembers}

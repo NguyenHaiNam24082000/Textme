@@ -56,7 +56,7 @@ export const useMeSocket = () => {
         socket.disconnect();
       }
     };
-  }, [me?.user._id, cache, me?.tokens?.access?.token, me?.user]);
+  }, [me?.user._id, cache, me?.tokens?.access?.token, me?.user, history]);
 };
 
 export default usersOnline;

@@ -53,6 +53,18 @@ const getMutual = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send({ user, channel, server });
 });
 
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+  const user = await userService.getUserById(id);
+  res.status(httpStatus.OK).send(user);
+};
+
+const editUserById = async (req, res) => {
+  const { id } = req.params;
+  const user = await userService.updateUserById(id, req.body);
+  res.status(httpStatus.OK).send(user);
+};
+
 module.exports = {
   allUsers,
   getUsers,
@@ -60,4 +72,6 @@ module.exports = {
   getMutualChannelIds,
   getMutualServerIds,
   getMutual,
+  getUserById,
+  editUserById,
 };

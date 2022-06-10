@@ -35,3 +35,7 @@ export const getAttachments = (channelId) => {
 export const getLinks = (channelId) => {
   return getRequest(`/api/v1/channel/${channelId}/links`);
 };
+
+export const getChannelById = (channelId) => {
+  return getRequest(`/api/v1/channel/${channelId}`);
+};

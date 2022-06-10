@@ -74,6 +74,11 @@ const getLinks = catchAsync(async (req, res, next) => {
   res.status(httpStatus.OK).send(result);
 });
 
+const getChannelById = catchAsync(async (req, res, next) => {
+  const result = await channelService.getChannelById(req.user, req.params);
+  res.status(httpStatus.OK).send(result);
+});
+
 module.exports = {
   getOrCreateDMChannel,
   getDMChannels,
@@ -86,4 +91,5 @@ module.exports = {
   inviteMembersToChannel,
   getAttachments,
   getLinks,
+  getChannelById,
 };

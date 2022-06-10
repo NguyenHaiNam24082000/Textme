@@ -10,6 +10,7 @@ import { DMChannelNavbar } from "../../../components/navigations";
 import { themeState } from "../../../recoil/themeState";
 import { isVisibleComplement } from "../../../store/uiSlice";
 import RightSidebar from "../../../components/navigations/RightSidebar";
+import ServerChannelNavbar from "../../../components/navigations/top/ServerChannelNavbar";
 
 export default function Server({ channel }) {
   // useMeSocket();
@@ -23,7 +24,7 @@ export default function Server({ channel }) {
       {!isNSFW ? (
         <>
           {/* <ChannelListSidebar channel={channel} user={user} /> */}
-          {/* <DMChannelNavbar channel={channel} user={user} /> */}
+          <ServerChannelNavbar channel={channel} user={user} />
           <div className="flex flex-auto min-w-0 min-h-0 relative overflow-hidden ">
             {channel.type === "TEXT" ? (
               <ChatArea channel={channel} user={user} />

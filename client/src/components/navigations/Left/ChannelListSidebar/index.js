@@ -1,8 +1,13 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  ActionIcon,
   BackgroundImage,
+  createStyles,
+  Group,
   // Divider,
   Menu,
+  Text,
+  Tooltip,
 } from "@mantine/core";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +25,124 @@ import {
 } from "../../../../store/uiSlice";
 import ModalCreateChannel from "../../../Modals/ModalCreateChannel";
 
+const useStyles = createStyles((theme) => ({
+  navbar: {
+    paddingTop: 0,
+  },
+
+  section: {
+    marginLeft: -theme.spacing.md,
+    marginRight: -theme.spacing.md,
+    marginBottom: theme.spacing.md,
+
+    "&:not(:last-of-type)": {
+      borderBottom: `1px solid ${
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[4]
+          : theme.colors.gray[3]
+      }`,
+    },
+  },
+
+  searchCode: {
+    fontWeight: 700,
+    fontSize: 10,
+    backgroundColor:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[7]
+        : theme.colors.gray[0],
+    border: `1px solid ${
+      theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.colors.gray[2]
+    }`,
+  },
+
+  mainLinks: {
+    paddingLeft: theme.spacing.md - theme.spacing.xs,
+    paddingRight: theme.spacing.md - theme.spacing.xs,
+    paddingBottom: theme.spacing.md,
+  },
+
+  mainLink: {
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+    fontSize: theme.fontSizes.xs,
+    padding: `8px ${theme.spacing.xs}px`,
+    borderRadius: theme.radius.sm,
+    fontWeight: 500,
+    color:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[0]
+        : theme.colors.gray[7],
+
+    "&:hover": {
+      backgroundColor:
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[6]
+          : theme.colors.gray[0],
+      color: theme.colorScheme === "dark" ? theme.white : theme.black,
+    },
+  },
+
+  mainLinkInner: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flex: 1,
+  },
+
+  mainLinkIcon: {
+    marginRight: theme.spacing.sm,
+    color:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[2]
+        : theme.colors.gray[6],
+  },
+
+  mainLinkBadge: {
+    padding: 0,
+    width: 20,
+    height: 20,
+    pointerEvents: "none",
+  },
+
+  collections: {
+    paddingLeft: theme.spacing.md - 6,
+    paddingRight: theme.spacing.md - 6,
+    paddingBottom: theme.spacing.md,
+  },
+
+  collectionsHeader: {
+    paddingLeft: theme.spacing.xs,
+    paddingRight: theme.spacing.xs,
+    marginBottom: 8,
+  },
+
+  collectionLink: {
+    display: "block",
+    padding: `8px ${theme.spacing.xs}px`,
+    textDecoration: "none",
+    borderRadius: theme.radius.sm,
+    fontSize: theme.fontSizes.xs,
+    color:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[0]
+        : theme.colors.gray[7],
+    lineHeight: 1,
+    fontWeight: 500,
+
+    "&:hover": {
+      backgroundColor:
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[6]
+          : theme.colors.gray[0],
+      color: theme.colorScheme === "dark" ? theme.white : theme.black,
+    },
+  },
+}));
+
 export default function ChannelListSidebar({ server }) {
+  const classes = useStyles();
   const [openedModalWorkspaceSettings, setOpenedModalWorkspaceSettings] =
     useState(false);
   const [openedModalCreateChannel, setOpenedModalCreateChannel] =
@@ -39,7 +161,7 @@ export default function ChannelListSidebar({ server }) {
         closeOnItemClick={false}
         control={
           <BackgroundImage
-            src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=720&q=80"
+            // src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=720&q=80"
             radius="xs"
           >
             <div
@@ -154,6 +276,23 @@ export default function ChannelListSidebar({ server }) {
               <div className="text-sm font-semibold">Draft</div>
             </div>
             <div>
+              <Group className={classes.collectionsHeader} position="apart">
+                <Text weight={500} color="dimmed">
+                  Channels
+                </Text>
+                <Group spacing={8}>
+                  <Tooltip label="List options" withArrow position="right">
+                    <ActionIcon variant="hover">
+                      <FontAwesomeIcon icon="fa-solid fa-ellipsis" />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Create collection" withArrow position="right">
+                    <ActionIcon variant="hover">
+                      <FontAwesomeIcon icon="fa-solid fa-plus" />
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
+              </Group>
               {/* {server &&
                 server.channels.map((channel) => (
                   <div

@@ -13,6 +13,13 @@ const slice = createSlice({
     error: null,
   },
   reducers: {
+    updateUser: (state, action) => {
+      state.user = { ...state.user, user: action.payload };
+      localStorage.setItem("user", JSON.stringify(state.user));
+      localStorage.setItem("email_cache", state.user.user.email);
+      localStorage.setItem("user_id_cache", state.user.user._id);
+      localStorage.setItem("deviceProperties", "");
+    },
     loginSuccess: (state, action) => {
       state.user = action.payload;
       localStorage.setItem("user", JSON.stringify(action.payload));
@@ -33,4 +40,4 @@ export const GetMe = () => {
 };
 
 export default slice.reducer;
-export const { loginSuccess, logoutSuccess } = slice.actions;
+export const { loginSuccess, logoutSuccess, updateUser } = slice.actions;

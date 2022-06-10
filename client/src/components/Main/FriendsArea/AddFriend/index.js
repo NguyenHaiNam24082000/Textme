@@ -29,7 +29,7 @@ export default function AddFriend() {
     }
     const { data } = await getUsers(search);
     if (data) {
-      setListUsers(data.results);
+      setListUsers(data);
     } else {
       setListUsers([]);
     }
@@ -50,13 +50,15 @@ export default function AddFriend() {
         placeholder="Enter a username#0000"
         rightSectionWidth={150}
       />
-      {listUsers.length > 0 &&
-        listUsers.map((user) => <AddFriendItem user={user} />)}
-      <Empty
-        image={<IllustrationFailure style={{ width: 200, height: 200 }} />}
-        title="Let's find a teammate"
-        description="😴😴😴"
-      ></Empty>
+      {listUsers.length > 0 ? (
+        listUsers.map((user) => <AddFriendItem user={user} />)
+      ) : (
+        <Empty
+          image={<IllustrationFailure style={{ width: 200, height: 200 }} />}
+          title="Let's find a teammate"
+          description="😴😴😴"
+        ></Empty>
+      )}
     </div>
   );
 }

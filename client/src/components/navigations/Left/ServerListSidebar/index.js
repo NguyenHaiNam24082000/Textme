@@ -17,7 +17,7 @@ export default function Sidebar({ servers }) {
   const theme = useSelector(themeSelector);
   return (
     <div
-      className="flex flex-col w-16 h-full flex-shrink-0 bg-slate-300"
+      className="flex flex-col w-16 h-full flex-shrink-0 bg-[#E3E5E8]"
       style={{
         backgroundColor: theme.sidebarBackground,
       }}

@@ -1,9 +1,14 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ActionIcon,
-  Avatar, Button,
+  Avatar,
+  Button,
   Divider,
-  Group, Indicator, Menu, Paper, Text
+  Group,
+  Indicator,
+  Menu,
+  Paper,
+  Text,
 } from "@mantine/core";
 import React, { useState } from "react";
 import { ContextMenu, ContextMenuTrigger, MenuItem } from "react-contextmenu";
@@ -11,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   deafen,
   isVoiceConnectedSelector,
-  mute
+  mute,
 } from "../../../../store/uiSlice";
 import { GetMe } from "../../../../store/userSlice";
 import ModalUserSettings from "../../../Modals/ModalUserSettings";
@@ -223,6 +228,7 @@ export default function UserArea() {
               // delay={250}
               // closeOnScroll={false}
               gutter={5}
+              zIndex={401}
               // position="right"
               className="menu justify-center items-center flex-shrink-0"
               control={
@@ -231,21 +237,39 @@ export default function UserArea() {
                   size={16}
                   offset={5}
                   position="bottom-end"
-                  color="red"
+                  color={me.user?.status?.online ? "green" : "gray"}
+                  className="cursor-pointer"
                   withBorder
                 >
-                  <Avatar
+                  {/* <Avatar
                     // size="lg"
                     radius="xl"
                     src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
-                  />
+                  /> */}
+                  <Avatar
+                    src={me.user.avatar_url}
+                    radius="xl"
+                    styles={{
+                      placeholder: {
+                        color: "#fff",
+                        backgroundColor: `#${Math.floor(
+                          me.user.accent_color
+                        ).toString(16)}`,
+                      },
+                    }}
+                  >
+                    {me?.user?.username[0].toUpperCase()}
+                    {/* {channel.members[0]._id !== user._id
+                      ? channel.members[0].username[0]
+                      : channel.members[1].username[0]} */}
+                  </Avatar>
                 </Indicator>
               }
               size="xl"
             >
               <Menu.Label>
                 <div className="flex flex-col">
-                  <div className="font-bold text-sm">@Nguyen Hai Nam</div>
+                  <div className="font-bold text-sm">@{me?.user?.username}</div>
                   <div className="text-xs">Trực tuyến</div>
                 </div>
               </Menu.Label>

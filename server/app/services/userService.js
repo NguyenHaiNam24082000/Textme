@@ -41,12 +41,27 @@ const createUser = async (userBody) => {
 //TODO: xxx
 const queryUsers = async (user, filter) => {
   const { username, discriminator } = filter;
-  console.log(username, discriminator);
   const users = await User.find({
+    _id: {
+      $ne: user._id,
+    },
     username: { $regex: `.*${removeAccents(username)}.*`, $options: "i" },
     ...(discriminator && { discriminator }),
   });
-  return users;
+  const mutualUsersFriends = await Promise.all(
+    users.map(async (u) => {
+      return {
+        id: u.id,
+        name: u.name,
+        username: u.username,
+        avatar_url: u.avatar_url,
+        discriminator: u.discriminator,
+        accent_color: u.accent_color,
+        mutualFriends: await getMutualUserIds(user._id, u._id),
+      };
+    })
+  );
+  return mutualUsersFriends;
 };
 
 /**
@@ -105,32 +120,6 @@ const getAllUsers = async () => {
 };
 
 const getMutualUserIds = async (userAId, userBId) => {
-  // const users = await Friend.find({
-  //   $and: [
-  //     {
-  //       $or: [
-  //         {
-  //           sender: userAId,
-  //         },
-  //         {
-  //           receiver: userAId,
-  //         },
-  //       ],
-  //       status: "FRIEND",
-  //     },
-  //     {
-  //       $or: [
-  //         {
-  //           sender: userBId,
-  //         },
-  //         {
-  //           receiver: userBId,
-  //         },
-  //       ],
-  //       status: "FRIEND",
-  //     },
-  //   ],
-  // });
   const userA = await Friend.find({
     $or: [
       {
@@ -141,7 +130,29 @@ const getMutualUserIds = async (userAId, userBId) => {
       },
     ],
     status: "FRIEND",
-  });
+  })
+    .populate({
+      path: "sender",
+      select: [
+        "id",
+        "name",
+        "username",
+        "avatar_url",
+        "accent_color",
+        "discriminator",
+      ],
+    })
+    .populate({
+      path: "receiver",
+      select: [
+        "id",
+        "name",
+        "username",
+        "avatar_url",
+        "accent_color",
+        "discriminator",
+      ],
+    });
   const userB = await Friend.find({
     $or: [
       {
@@ -152,23 +163,45 @@ const getMutualUserIds = async (userAId, userBId) => {
       },
     ],
     status: "FRIEND",
-  });
+  })
+    .populate({
+      path: "sender",
+      select: [
+        "id",
+        "name",
+        "username",
+        "avatar_url",
+        "accent_color",
+        "discriminator",
+      ],
+    })
+    .populate({
+      path: "receiver",
+      select: [
+        "id",
+        "name",
+        "username",
+        "avatar_url",
+        "accent_color",
+        "discriminator",
+      ],
+    });
+  console.log(userA);
   const mutualFriends = userA.filter((friend) => {
     return userB.some((friend2) => {
       return (
-        friend.sender.equals(friend2.sender) ||
-        friend.receiver.equals(friend2.receiver)
+        friend.sender._id.equals(friend2.sender._id) ||
+        friend.receiver._id.equals(friend2.receiver._id)
       );
     });
   });
   const mutualFriendIds = mutualFriends.map((friend) => {
-    if (friend.sender.equals(userAId)) {
+    if (friend.sender._id.equals(userAId)) {
       return friend.receiver;
     }
     return friend.sender;
   });
   return mutualFriendIds;
-  // return users;
 };
 
 const getMutualChannelIds = async (userAId, userBId) => {

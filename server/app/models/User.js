@@ -131,20 +131,8 @@ const userSchema = new mongoose.Schema(
       maxLength: 5,
     },
     phone: {
-      type: Object,
-      properties: {
-        number: {
-          type: String,
-        },
-        verified: {
-          type: Boolean,
-          default: false,
-        },
-        verified_at: {
-          type: String,
-          format: "date-time",
-        },
-      },
+      type: String,
+      default: null,
       // required: ["number"],
     },
     accounts: {

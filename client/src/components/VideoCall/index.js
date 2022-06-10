@@ -54,6 +54,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useFullscreen } from "@mantine/hooks";
 import { PackedGrid } from "react-packed-grid";
 import VideoCard from "./Video";
+import { getChannelById } from "../../apis/channel";
+import { useParams } from "react-router";
 
 const backgrounds = [
   bg1,
@@ -104,9 +106,10 @@ const selfieSegmentation = new SelfieSegmentation({
     `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
 });
 
-export default function VideoCall({ channel }) {
+export default function VideoCall({ channel: channelInfo }) {
   const me = GetMe();
   const socket = getSocket(me?.tokens?.access?.token);
+  const [channel, setChannel] = useState(channelInfo);
   const { ref, toggle, fullscreen } = useFullscreen();
   const [openedModalPreviewVideo, setOpenedModalPreviewVideo] = useState(false);
   const [audioInput, setAudioInput] = useState([]);
@@ -123,7 +126,7 @@ export default function VideoCall({ channel }) {
   const [background, setBackground] = useState("none");
   // const [stream, setStream] = useState();
   // const [callerSignal, setCallerSignal] = useState();
-  // const screenTrackRef = useRef();
+  const screenTrackRef = useRef();
   const [userVideoAudio, setUserVideoAudio] = useState({
     localUser: { video: true, audio: true },
   });
@@ -132,8 +135,22 @@ export default function VideoCall({ channel }) {
   const userStream = useRef();
   const [aspectRatio, setAspectRatio] = useState(1);
   const updateLayoutRef = useRef();
+  const [screenShare, setScreenShare] = useState(false);
+  const params = useParams();
   // const webcamCanvasRef = useRef();
   // const webcamContextRef = useRef();
+  useEffect(() => {
+    async function getChannel() {
+      if (!channel) {
+        const { channel: channelId } = params;
+        const { data } = await getChannelById(channelId);
+        setChannel(data);
+      } else {
+        setChannel(channel);
+      }
+    }
+    getChannel();
+  }, []);
 
   const onResults = (results) => {
     contextRef.current.save();
@@ -195,30 +212,6 @@ export default function VideoCall({ channel }) {
   }, [background]);
 
   useEffect(() => {
-    // const newSocket = getSocket(me?.tokens?.access?.token);
-    // if (!socket) {
-    //   setSocket(newSocket);
-    // }
-    // const peer = new Peer({
-    //   initiator: true,
-    //   trickle: false,
-    //   stream: videoRef.current.srcObject,
-    // });
-    // peer.on("signal", (data) => {
-    //   newSocket.emit(CHANNEL_SOCKET.CALL, {
-    //     to: channel.id,
-    //     signalData: data,
-    //     from: newSocket.id,
-    //   });
-    // });
-    // peer.on("stream", (stream) => {
-    //   // setPeer(peer)
-    //   // setStream(stream)
-    //   // setCall(true)
-    // });
-    // socket.on("callAccepted", (data) => {
-    //   peer.signal(data);
-    // });
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       const audioInputs = devices.filter(
         (device) => device.kind === "audioinput"
@@ -322,7 +315,7 @@ export default function VideoCall({ channel }) {
         requestAnimationFrame(sendToMediaPipe);
       }
     };
-  }, [channel.id, me.user, socket]);
+  }, [channel, me.user, socket]);
 
   console.log(peers, "listPeers");
 
@@ -512,19 +505,19 @@ export default function VideoCall({ channel }) {
   //   getVideo();
   // }, [userVideoRef]);
 
-  const getDisplayMedia = () => {
-    try {
-      navigator.mediaDevices
-        .getDisplayMedia({
-          video: false,
-        })
-        .then((stream) => {
-          webcamRef.current.srcObject = stream;
-        });
-    } catch (e) {
-      console.log("Unable to acquire screen capture: " + e);
-    }
-  };
+  // const getDisplayMedia = () => {
+  //   try {
+  //     navigator.mediaDevices
+  //       .getDisplayMedia({
+  //         video: false,
+  //       })
+  //       .then((stream) => {
+  //         webcamRef.current.srcObject = stream;
+  //       });
+  //   } catch (e) {
+  //     console.log("Unable to acquire screen capture: " + e);
+  //   }
+  // };
 
   const call = (id) => {
     const peer = new Peer({
@@ -550,47 +543,47 @@ export default function VideoCall({ channel }) {
     });
   };
 
-  // const clickScreenSharing = () => {
-  //   if (!screenShare) {
-  //     navigator.mediaDevices
-  //       .getDisplayMedia({ cursor: true })
-  //       .then((stream) => {
-  //         const screenTrack = stream.getTracks()[0];
+  const clickScreenSharing = () => {
+    if (!screenShare) {
+      navigator.mediaDevices
+        .getDisplayMedia({ cursor: true })
+        .then((stream) => {
+          const screenTrack = stream.getTracks()[0];
 
-  //         peersRef.current.forEach(({ peer }) => {
-  //           // replaceTrack (oldTrack, newTrack, oldStream);
-  //           peer.replaceTrack(
-  //             peer.streams[0]
-  //               .getTracks()
-  //               .find((track) => track.kind === "video"),
-  //             screenTrack,
-  //             userStream.current
-  //           );
-  //         });
+          peersRef.current.forEach(({ peer }) => {
+            // replaceTrack (oldTrack, newTrack, oldStream);
+            peer.replaceTrack(
+              peer.streams[0]
+                .getTracks()
+                .find((track) => track.kind === "video"),
+              screenTrack,
+              userStream.current
+            );
+          });
 
-  //         // Listen click end
-  //         screenTrack.onended = () => {
-  //           peersRef.current.forEach(({ peer }) => {
-  //             peer.replaceTrack(
-  //               screenTrack,
-  //               peer.streams[0]
-  //                 .getTracks()
-  //                 .find((track) => track.kind === "video"),
-  //               userStream.current
-  //             );
-  //           });
-  //           userVideoRef.current.srcObject = userStream.current;
-  //           setScreenShare(false);
-  //         };
+          // Listen click end
+          screenTrack.onended = () => {
+            peersRef.current.forEach(({ peer }) => {
+              peer.replaceTrack(
+                screenTrack,
+                peer.streams[0]
+                  .getTracks()
+                  .find((track) => track.kind === "video"),
+                userStream.current
+              );
+            });
+            userVideoRef.current.srcObject = userStream.current;
+            setScreenShare(false);
+          };
 
-  //         userVideoRef.current.srcObject = stream;
-  //         screenTrackRef.current = screenTrack;
-  //         setScreenShare(true);
-  //       });
-  //   } else {
-  //     screenTrackRef.current.onended();
-  //   }
-  // };
+          userVideoRef.current.srcObject = stream;
+          screenTrackRef.current = screenTrack;
+          setScreenShare(true);
+        });
+    } else {
+      screenTrackRef.current.onended();
+    }
+  };
 
   const clickCameraDevice = (id) => {
     if (id) {
@@ -626,7 +619,7 @@ export default function VideoCall({ channel }) {
 
   return (
     <div ref={ref} className="bg-black flex w-full h-full relative">
-      <FloatingTrackContainer>
+      {/* <FloatingTrackContainer>
         <FloatingReactionItem />
       </FloatingTrackContainer>
       <GiantReactionMotionWrapper
@@ -640,7 +633,7 @@ export default function VideoCall({ channel }) {
             style={{ height: "250px", width: "auto", marginRight: "8px" }}
           ></Player>
         }
-      />
+      /> */}
       <PackedGrid
         boxAspectRatio={aspectRatio}
         className="fullscreen"
@@ -674,7 +667,7 @@ export default function VideoCall({ channel }) {
       <div className="px-2 w-full h-14 flex items-center justify-between absolute bottom-2 left-0">
         <div>
           <Popover
-            opened={true}
+            opened={false}
             // onClose={() => setOpenedMenuReactions(false)}
             target={
               <ActionIcon
@@ -838,7 +831,7 @@ export default function VideoCall({ channel }) {
             size={56}
             radius="xl"
             variant="light"
-            onClick={getDisplayMedia}
+            onClick={clickScreenSharing}
           >
             <MdOutlineScreenShare className="w-6 h-auto" />
           </ActionIcon>

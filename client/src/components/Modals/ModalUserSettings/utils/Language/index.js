@@ -1,23 +1,46 @@
 import { Button, Group, Image, Text } from "@mantine/core";
 import i18next from "i18next";
 import React, { useEffect, useState } from "react";
+import { useQueryClient } from "react-query";
+import { updateProfile } from "../../../../../apis/account";
 import langs from "../../../../../configs/langs";
+import { ACCOUNT_KEY } from "../../../../../configs/queryKeys";
 import Checkbox from "../../../../Checkbox";
+import { useDispatch } from "react-redux";
+import { updateUser } from "../../../../../store/userSlice";
 
-export default function Language() {
+export default function Language({ me }) {
+  const dispatch = useDispatch();
   // const [languages, setLanguages] = useState(langs);
-  const [language, setLanguage] = useState(i18next.language);
+  const cache = useQueryClient();
+  const [language, setLanguage] = useState(me.locale.replace("-", "_"));
   // const [langValue, setLangValue] = useState(i18next.language);
   useEffect(() => {
-    i18next.changeLanguage(language);
-  }, [language]);
+    i18next.changeLanguage(language.replace("-", "_"));
+  }, [me, language]);
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex flex-col w-full">
         <div className="flex flex-col w-full gap-2 relative">
           <Group position="apart">
             <h3 className="text-xl font-semibold mb-3">Language</h3>
-            <Button>aaa</Button>
+            <Button
+              disabled={
+                me.locale.replace("-", "_") === language.replace("-", "_")
+              }
+              onClick={async () => {
+                const { data } = await updateProfile(me.id, {
+                  locale: language.replace("_", "-"),
+                });
+                console.log(data, "update");
+                if (data) {
+                  cache.invalidateQueries(ACCOUNT_KEY);
+                  dispatch(updateUser(data));
+                }
+              }}
+            >
+              Edit
+            </Button>
           </Group>
           {/* Định dạng vùng Van ban thanh giong noi
           <Select

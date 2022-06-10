@@ -6,7 +6,7 @@ export default function SidebarBase({ children }) {
   const theme = useSelector(themeSelector);
   return (
     <div
-      className="flex flex-col w-64 h-full flex-shrink-0 overflow-hidden bg-slate-300"
+      className="flex flex-col w-64 h-full flex-shrink-0 overflow-hidden bg-[#f2f3f5]"
       style={{ backgroundColor: theme.channelBackground }}
     >
       <nav className="flex flex-col w-full flex-auto min-h-0">{children}</nav>

@@ -204,7 +204,7 @@ const getAllDMChannels = async (user) => {
           },
         ],
       });
-      with_status = friend.status;
+      with_status = friend ? friend.status : "REMOVED";
 
       return { ...JSON.parse(JSON.stringify(channel)), with_status };
     })
@@ -428,6 +428,17 @@ const inviteMembersToChannel = async (user, params, data) => {
   return channel.populate("members");
 };
 
+const getChannelById = async (user, { channelId }) => {
+  const channel = await Channel.findOne({
+    _id: channelId,
+    $or: [{ owner: user._id }, { members: user._id }],
+  });
+  if (!channel) {
+    throw new ApiError(httpStatus.NOT_FOUND, `there is no such a channel!`);
+  }
+  return channel.populate("members");
+};
+
 module.exports = {
   createDMChannel,
   createTextChannel,
@@ -445,4 +456,5 @@ module.exports = {
   getAttachments,
   // getFiles,
   inviteMembersToChannel,
+  getChannelById,
 };

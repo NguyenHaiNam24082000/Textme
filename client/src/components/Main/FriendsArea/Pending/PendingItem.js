@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { GetMe } from "../../../../store/userSlice";
 import getSocket from "../../../../apis/socket";
-import { ActionIcon, Avatar, Group, Text } from "@mantine/core";
+import { ActionIcon, Avatar, Group, Indicator, Text } from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import friendObject, {
   isIncoming,
@@ -74,7 +74,31 @@ export default function PendingItem({ user, pending }) {
       className="w-full p-2 rounded-md cursor-pointer hover:bg-slate-300 group"
     >
       <Group spacing="sm">
-        <Avatar
+        <Indicator
+          inline
+          size={16}
+          offset={7}
+          position="bottom-end"
+          color={friendObject(user, pending)?.status?.online ? "green" : "gray"}
+          withBorder
+        >
+          <Avatar
+            src={friendObject(user, pending).avatar_url}
+            radius="xl"
+            size="lg"
+            styles={{
+              placeholder: {
+                color: "#fff",
+                backgroundColor: `#${Math.floor(
+                  friendObject(user, pending).accent_color
+                ).toString(16)}`,
+              },
+            }}
+          >
+            {friendObject(user, pending).username[0].toUpperCase()}
+          </Avatar>
+        </Indicator>
+        {/* <Avatar
           color={`#${Math.floor(
             friendObject(user, pending).accent_color
           ).toString(16)}`}
@@ -84,7 +108,7 @@ export default function PendingItem({ user, pending }) {
         >
           {!friendObject(user, pending).avatar_url &&
             pendingUsername(user, pending)[0]}
-        </Avatar>
+        </Avatar> */}
         <div>
           <div className="flex items-center">
             <Text size="sm" weight={500}>
