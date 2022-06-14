@@ -209,8 +209,8 @@ export default function FriendItem({ user, friend }) {
         onClose={() => {
           setOpenedModalUserProfile(false);
         }}
-        user={me.user}
-        pending={friend}
+        me={me.user}
+        friend={friend}
       />
     </>
   );

@@ -186,7 +186,6 @@ const getMutualUserIds = async (userAId, userBId) => {
         "discriminator",
       ],
     });
-  console.log(userA);
   const mutualFriends = userA.filter((friend) => {
     return userB.some((friend2) => {
       return (
@@ -222,7 +221,7 @@ const getMutualChannelIds = async (userAId, userBId) => {
         members: [userAId, userBId],
       },
     ],
-  });
+  }).populate("members");
   return channels;
 };
 

@@ -1,5 +1,12 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ActionIcon, Avatar, AvatarsGroup, Group, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Avatar,
+  AvatarsGroup,
+  Divider,
+  Group,
+  Text,
+} from "@mantine/core";
 import React from "react";
 
 export default function AddFriendItem({ user }) {
@@ -33,28 +40,38 @@ export default function AddFriendItem({ user }) {
             >{`#${user.discriminator}`}</Text>
           </div>
           {user.mutualFriends.length > 0 ? (
-            <AvatarsGroup
-              size={18}
-              radius="lg"
-              limit={2}
-              total={user.mutualFriends.length}
-            >
-              {user.mutualFriends.map((friend) => (
-                <Avatar
-                  src={friend.avatar_url}
-                  styles={{
-                    placeholder: {
-                      color: "#fff",
-                      backgroundColor: `#${Math.floor(
-                        friend.accent_color
-                      ).toString(16)}`,
-                    },
-                  }}
-                >
-                  {friend.username[0].toUpperCase()}
-                </Avatar>
-              ))}
-            </AvatarsGroup>
+            <Group spacing="xs">
+              <AvatarsGroup
+                size={18}
+                radius="lg"
+                limit={2}
+                total={user.mutualFriends.length}
+              >
+                {user.mutualFriends.map((friend) => (
+                  <Avatar
+                    src={friend.avatar_url}
+                    styles={{
+                      placeholder: {
+                        color: "#fff",
+                        backgroundColor: `#${Math.floor(
+                          friend.accent_color
+                        ).toString(16)}`,
+                      },
+                    }}
+                  >
+                    {friend.username[0].toUpperCase()}
+                  </Avatar>
+                ))}
+              </AvatarsGroup>
+              <Divider
+                sx={{ height: "18px" }}
+                size="sm"
+                orientation="vertical"
+              />
+              <Text color="dimmed" size="xs">
+                Có {user.mutualFriends.length} bạn chung
+              </Text>
+            </Group>
           ) : (
             <Text color="dimmed" size="xs">
               No mutual friends

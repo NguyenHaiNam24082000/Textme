@@ -7,7 +7,9 @@ import {
   BackgroundImage,
   Button,
   Group,
+  Indicator,
   Tabs,
+  Text,
   // Text,
 } from "@mantine/core";
 import React, { useState, useEffect } from "react";
@@ -26,16 +28,16 @@ import {
 import { useQueryClient } from "react-query";
 import { getMutualIds } from "../../../apis/account";
 
-export default function ModalUserProfile({ opened, onClose, user, pending }) {
+export default function ModalUserProfile({ opened, onClose, me, friend }) {
   const cache = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
-  const [profile, setProfile] = useState({});
+  const [profile, setProfile] = useState(null);
 
   const cancelPending = async () => {
     setIsLoading(true);
     try {
-      await cancelPendingRequestApi(pending.id);
-      if (isIncoming(user, pending)) {
+      await cancelPendingRequestApi(friend.id);
+      if (isIncoming(me, friend)) {
         cache.invalidateQueries(PENDING_REQUESTS_KEY);
       } else {
         cache.invalidateQueries(OUT_GOING_REQUESTS_KEY);
@@ -48,13 +50,18 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
   };
 
   useEffect(() => {
-    if (opened) {
-      const { data } = getMutualIds(
-        pending.sender.id === user.id ? pending.receiver.id : pending.sender.id
-      );
-      setProfile(data);
-    }
-  }, [opened]);
+    const fetchProfile = async () => {
+      if (opened) {
+        const { data } = await getMutualIds(
+          friend.sender.id === me.id ? friend.receiver.id : friend.sender.id
+        );
+        console.log(data, "pofile");
+        setProfile(data);
+      }
+    };
+    fetchProfile();
+  }, [friend.receiver.id, friend.sender.id, me.id, opened]);
+  console.log(profile, "pofile");
 
   return (
     <Modal
@@ -67,7 +74,18 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
       classNames={{ modal: "overflow-hidden", body: "overflow-hidden" }}
     >
       <BackgroundImage
-        src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=720&q=80"
+        sx={{
+          background: `#${Math.floor(
+            friend.sender.id === me.id
+              ? friend.receiver.accent_color
+              : friend.sender.accent_color
+          ).toString(16)}`,
+        }}
+        src={
+          friend.sender.id === me.id
+            ? friend.receiver.banner
+            : friend.sender.banner
+        }
         radius="xs"
         className="h-40"
       />
@@ -78,8 +96,26 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
               size={128}
               radius="50%"
               style={{ border: "8px solid #fff" }}
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
-            />
+              styles={{
+                placeholder: {
+                  color: "#fff",
+                  backgroundColor: `#${Math.floor(
+                    friend.sender.id === me.id
+                      ? friend.receiver.accent_color
+                      : friend.sender.accent_color
+                  ).toString(16)}`,
+                },
+              }}
+              src={
+                friend.sender.id === me.id
+                  ? friend.receiver.avatar_url
+                  : friend.sender.avatar_url
+              }
+            >
+              {friend.sender.id === me.id
+                ? friend.receiver.username[0]
+                : friend.sender.username[0]}
+            </Avatar>
             <div
               className="rounded-full w-8 h-8 justify-center items-center flex absolute bottom-3 right-3"
               style={{ border: "8px solid #fff" }}
@@ -94,10 +130,10 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
           >
             <div className="flex items-end w-full">
               <span className="text-white text-2xl font-bold">
-                @{user && pending && pendingUsername(user, pending)}
+                @{me && friend && pendingUsername(me, friend)}
               </span>
               <span className="text-slate-300 text-2xl font-medium">
-                #{user && pending && pendingDiscriminator(user, pending)}
+                #{me && friend && pendingDiscriminator(me, friend)}
               </span>
             </div>
             <div className="flex w-full text-black text-sm font-medium items-center">
@@ -112,10 +148,10 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
           </Group>
           <div className="flex flex-col justify-end h-32 py-5">
             <div className="flex items-center gap-2">
-              {user && pending && isIncoming(user, pending) ? (
+              {me && friend && isIncoming(me, friend) ? (
                 <Button
                   className="bg-green-600"
-                  leftIcon={<FontAwesomeIcon icon="fa-solid fa-user-plus" />}
+                  leftIcon={<FontAwesomeIcon icon="fa-solid fa-me-plus" />}
                 >
                   Send Friend Request
                 </Button>
@@ -123,9 +159,9 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
                 <Button
                   onClick={cancelPending}
                   className="bg-red-600"
-                  leftIcon={<FontAwesomeIcon icon="fa-solid fa-user-minus" />}
+                  leftIcon={<FontAwesomeIcon icon="fa-solid fa-me-minus" />}
                 >
-                  {user && pending && isIncoming(user, pending)
+                  {me && friend && isIncoming(me, friend)
                     ? "Cancel Friend Request"
                     : "Unfriend"}
                 </Button>
@@ -148,7 +184,6 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
           classNames={{ body: "p-5 overflow-y-auto" }}
         >
           <Tabs.Tab label="Profile">
-            {JSON.stringify(profile)}
             {/* <Empty
               image={
                 <IllustrationConstruction style={{ width: 150, height: 150 }} />
@@ -157,28 +192,255 @@ export default function ModalUserProfile({ opened, onClose, user, pending }) {
             /> */}
           </Tabs.Tab>
           <Tabs.Tab label="Mutual Friends">
-            <Empty
-              image={
-                <IllustrationConstruction style={{ width: 150, height: 150 }} />
-              }
-              description={"under construction"}
-            />
+            {profile && profile.user.length > 0 ? (
+              profile.user.map((user) => (
+                <Group
+                  key={user.id}
+                  position="apart"
+                  className="w-full p-2 rounded-md cursor-pointer hover:bg-slate-300 group"
+                  // onClick={() => setOpenedModalUserProfile(true)}
+                >
+                  <Group spacing="sm">
+                    <Indicator
+                      inline
+                      size={16}
+                      offset={7}
+                      position="bottom-end"
+                      color={user?.status?.online ? "green" : "gray"}
+                      withBorder
+                    >
+                      <Avatar
+                        src={user.avatar_url}
+                        radius="xl"
+                        size="lg"
+                        styles={{
+                          placeholder: {
+                            color: "#fff",
+                            backgroundColor: `#${Math.floor(
+                              user.accent_color
+                            ).toString(16)}`,
+                          },
+                        }}
+                      >
+                        {user.username[0].toUpperCase()}
+                      </Avatar>
+                    </Indicator>
+                    {/* <Avatar
+                  color={`#${Math.floor(
+                    friendObject(user, friend).accent_color
+                  ).toString(16)}`}
+                  size="lg"
+                  radius="xl"
+                  src={friendObject(user, friend).avatar_url}
+                >
+                  {!friendObject(user, friend).avatar_url &&
+                    pendingUsername(user, friend)[0]}
+                </Avatar> */}
+                    <div>
+                      <div className="flex items-center">
+                        <Text size="lg" weight={500}>
+                          {user.username}
+                        </Text>
+                        <Text
+                          color="dimmed"
+                          size="sm"
+                          className="group-hover:opacity-100 opacity-0"
+                        >{`#${user.discriminator}`}</Text>
+                      </div>
+                      <Text color="dimmed" size="xs">
+                        {user?.status?.online ? "Online" : "Offline"}
+                      </Text>
+                    </div>
+                  </Group>
+                </Group>
+              ))
+            ) : (
+              <Empty
+                image={
+                  <IllustrationConstruction
+                    style={{ width: 150, height: 150 }}
+                  />
+                }
+                description={"No mutual friends"}
+              />
+            )}
           </Tabs.Tab>
           <Tabs.Tab label="Mutual Groups">
-            <Empty
-              image={
-                <IllustrationConstruction style={{ width: 150, height: 150 }} />
-              }
-              description={"under construction"}
-            />
+            {profile && profile.channel.length > 0 ? (
+              profile.channel.map((channel) => (
+                <Group
+                  key={channel.id}
+                  position="apart"
+                  className="w-full p-2 rounded-md cursor-pointer hover:bg-slate-300 group"
+                  // onClick={() => setOpenedModalUserProfile(true)}
+                >
+                  <Group spacing="sm">
+                    {channel.type === "GROUP" ? (
+                      <Indicator
+                        inline
+                        size={16}
+                        offset={7}
+                        position="bottom-end"
+                        color={
+                          channel.owner?.status?.online
+                            ? "green"
+                            : channel.members.some(
+                                (member) => member?.status?.online
+                              )
+                            ? "green"
+                            : "gray"
+                        }
+                        withBorder
+                        sx={{
+                          width: "100%",
+                          height: "100%",
+                          position: "relative",
+                        }}
+                      >
+                        <Avatar
+                          src={channel.owner.avatar_url}
+                          radius="xl"
+                          style={{
+                            height: "calc(100% * (2/3))",
+                            border: "2px solid #fff",
+                          }}
+                          className="absolute left-0 bottom-0 z-[1]"
+                          styles={{
+                            placeholder: {
+                              color: "#fff",
+                              backgroundColor: `#${Math.floor(
+                                channel.owner.accent_color
+                              ).toString(16)}`,
+                            },
+                          }}
+                        >
+                          {channel.owner.username[0]}
+                        </Avatar>
+                        <Avatar
+                          src={channel.members[0].avatar_url}
+                          radius="xl"
+                          style={{ height: "calc(100% * (2/3))" }}
+                          className="absolute right-0 top-0 z-0"
+                          styles={{
+                            placeholder: {
+                              color: "#fff",
+                              backgroundColor: `#${Math.floor(
+                                channel.members[0].accent_color
+                              ).toString(16)}`,
+                            },
+                          }}
+                        >
+                          {channel.members[0].username[0]}
+                        </Avatar>
+                      </Indicator>
+                    ) : (
+                      <Indicator
+                        inline
+                        size={16}
+                        offset={7}
+                        position="bottom-end"
+                        color={
+                          channel.members[0]._id !== me._id
+                            ? channel.members[0]?.status?.online
+                              ? "green"
+                              : "gray"
+                            : channel.members[1]?.status?.online
+                            ? "green"
+                            : "gray"
+                        }
+                        withBorder
+                      >
+                        <Avatar
+                          src={
+                            channel.members[0]._id !== me._id
+                              ? channel.members[0].avatar_url
+                              : channel.members[1].avatar_url
+                          }
+                          radius="xl"
+                          size="lg"
+                          styles={{
+                            placeholder: {
+                              color: "#fff",
+                              backgroundColor: `#${
+                                channel.members[0]._id !== me._id
+                                  ? Math.floor(
+                                      channel.members[0].accent_color
+                                    ).toString(16)
+                                  : Math.floor(
+                                      channel.members[1].accent_color
+                                    ).toString(16)
+                              }`,
+                            },
+                          }}
+                        >
+                          {channel.members[0]._id !== me._id
+                            ? channel.members[0].username[0]
+                            : channel.members[1].username[0]}
+                        </Avatar>
+                      </Indicator>
+                    )}
+                    <div>
+                      <div className="flex items-center">
+                        <Text size="lg" weight={500}>
+                          {channel.type === "GROUP"
+                            ? channel.name === null
+                              ? channel.members
+                                  .map((member) => member.username)
+                                  .join(", ")
+                              : channel.name
+                            : channel.members[0]._id !== me._id
+                            ? channel.members[0].username
+                            : channel.members[1].username}
+                        </Text>
+                        {/* <Text
+                          color="dimmed"
+                          size="sm"
+                          className="group-hover:opacity-100 opacity-0"
+                        >{`#${user.discriminator}`}</Text> */}
+                      </div>
+                      <Text color="dimmed" size="xs">
+                        {channel?.type === "GROUP"
+                          ? channel.owner?.status?.online
+                            ? "Online"
+                            : channel.members.some(
+                                (member) => member?.status?.online
+                              )
+                            ? "Online"
+                            : "Offline"
+                          : channel?.members[0]._id !== me._id
+                          ? channel?.members[0].status?.online
+                          : channel?.members[1].status?.online
+                          ? "Online"
+                          : "Offline"}
+                      </Text>
+                    </div>
+                  </Group>
+                </Group>
+              ))
+            ) : (
+              <Empty
+                image={
+                  <IllustrationConstruction
+                    style={{ width: 150, height: 150 }}
+                  />
+                }
+                description={"No mutual groups"}
+              />
+            )}
           </Tabs.Tab>
           <Tabs.Tab label="Mutual Servers">
-            <Empty
-              image={
-                <IllustrationConstruction style={{ width: 150, height: 150 }} />
-              }
-              description={"under construction"}
-            />
+            {profile && profile.server.length > 0 ? (
+              profile.server.map((server) => <div>{server.id}</div>)
+            ) : (
+              <Empty
+                image={
+                  <IllustrationConstruction
+                    style={{ width: 150, height: 150 }}
+                  />
+                }
+                description={"No mutual servers"}
+              />
+            )}
           </Tabs.Tab>
         </Tabs>
       </div>

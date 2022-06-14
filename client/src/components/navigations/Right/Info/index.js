@@ -4,26 +4,56 @@ import {
   Accordion,
   ActionIcon,
   Avatar,
+  Group,
   Image,
   SimpleGrid,
+  UnstyledButton,
   Text,
+  Indicator,
 } from "@mantine/core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getAttachments, getLinks } from "../../../../apis/channel";
+import { GetMe } from "../../../../store/userSlice";
 
 export default function Info({ messages, channel }) {
-  const [attachments, setAttachments] = useState([
-    ...messages.filter((message) => message.attachments.length === 0),
-  ]);
-  // const [links, setLinks] = useState([
-  //   ...messages.filter((message) =>
-  //     ...message.embed.map((embed) => {
-  //       ogUrl:embed.ogUrl)
-  //   ),
-  // ]);
-  console.log(
-    messages.filter((message) => message.attachments.length === 0),
-    "attachments"
-  );
+  const me = GetMe();
+  const user = me.user;
+  const [attachments, setAttachments] = useState([]);
+  const [links, setLinks] = useState([]);
+  useEffect(() => {
+    const getAttachmentsFromChannel = async () => {
+      const { data } = await getAttachments(channel.id);
+      setAttachments(data);
+    };
+    const getLinkFromChannel = async () => {
+      const { data } = await getLinks(channel.id);
+      setLinks(data);
+    };
+    Promise.all([getAttachmentsFromChannel(), getLinkFromChannel()]);
+  }, [channel]);
+  console.log(links, "attachments");
+
+  const showImage = () => {
+    let index = 0;
+    return attachments.forEach((at) => {
+      if (index > 8) return;
+      return at.attachments.forEach((image) => {
+        if (image.filename.match(/^.+[.](jpg|png|gif)$/i)) {
+          index++;
+          return (
+            <Image
+              key={image.id}
+              radius="sm"
+              src={image.url}
+              alt={image.filename}
+              width={40}
+              height={40}
+            />
+          );
+        } else return null;
+      });
+    });
+  };
   // useEffect(() => {
   //   console.log(messages);
   // }, [messages]);
@@ -36,23 +66,149 @@ export default function Info({ messages, channel }) {
         </ActionIcon>
       </div>
       <div className="flex flex-col items-center">
-        <Avatar
-          radius="50%"
-          size="xl"
-          src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
-        />
+        {channel.type === "GROUP" ? (
+          <Indicator
+            inline
+            size={16}
+            offset={7}
+            position="bottom-end"
+            color={
+              channel.owner?.status?.online
+                ? "green"
+                : channel.members.some((member) => member?.status?.online)
+                ? "green"
+                : "gray"
+            }
+            withBorder
+            sx={{
+              width: "100%",
+              height: "100%",
+              position: "relative",
+            }}
+          >
+            <Avatar
+              src={channel.owner.avatar_url}
+              radius="xl"
+              style={{
+                height: "calc(100% * (2/3))",
+                border: "2px solid #fff",
+              }}
+              className="absolute left-0 bottom-0 z-[1]"
+              styles={{
+                placeholder: {
+                  color: "#fff",
+                  backgroundColor: `#${Math.floor(
+                    channel.owner.accent_color
+                  ).toString(16)}`,
+                },
+              }}
+            >
+              {channel.owner.username[0]}
+            </Avatar>
+            <Avatar
+              src={channel.members[0].avatar_url}
+              radius="xl"
+              style={{ height: "calc(100% * (2/3))" }}
+              className="absolute right-0 top-0 z-0"
+              styles={{
+                placeholder: {
+                  color: "#fff",
+                  backgroundColor: `#${Math.floor(
+                    channel.members[0].accent_color
+                  ).toString(16)}`,
+                },
+              }}
+            >
+              {channel.members[0].username[0]}
+            </Avatar>
+          </Indicator>
+        ) : (
+          <Indicator
+            inline
+            size={20}
+            offset={12}
+            position="bottom-end"
+            color={
+              channel.members[0]._id !== user._id
+                ? channel.members[0]?.status?.online
+                  ? "green"
+                  : "gray"
+                : channel.members[1]?.status?.online
+                ? "green"
+                : "gray"
+            }
+            withBorder
+          >
+            <Avatar
+              src={
+                channel.members[0]._id !== user._id
+                  ? channel.members[0].avatar_url
+                  : channel.members[1].avatar_url
+              }
+              radius="50%"
+              size="xl"
+              styles={{
+                placeholder: {
+                  color: "#fff",
+                  backgroundColor: `#${
+                    channel.members[0]._id !== user._id
+                      ? Math.floor(channel.members[0].accent_color).toString(16)
+                      : Math.floor(channel.members[1].accent_color).toString(16)
+                  }`,
+                },
+              }}
+            >
+              {channel.members[0]._id !== user._id
+                ? channel.members[0].username[0]
+                : channel.members[1].username[0]}
+            </Avatar>
+          </Indicator>
+        )}
         <Text size="md" weight={600} color="black">
-          @HaiNam2000
+          {channel.type === "GROUP"
+            ? channel.name === null
+              ? channel.members.map((member) => member.username).join(", ")
+              : channel.name
+            : channel.members[0]._id !== user._id
+            ? channel.members[0].username
+            : channel.members[1].username}
         </Text>
         <Text size="xs" color="black">
-          Online
+          {/* {channel.type === "GROUP"
+            ? channel.owner?.status?.online
+              ? "Online"
+              : channel.members.some((member) => member?.status?.online)
+              ? "Online"
+              : "Offline"
+            : channel.members[0]._id !== user._id
+            ? channel.members[0]?.status?.online
+              ? "Online"
+              : "Offline"
+            : channel.members[1]?.status?.online
+            ? "Online"
+            : "Offline"} */}
         </Text>
       </div>
       <Accordion className="w-full" offsetIcon={false} multiple>
         <Accordion.Item label="Members">
           {channel &&
             channel.members.map((member) => (
-              <div>{JSON.stringify(member)}</div>
+              <Group>
+                <Avatar
+                  src={member.avatar_url}
+                  radius="xl"
+                  styles={{
+                    placeholder: {
+                      color: "#fff",
+                      backgroundColor: `#${Math.floor(
+                        member.accent_color
+                      ).toString(16)}`,
+                    },
+                  }}
+                >
+                  {member.username[0]}
+                </Avatar>
+              </Group>
             ))}
           <Button
             className="w-full bg-yellow-400"
@@ -67,16 +223,7 @@ export default function Info({ messages, channel }) {
         <Accordion.Item label="Images/Videos">
           {attachments && (
             <SimpleGrid cols={4} spacing="xs">
-              {attachments.map((image) => (
-                <Image
-                  key={image}
-                  radius="sm"
-                  src={
-                    "https://firebasestorage.googleapis.com/v0/b/textme-chat.appspot.com/o/62380034d4b2be0e54a64da8%2F62512d0b70a197adfccbfd7e%2Fleague-of-legends-penguin-uhdpaper.com-4K-5.3306.jpg?alt=media"
-                  }
-                  alt="Random unsplash image"
-                />
-              ))}
+              {showImage}
             </SimpleGrid>
           )}
           <Button
@@ -99,6 +246,31 @@ export default function Info({ messages, channel }) {
           </Button>
         </Accordion.Item>
         <Accordion.Item label="Links">
+          {links &&
+            links.length > 0 &&
+            links.map((link) => {
+              return link.embed.map((embed) => (
+                <UnstyledButton
+                  onClick={() => console.log("try focusing button with tab")}
+                >
+                  <Group>
+                    <Image
+                      lineClamp={1}
+                      width={40}
+                      height={40}
+                      src={embed?.image?.url}
+                    />
+                    <div>
+                      <Text lineClamp={1}>{embed?.title ?? "Untitled"}</Text>
+                      <Text size="xs" color="blue">
+                        {embed?.url}
+                      </Text>
+                    </div>
+                  </Group>
+                </UnstyledButton>
+              ));
+            })}
+
           <Button
             className="w-full bg-yellow-400"
             onClick={() => {

@@ -14,14 +14,14 @@ import { getDiscoverServers } from "../../../apis/workspace";
 export default function Discover() {
   const { data } = getDiscoverServers();
   return (
-    <Box sx={{ height: 400, width: "100%" }}>
+    <Box sx={{ height: 400, width: "100%" }} p={16}>
       <BackgroundImage
         sx={{
           height: "100%",
           width: "100%",
         }}
-        src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=720&q=80"
-        radius={0}
+        src="https://images.hdqwalls.com/wallpapers/genshin-impact-game-2021-ig.jpg"
+        radius={"md"}
       >
         <Center
           sx={{
@@ -30,16 +30,16 @@ export default function Discover() {
           }}
           p="md"
         >
-          <Stack spacing="sm">
-            <Text size={30} weight={500}>
-              Discover Workspaces
+          <Stack spacing="sm" align="center">
+            <Text size="xl" color="white" weight={700}>
+              Find your community on Textme
             </Text>
-            <Text size={14}>
+            <Text size={14} color="white">
               From one community to another, there's a place for everyone.
             </Text>
             <TextInput placeholder="Search workspaces" variant="filled" />
-            <Group spacing="xs">
-              <span>Related tags:</span>
+            <Group spacing="xs" grow>
+              <Text color="white">Related tags:</Text>
               <Badge radius="sm" variant="outline">
                 #Badge
               </Badge>
