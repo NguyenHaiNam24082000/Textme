@@ -142,7 +142,9 @@ export default function DMItem({ user, channel, match }) {
                 >
                   {channel.lastMessage.systemMessage
                     ? "Ban co tin nhan he thong"
-                    : channel.lastMessage.content}
+                    : `${
+                        channel.lastMessage.sender.id === user._id ? "You:" : ""
+                      } ${channel.lastMessage.content}`}
                 </Text>
                 <Text color="dimmed" size="xs">
                   · {moment(channel.lastMessage.createdAt).fromNow()}
@@ -164,7 +166,7 @@ export default function DMItem({ user, channel, match }) {
           {/* <ActionIcon size="lg" radius="xl" variant="light">
             <FontAwesomeIcon icon="fa-solid fa-ellipsis" />
           </ActionIcon> */}
-          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+          {/* <div className="w-3 h-3 bg-blue-500 rounded-full"></div> */}
 
           {/* {icon || <ChevronRight size={14} />} */}
         </Group>

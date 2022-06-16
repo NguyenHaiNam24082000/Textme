@@ -245,9 +245,11 @@ export default function DMChannelNavbar({ channel, user }) {
                     window.open(
                       `/channel/${channel.id}/videoCall`,
                       "Video Call",
-                      `width=${window.innerWidth - 50},height=${
-                        window.innerHeight - 50
-                      },left=${window.screenX + 25},top=${window.screenY + 25}`
+                      `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${
+                        window.innerWidth - 50
+                      },height=${window.innerHeight - 50},left=${
+                        window.screenX + 25
+                      },top=${window.screenY + 25}`
                     );
                     dispatch(mute(false));
                     dispatch(voiceConnected(true));
@@ -353,7 +355,7 @@ export default function DMChannelNavbar({ channel, user }) {
             {/* //   ) : (
         //     <VideoCall />
         //   )} */}
-            <div className="flex justify-center gap-3">
+            {/* <div className="flex justify-center gap-3">
               <ActionIcon
                 color={!video ? "red" : ""}
                 size="xl"
@@ -457,16 +459,16 @@ export default function DMChannelNavbar({ channel, user }) {
                   className="rotate-[135deg]"
                 />
               </ActionIcon>
-            </div>
+            </div> */}
           </div>
         )}
       </div>
-      <ModalUserProfile
+      {/* <ModalUserProfile
         opened={showUserProfile}
         onClose={() => setShowUserProfile(false)}
         user={null}
         pending={null}
-      />
+      /> */}
     </section>
   );
 }

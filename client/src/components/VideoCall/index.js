@@ -144,6 +144,7 @@ export default function VideoCall({ channel: channelInfo }) {
       if (!channel) {
         const { channel: channelId } = params;
         const { data } = await getChannelById(channelId);
+        console.log("data", data);
         setChannel(data);
       } else {
         setChannel(channel);
@@ -230,6 +231,7 @@ export default function VideoCall({ channel: channelInfo }) {
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
+        console.log(channel, "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
         contextRef.current = canvasRef.current.getContext("2d");
         userVideoRef.current.srcObject = stream;
         userStream.current = stream;
@@ -240,7 +242,6 @@ export default function VideoCall({ channel: channelInfo }) {
         });
 
         socket.on("join-call", (users) => {
-          console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
           const listPeers = [];
           users.forEach((user) => {
             if (user.id !== me.user.id) {
@@ -364,6 +365,12 @@ export default function VideoCall({ channel: channelInfo }) {
       initiator: true,
       trickle: false,
       stream,
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:global.stun.twilio.com:3478?transport=udp" },
+        ],
+      },
     });
 
     peer.on("signal", (signal) => {

@@ -242,9 +242,11 @@ export default function ServerChannelNavbar({ channel, user }) {
                     window.open(
                       `/channel/${channel.id}/videoCall`,
                       "Video Call",
-                      `width=${window.innerWidth - 50},height=${
-                        window.innerHeight - 50
-                      },left=${window.screenX + 25},top=${window.screenY + 25}`
+                      `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no,width=${
+                        window.innerWidth - 50
+                      },height=${window.innerHeight - 50},left=${
+                        window.screenX + 25
+                      },top=${window.screenY + 25}`
                     );
                     dispatch(mute(false));
                     dispatch(voiceConnected(true));
@@ -458,12 +460,12 @@ export default function ServerChannelNavbar({ channel, user }) {
           </div>
         )}
       </div>
-      <ModalUserProfile
+      {/* <ModalUserProfile
         opened={showUserProfile}
         onClose={() => setShowUserProfile(false)}
         user={null}
         pending={null}
-      />
+      /> */}
     </section>
   );
 }

@@ -15,6 +15,9 @@ import UploadImage from "../../UI/UploadImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CSSTransition } from "react-transition-group";
 import { createWorkspace } from "../../../apis/workspace";
+import { useQueryClient } from "react-query";
+import { useNavigate } from "react-router";
+import { OPEN_SERVER } from "../../../configs/queryKeys";
 
 const titleTypeRoom = {
   private: `Anyone will be able to find but only people invited will be join this room. You can change this at any time from room settings.`,
@@ -25,15 +28,24 @@ const titleTypeRoom = {
 export default function ModalCreateWorkspace({ opened, onClose }) {
   const [typeWorkspace, setTypeWorkspace] = useState("public");
   const [activeMenu, setActiveMenu] = useState("main");
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
+  const cache = useQueryClient();
+  const history = useNavigate();
   const [payload, setPayload] = useState({});
   useEffect(() => {
     setActiveMenu("main");
   }, [opened]);
 
   const createServer = async () => {
-    const { data } = await createWorkspace({ ...payload, typeWorkspace });
-    console.log(data);
+    const { data } = await createWorkspace({
+      ...payload,
+      type: typeWorkspace.toUpperCase(),
+    });
+    if (data) {
+      cache.invalidateQueries(OPEN_SERVER);
+      history(`/channel/${data._id}/${data.channels[0].channel}`);
+      onClose();
+    }
   };
 
   return (
@@ -149,7 +161,7 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
               onChange={(e) => {
                 setPayload({
                   ...payload,
-                  topic: e.target.value,
+                  description: e.target.value,
                 });
               }}
             />
@@ -160,7 +172,7 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
                 component="button"
                 withBorder
                 onClick={() => setTypeWorkspace("public")}
-                className={`flex flex-col items-center justify-center ${
+                className={`flex flex-col items-center justify-center cursor-pointer ${
                   typeWorkspace === "public" && "bg-yellow-400 text-white"
                 }`}
               >
@@ -182,7 +194,7 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
                 component="button"
                 withBorder
                 onClick={() => setTypeWorkspace("private")}
-                className={`flex flex-col items-center justify-center ${
+                className={`flex flex-col items-center justify-center cursor-pointer ${
                   typeWorkspace === "private" && "bg-yellow-400 text-white"
                 }`}
               >
@@ -205,7 +217,7 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
                 component="button"
                 withBorder
                 onClick={() => setTypeWorkspace("secret")}
-                className={`flex flex-col items-center justify-center ${
+                className={`flex flex-col items-center justify-center cursor-pointer ${
                   typeWorkspace === "secret" && "bg-yellow-400 text-white"
                 }`}
               >
@@ -228,7 +240,7 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
               </Text>
               {titleTypeRoom[typeWorkspace]}
             </Text>
-            <Text
+            {/* <Text
               weight={500}
               size="sm"
               color="yellow"
@@ -244,18 +256,18 @@ export default function ModalCreateWorkspace({ opened, onClose }) {
                 collaborating with internal teams on your homeserver. This
                 cannot be changed later.
               </Text>
-            </Collapse>
-            <Group position="right" spacing="xs" className="mt-3">
+            </Collapse> */}
+            <Group position="apart" spacing="xs" className="mt-3">
               <Button
-                style={{ backgroundColor: "red" }}
+                style={{ backgroundColor: "transparent", color: "black" }}
                 radius="md"
                 onClick={() => setActiveMenu("main")}
               >
                 Cancel
               </Button>
               <Button
-                style={{ backgroundColor: "#18f59f" }}
-                radius="md"
+                // style={{ backgroundColor: "#18f59f" }}
+                radius="xs"
                 onClick={createServer}
               >
                 Create Workspace

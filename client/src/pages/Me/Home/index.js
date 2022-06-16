@@ -1,12 +1,8 @@
-import {
-  BackgroundImage,
-  Box, Paper,
-  SimpleGrid,
-  Text
-} from "@mantine/core";
+import { BackgroundImage, Box, Paper, SimpleGrid, Text } from "@mantine/core";
 import React from "react";
 import { MainBase } from "../../../components/Main";
 import HomeNavbar from "../../../components/navigations/top/HomeNavbar";
+import homeBg from "../../../assets/home-background.webp";
 
 const listItems = [
   {
@@ -39,14 +35,15 @@ export default function Home() {
       <HomeNavbar />
       <div
         className="flex justify-center flex-auto min-w-0 min-h-0 relative overflow-y-scroll "
-        style={{ padding: "60px 40px 80px" }}
+        style={{ padding: "40px 40px 80px" }}
       >
-        <div style={{ maxWidth: 660 }} className="flex flex-col">
+        <div className="flex flex-col p-2">
           <Box sx={{ height: 460, marginBottom: 20, width: "100%" }} mx="auto">
             <BackgroundImage
-              className="rounded-xl"
-              style={{ maxWidth: 660, height: 460 }}
-              src="https://odindesignthemes.com/vikinger-theme/wp-content/uploads/2021/05/mainbg.jpg"
+              // className="rounded-xl"
+              radius="md"
+              style={{ height: 460 }}
+              src={homeBg}
             ></BackgroundImage>
           </Box>
           <SimpleGrid cols={3}>

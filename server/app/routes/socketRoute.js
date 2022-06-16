@@ -140,18 +140,31 @@ module.exports = [
     name: CHANNEL_SOCKET.CALL,
     controller: async (socket, io, { to, from }) => {
       if (to) {
+        console.log(to, "aAaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         listUsersCall[socket.id] = { user: from, video: true, audio: true };
         const rooms = io.adapter.rooms;
+        const isInRoom = rooms.get(to)?.has(socket.id);
+        console.log(socket.id, "isInRoom");
+        console.log(isInRoom, "isInRoom");
+        console.log(rooms.get(to), "isInRoom");
+        console.log(rooms, "rooms");
+        if (!isInRoom) {
+          socket.join(to);
+        }
+        // console.log(await io.in(to).fetchSockets(), "io.sockets.in(roomId)");
         try {
-          console.log(to);
+          console.log(to, "to");
           const users = [];
+          console.log(rooms.get(to), "aaaa");
           rooms.get(to).forEach((client) => {
-            users.push({
-              id: listUsersCall[client].user.id,
-              info: listUsersCall[client],
-            });
+            if (listUsersCall[client]) {
+              users.push({
+                id: listUsersCall[client].user.id,
+                info: listUsersCall[client],
+              });
+            }
           });
-          console.log(from.id, users);
+          console.log(from.id, "aaaaaaaaaaaaaaaaaaaaaaaaaaaa");
           socket.to(to).emit("join-call", users);
         } catch (e) {
           socket.to(to).emit("error-join-call", { err: true });

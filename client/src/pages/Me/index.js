@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useMatch, useLocation, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import { useRecoilValue } from "recoil";
-import useSound from "use-sound";
+// import useSound from "use-sound";
 import { useMeSocket } from "../../apis/socket/useMeSocket";
-import config from "../../assets/jsons/cherrymx-brown-abs/config.json";
-import sound from "../../assets/sounds/audio.ogg";
+// import config from "../../assets/jsons/cherrymx-brown-abs/config.json";
+// import sound from "../../assets/sounds/audio.ogg";
 import Friends from "./Friends";
 import DMPage from "./DMPage";
 import Server from "./Server";
@@ -17,20 +17,30 @@ import {
   HomeSidebar,
 } from "../../components/navigations";
 import { themeState } from "../../recoil/themeState";
-import { isVisibleChanelSelector } from "../../store/uiSlice";
+// import { isVisibleChanelSelector } from "../../store/uiSlice";
 import Home from "./Home";
 import Discover from "./Discover";
 import { GetAllWorkspaces } from "../../reactQuery/workspace";
 import { GetOpenChannels } from "../../reactQuery/channel";
 import Invite from "./Invite";
-import { registerSpotlightActions, useSpotlight } from "@mantine/spotlight";
+import { useSpotlight } from "@mantine/spotlight";
 import { GetMe } from "../../store/userSlice";
-import { Avatar, Button, Group, Stack, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Avatar,
+  Button,
+  CloseButton,
+  Group,
+  Indicator,
+  Stack,
+  Text,
+} from "@mantine/core";
 import VideoCall from "../../components/VideoCall";
 import getSocket from "../../apis/socket";
 import Modal from "../../components/Modals/Modal";
 import { useDispatch } from "react-redux";
 import { expandedComplement } from "../../store/uiSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import Server from "./Server";
 
 // const MainBase = ({ location }) => {
@@ -60,10 +70,10 @@ export default function Me() {
   const { data: servers } = GetAllWorkspaces();
   const spotlight = useSpotlight();
   const location = useLocation();
-  const isVisibleChanel = useSelector(isVisibleChanelSelector);
-  const [play] = useSound(sound, {
-    sprite: config.defines,
-  });
+  // const isVisibleChanel = useSelector(isVisibleChanelSelector);
+  // const [play] = useSound(sound, {
+  //   sprite: config.defines,
+  // });
   const theme = useRecoilValue(themeState);
   const [channel, setChannel] = useState(null);
   const [server, setServer] = useState(null);
@@ -242,26 +252,154 @@ export default function Me() {
         onClose={() => {}}
         withCloseButton={false}
       >
-        <Group>
-          <Avatar />
+        {channelCall && (
           <Stack>
-            <Text>Abc Dang goi ban</Text>
-            <Text>Abc Dang goi ban</Text>
+            <div className="h-full w-14 relative">
+              {channelCall.type === "GROUP" ? (
+                <Indicator
+                  inline
+                  size={16}
+                  offset={7}
+                  position="bottom-end"
+                  color={
+                    channelCall.owner?.status?.online
+                      ? "green"
+                      : channelCall.members.some(
+                          (member) => member?.status?.online
+                        )
+                      ? "green"
+                      : "gray"
+                  }
+                  withBorder
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    position: "relative",
+                  }}
+                >
+                  <Avatar
+                    src={channelCall.owner.avatar_url}
+                    radius="xl"
+                    style={{
+                      height: "calc(100% * (2/3))",
+                      border: "2px solid #fff",
+                    }}
+                    className="absolute left-0 bottom-0 z-[1]"
+                    styles={{
+                      placeholder: {
+                        color: "#fff",
+                        backgroundColor: `#${Math.floor(
+                          channelCall.owner.accent_color
+                        ).toString(16)}`,
+                      },
+                    }}
+                  >
+                    {channelCall.owner.username[0]}
+                  </Avatar>
+                  <Avatar
+                    src={channelCall.members[0].avatar_url}
+                    radius="xl"
+                    style={{ height: "calc(100% * (2/3))" }}
+                    className="absolute right-0 top-0 z-0"
+                    styles={{
+                      placeholder: {
+                        color: "#fff",
+                        backgroundColor: `#${Math.floor(
+                          channelCall.members[0].accent_color
+                        ).toString(16)}`,
+                      },
+                    }}
+                  >
+                    {channelCall.members[0].username[0]}
+                  </Avatar>
+                </Indicator>
+              ) : (
+                <Indicator
+                  inline
+                  size={16}
+                  offset={7}
+                  position="bottom-end"
+                  color={
+                    channelCall.members[0]._id !== me._id
+                      ? channelCall.members[0]?.status?.online
+                        ? "green"
+                        : "gray"
+                      : channelCall.members[1]?.status?.online
+                      ? "green"
+                      : "gray"
+                  }
+                  withBorder
+                >
+                  <Avatar
+                    src={
+                      channelCall.members[0]._id !== me._id
+                        ? channelCall.members[0].avatar_url
+                        : channelCall.members[1].avatar_url
+                    }
+                    radius="xl"
+                    size="lg"
+                    styles={{
+                      placeholder: {
+                        color: "#fff",
+                        backgroundColor: `#${
+                          channelCall.members[0]._id !== me._id
+                            ? Math.floor(
+                                channelCall.members[0].accent_color
+                              ).toString(16)
+                            : Math.floor(
+                                channelCall.members[1].accent_color
+                              ).toString(16)
+                        }`,
+                      },
+                    }}
+                  >
+                    {channelCall.members[0]._id !== me._id
+                      ? channelCall.members[0].username[0]
+                      : channelCall.members[1].username[0]}
+                  </Avatar>
+                </Indicator>
+              )}
+            </div>
+            <Text>
+              Ban co mot cuoc goi tu{" "}
+              {channelCall.type === "GROUP"
+                ? channelCall.name === null
+                  ? channelCall.members
+                      .map((member) => member.username)
+                      .join(", ")
+                  : channelCall.name
+                : channelCall.members[0]._id !== me._id
+                ? channelCall.members[0].username
+                : channelCall.members[1].username}
+            </Text>
+            <Group>
+              <ActionIcon
+                color="green"
+                size="xl"
+                radius="xl"
+                variant="filled"
+                onClick={() => {
+                  window.open(
+                    `/channel/${channelCall.id}/videoCall`,
+                    "Video Call",
+                    `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${window.innerWidth - 50},height=${
+                      window.innerHeight - 50
+                    },left=${window.screenX + 25},top=${window.screenY + 25}`
+                  );
+                  setCall(false);
+                }}
+              >
+                <FontAwesomeIcon icon="fa-solid fa-phone" />
+              </ActionIcon>
+              <CloseButton
+                color="red"
+                size="xl"
+                radius="xl"
+                variant="filled"
+              ></CloseButton>
+            </Group>
           </Stack>
-        </Group>
-        <Button
-          onClick={() => {
-            window.open(
-              `/channel/${channelCall.id}/videoCall`,
-              "Video Call",
-              `width=${window.innerWidth - 50},height=${
-                window.innerHeight - 50
-              },left=${window.screenX + 25},top=${window.screenY + 25}`
-            );
-          }}
-        >
-          Accept Call
-        </Button>
+        )}
       </Modal>
     </div>
   );

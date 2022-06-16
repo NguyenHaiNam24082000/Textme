@@ -31,13 +31,13 @@ export default function Info({ messages, channel }) {
     };
     Promise.all([getAttachmentsFromChannel(), getLinkFromChannel()]);
   }, [channel]);
-  console.log(links, "attachments");
+  console.log(links, attachments, "attachments");
 
   const showImage = () => {
     let index = 0;
-    return attachments.forEach((at) => {
-      if (index > 8) return;
-      return at.attachments.forEach((image) => {
+    return attachments.map((at) => {
+      if (index > 8) return null;
+      return at.attachments.map((image) => {
         if (image.filename.match(/^.+[.](jpg|png|gif)$/i)) {
           index++;
           return (
@@ -46,14 +46,16 @@ export default function Info({ messages, channel }) {
               radius="sm"
               src={image.url}
               alt={image.filename}
-              width={40}
+              width={"100%"}
               height={40}
             />
           );
-        } else return null;
+        }
+        return null;
       });
     });
   };
+  console.log(showImage(), "showImage");
   // useEffect(() => {
   //   console.log(messages);
   // }, [messages]);
@@ -223,7 +225,7 @@ export default function Info({ messages, channel }) {
         <Accordion.Item label="Images/Videos">
           {attachments && (
             <SimpleGrid cols={4} spacing="xs">
-              {showImage}
+              {showImage()}
             </SimpleGrid>
           )}
           <Button

@@ -224,6 +224,7 @@ const getAllGroupChannels = async (user) => {
   })
     .populate("members")
     .populate("lastMessage")
+    .populate({ path: "lastMessage", populate: { path: "sender" } })
     .populate("owner");
 
   const channels = await query;

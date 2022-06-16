@@ -66,7 +66,12 @@ const createWorkspaceChannel = async (user, params, body) => {
 };
 
 const getDiscoverServers = async () => {
-  const servers = await Workspace.find({});
+  //select top 24 workspace sort by members count desc
+  const servers = await Workspace.find({
+    type: { $in: ["PUBLIC", "PRIVATE"] },
+  })
+    .sort({ membersCount: -1 })
+    .limit(24);
   return servers;
 };
 

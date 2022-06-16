@@ -268,7 +268,7 @@ export default function ModalUsersSetting({ opened, onClose }) {
         await logout(user?.tokens?.refresh?.token);
         cache.clear();
         dispatch(logoutSuccess());
-        history("./login");
+        history("/login");
 
         //disconnect socket after logout.
         socket.emit(ME_SOCKET.LOGOUT, { userId: user?.user?.id });
