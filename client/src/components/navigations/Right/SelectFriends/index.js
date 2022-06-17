@@ -6,6 +6,7 @@ import {
   Button,
   CloseButton,
   Group,
+  Indicator,
   MultiSelect,
   Text,
 } from "@mantine/core";
@@ -25,6 +26,8 @@ import { AllFriends } from "../../../../reactQuery/friend";
 import { GetMe } from "../../../../store/userSlice";
 import Checkbox from "../../../Checkbox";
 import ModalCreateNewGroup from "../../../Modals/ModalCreateNewGroup";
+import { useDispatch } from "react-redux";
+import { expandedComplement } from "../../../../store/uiSlice";
 
 const Item = forwardRef(({ value, label, ...others }, ref) => {
   // const Flag = flags[value];
@@ -32,8 +35,20 @@ const Item = forwardRef(({ value, label, ...others }, ref) => {
     <div ref={ref} {...others}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Box mr={10}>
-          <Avatar radius="xl" size="sm">
-            XL
+          <Avatar
+            radius="xl"
+            size="sm"
+            src={others.avatar_url}
+            styles={{
+              placeholder: {
+                color: "#fff",
+                backgroundColor: `#${Math.floor(others.accent_color).toString(
+                  16
+                )}`,
+              },
+            }}
+          >
+            {label[0].toUpperCase()}
           </Avatar>
         </Box>
         <div>{label}</div>
@@ -63,8 +78,20 @@ function Value({ value, label, onRemove, classNames, ...others }) {
         })}
       >
         <Box mr={10}>
-          <Avatar radius="xl" size="xs">
-            XL
+          <Avatar
+            radius="xl"
+            size="xs"
+            src={others.avatar_url}
+            styles={{
+              placeholder: {
+                color: "#fff",
+                backgroundColor: `#${Math.floor(others.accent_color).toString(
+                  16
+                )}`,
+              },
+            }}
+          >
+            {label[0].toUpperCase()}
           </Avatar>
         </Box>
         <Box sx={{ lineHeight: 1, fontSize: 12 }}>{label}</Box>
@@ -96,6 +123,7 @@ export default function SelectFriends({
   const history = useNavigate();
   const cache = useQueryClient();
   const params = useParams();
+  const dispatch = useDispatch();
 
   const data = allFriends
     ? allFriends
@@ -105,10 +133,17 @@ export default function SelectFriends({
         .flatMap((friend) => {
           const obj = friendObject(me, friend);
           return {
+            ...obj,
             value: obj.id,
             label: obj.username,
           };
         })
+    : [];
+
+  const friends = allFriends
+    ? allFriends.filter((friend) => {
+        return !alreadyFriends.includes(friendObject(me, friend).id);
+      })
     : [];
 
   const createGroup = async () => {
@@ -204,7 +239,7 @@ export default function SelectFriends({
             <IconChevronLeft />
           </ActionIcon> */}
           <Text weight={500}>Select Friend</Text>
-          <ActionIcon>
+          <ActionIcon onClick={() => dispatch(expandedComplement())}>
             <IconClose />
           </ActionIcon>
         </div>
@@ -253,9 +288,10 @@ export default function SelectFriends({
                       </motion.div>
                     );
                   })} */}
-              {allFriends &&
-                allFriends.map((user, index) => (
+              {friends &&
+                friends.map((user, index) => (
                   <Checkbox
+                    key={user.id}
                     isChecked={value.includes(friendObject(me, user).id)}
                     onClick={() => {
                       if (value.includes(friendObject(me, user).id)) {
@@ -269,10 +305,33 @@ export default function SelectFriends({
                     className={`hover:bg-slate-200 flex w-full h-11 p-2 rounded-md justify-between items-center cursor-pointer`}
                   >
                     <Group spacing="xs">
-                      <Avatar
-                        radius="xl"
-                        src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
-                      />
+                      <Indicator
+                        inline
+                        size={16}
+                        offset={7}
+                        position="bottom-end"
+                        color={
+                          friendObject(me, user)?.status?.online
+                            ? "green"
+                            : "gray"
+                        }
+                        withBorder
+                      >
+                        <Avatar
+                          src={friendObject(me, user).avatar_url}
+                          radius="xl"
+                          styles={{
+                            placeholder: {
+                              color: "#fff",
+                              backgroundColor: `#${Math.floor(
+                                friendObject(me, user).accent_color
+                              ).toString(16)}`,
+                            },
+                          }}
+                        >
+                          {friendObject(me, user).username[0]}
+                        </Avatar>
+                      </Indicator>
                       <div className="select-none">
                         <Text weight={600}>
                           {friendObject(me, user).username}

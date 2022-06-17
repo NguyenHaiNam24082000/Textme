@@ -18,7 +18,10 @@ import {
   chatMainTime,
   getMoreDetailsTime,
 } from "../../../../commons/dateUtils";
-import { setActiveComplement } from "../../../../store/uiSlice";
+import {
+  expandedComplement,
+  setActiveComplement,
+} from "../../../../store/uiSlice";
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,
@@ -162,7 +165,11 @@ export default function Search({ channel }) {
         <ActionIcon onClick={() => dispatch(setActiveComplement("main"))}>
           <IconChevronLeft />
         </ActionIcon>
-        <ActionIcon>
+        <ActionIcon
+          onClick={() => {
+            dispatch(expandedComplement());
+          }}
+        >
           <IconClose />
         </ActionIcon>
       </div>

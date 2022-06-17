@@ -12,8 +12,18 @@ const workspaceMemberSchema = new mongoose.Schema(
     },
     roles: [
       {
-        type: mongoose.Schema.Types.Mixed,
+        type: String,
         default: "MEMBER",
+        enum: [
+          "MEMBER",
+          "OWNER",
+          "MANAGE_CHANNEL",
+          "MANAGE_SERVER",
+          "MANAGE_ROLES",
+          "KICK_MEMBER",
+          "BAN_MEMBER",
+          "INVITE_MEMBER",
+        ],
       },
     ],
     status: {

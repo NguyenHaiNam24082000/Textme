@@ -14,12 +14,15 @@ import {
 import React, { useEffect, useState } from "react";
 import { getAttachments, getLinks } from "../../../../apis/channel";
 import { GetMe } from "../../../../store/userSlice";
+import { useDispatch } from "react-redux";
+import { expandedComplement } from "../../../../store/uiSlice";
 
 export default function Info({ messages, channel }) {
   const me = GetMe();
   const user = me.user;
   const [attachments, setAttachments] = useState([]);
   const [links, setLinks] = useState([]);
+  const dispatch = useDispatch();
   useEffect(() => {
     const getAttachmentsFromChannel = async () => {
       const { data } = await getAttachments(channel.id);
@@ -31,7 +34,7 @@ export default function Info({ messages, channel }) {
     };
     Promise.all([getAttachmentsFromChannel(), getLinkFromChannel()]);
   }, [channel]);
-  console.log(links, attachments, "attachments");
+  // console.log(links, attachments, "attachments");
 
   const showImage = () => {
     let index = 0;
@@ -55,15 +58,19 @@ export default function Info({ messages, channel }) {
       });
     });
   };
-  console.log(showImage(), "showImage");
+  // console.log(showImage(), "showImage");
   // useEffect(() => {
   //   console.log(messages);
   // }, [messages]);
-  console.log(messages, "images");
+  // console.log(messages, "images");
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex w-full h-10 items-center justify-end p-2">
-        <ActionIcon>
+        <ActionIcon
+          onClick={() => {
+            dispatch(expandedComplement());
+          }}
+        >
           <IconClose />
         </ActionIcon>
       </div>

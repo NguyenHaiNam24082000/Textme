@@ -15,6 +15,8 @@ import {
   chatMainTime,
   getMoreDetailsTime,
 } from "../../../../commons/dateUtils";
+import { useDispatch } from "react-redux";
+import { expandedComplement } from "../../../../store/uiSlice";
 
 const patterns = {
   boldItalic: /\*\*\*(.*?)\*\*\*/gs,
@@ -79,6 +81,7 @@ const format = (content) =>
 
 export default function PinnedList({ channel }) {
   const [messages, setMessages] = useState([]);
+  const dispatch = useDispatch();
   useEffect(async () => {
     const { data } = await getPinnedMessage(channel._id);
     setMessages(data);
@@ -122,7 +125,7 @@ export default function PinnedList({ channel }) {
             <IconChevronLeft />
           </ActionIcon> */}
           <Text weight={500}>Pinned List</Text>
-          <ActionIcon>
+          <ActionIcon onClick={() => dispatch(expandedComplement())}>
             <IconClose />
           </ActionIcon>
         </div>

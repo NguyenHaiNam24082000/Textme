@@ -25,6 +25,7 @@ const createWorkspace = async (user, body) => {
     workspace: workspace.id,
     user: user.id,
     roles: "OWNER",
+    status: "JOINED",
   });
 
   return workspace;
@@ -65,13 +66,71 @@ const createWorkspaceChannel = async (user, params, body) => {
   return channel;
 };
 
-const getDiscoverServers = async () => {
-  //select top 24 workspace sort by members count desc
-  const servers = await Workspace.find({
-    type: { $in: ["PUBLIC", "PRIVATE"] },
-  })
-    .sort({ membersCount: -1 })
-    .limit(24);
+const getDiscoverServers = async (user) => {
+  //join workspace with status workspace member pending
+  const servers = await Workspace.aggregate([
+    {
+      $match: {
+        type: { $in: ["PUBLIC", "PRIVATE"] },
+      },
+    },
+    {
+      $lookup: {
+        from: "workspacemembers",
+        localField: "_id",
+        foreignField: "workspace",
+        as: "members",
+      },
+    },
+    {
+      $addFields: {
+        totalMembers: { $size: "$members" },
+        //get all status from status of members where user is current user
+        me: {
+          $filter: {
+            input: "$members",
+            as: "member",
+            cond: { $eq: ["$$member.user", user._id] },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        description: 1,
+        avatar: 1,
+        type: 1,
+        owner: 1,
+        tags: 1,
+        totalMembers: 1,
+        // members: {
+        //   $filter: {
+        //     input: "$members",
+        //     as: "member.id",
+
+        //     // cond: { $eq: ["$$member.status", "PENDING"] },
+        //   },
+        // },
+        meStatus: {
+          $cond: {
+            if: { $eq: ["$me", []] },
+            then: "NOT_MEMBER",
+            else: {
+              $arrayElemAt: ["$me.status", 0],
+            },
+          },
+        },
+      },
+    },
+  ]);
+
+  // const servers = await Workspace.find({
+  //   type: { $in: ["PUBLIC", "PRIVATE"] },
+  // })
+  //   .sort({ membersCount: -1 })
+  //   .limit(24);
   return servers;
 };
 
@@ -131,7 +190,7 @@ const sendJoinServerRequest = async (user, params, body) => {
     });
   } else {
     member = alreadyMember;
-    return member;
+    // return member;
   }
   return member;
 };
@@ -212,7 +271,7 @@ const blockedMember = async (user, params, body) => {
   return member;
 };
 
-const BannedMember = async (user, params, body) => {
+const bannedMember = async (user, params, body) => {
   const { workspaceId } = params;
   const { receiver } = body;
   const workspace = await Workspace.findById(workspaceId);
@@ -231,10 +290,30 @@ const BannedMember = async (user, params, body) => {
   return member;
 };
 
+const setupRoles = async (user, params, body) => {
+  const { workspaceId } = params;
+  const { receiver, roles } = body;
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Workspace not found");
+  }
+  const member = await WorkspaceMember.findOne({
+    workspace: workspace._id,
+    user: receiver,
+  });
+  if (!member) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Member not found");
+  }
+  member.roles = roles;
+  await member.save();
+  return member;
+};
+
 module.exports = {
   createWorkspace,
   getAllWorkspaces,
   createWorkspaceChannel,
   inviteMember,
   getDiscoverServers,
+  sendJoinServerRequest,
 };

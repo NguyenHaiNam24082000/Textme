@@ -32,7 +32,12 @@ const inviteMember = catchAsync(async (req, res, next) => {
 });
 
 const getDiscoverServers = catchAsync(async (req, res, next) => {
-  const workspaces = await workspaceService.getDiscoverServers();
+  const workspaces = await workspaceService.getDiscoverServers(req.user);
+  res.status(httpStatus.OK).send(workspaces);
+});
+
+const sendJoinServerRequest = catchAsync(async (req, res, next) => {
+  const workspaces = await workspaceService.sendJoinServerRequest();
   res.status(httpStatus.OK).send(workspaces);
 });
 
@@ -42,4 +47,5 @@ module.exports = {
   createWorkspaceChannel,
   inviteMember,
   getDiscoverServers,
+  sendJoinServerRequest,
 };

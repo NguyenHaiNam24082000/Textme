@@ -382,9 +382,11 @@ export default function Me() {
                   window.open(
                     `/channel/${channelCall.id}/videoCall`,
                     "Video Call",
-                    `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${window.innerWidth - 50},height=${
-                      window.innerHeight - 50
-                    },left=${window.screenX + 25},top=${window.screenY + 25}`
+                    `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${
+                      window.innerWidth - 50
+                    },height=${window.innerHeight - 50},left=${
+                      window.screenX + 25
+                    },top=${window.screenY + 25}`
                   );
                   setCall(false);
                 }}

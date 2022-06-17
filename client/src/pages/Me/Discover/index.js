@@ -11,14 +11,38 @@ import {
   Avatar,
   SimpleGrid,
   ScrollArea,
+  Button,
 } from "@mantine/core";
 import { getDiscoverServers } from "../../../apis/workspace";
+import { useNavigate } from "react-router";
+
+// "PENDING",
+// "INVITED",
+// "JOINED",
+// "BLOCKED",
+// "LEFT",
+// "BANNED",
+// "KICKED",
 
 export default function Discover() {
   const [discoverServers, setDiscoverServers] = useState([]);
+  const history = useNavigate();
   useEffect(() => {
     const fetchDiscoverServers = async () => {
       const { data } = await getDiscoverServers();
+      // const serverIds = servers.map((item)=>item.id);
+      // const s= data.map((server) => {
+      //   let joined=false;
+      //   if(serverIds.includes(server.id))
+      //   {
+      //     joined=true;
+      //   }
+      //   return {
+      //     ...server,
+      //     joined,
+      //   };
+      // })
+      console.log(data);
       setDiscoverServers(data);
     };
     fetchDiscoverServers();
@@ -77,78 +101,102 @@ export default function Discover() {
             width: "100%",
           }}
         >
-          {discoverServers.map((server) => (
-            <Box
-              key={server.id}
-              sx={{
-                height: "100%",
-                width: "100%",
-              }}
-            >
-              <div
-                // style={{
-                //   width: 300,
-                // }}
-                className="w-full card-main rounded-lg inline-flex h-80 flex-col select-none font-normal pointer overflow-hidden"
+          {discoverServers &&
+            discoverServers.map((server) => (
+              <Box
+                key={server.id}
+                sx={{
+                  height: "100%",
+                  width: "100%",
+                }}
               >
-                <div className="h-32 overflow-hidden">
-                  <BackgroundImage
-                    src="https://images.hdqwalls.com/wallpapers/genshin-impact-game-2021-ig.jpg"
-                    sx={{
-                      height: "100%",
-                      width: "100%",
-                    }}
-                  />
-                </div>
-                <div className="relative">
-                  <div className="flex absolute w-full justify-center">
-                    <div
-                      className="-mt-12 w-16 h-16 object-cover rounded-full flex z-10 justify-center items-center -mt-20 object-cover rounded-full"
-                      style={{
-                        width: 100,
-                        height: 100,
-                        border: "6px solid #fff",
+                <div
+                  // style={{
+                  //   width: 300,
+                  // }}
+                  className="w-full card-main rounded-lg inline-flex h-80 flex-col select-none font-normal pointer overflow-hidden"
+                >
+                  <div className="h-32 overflow-hidden">
+                    <BackgroundImage
+                      src="https://images.hdqwalls.com/wallpapers/genshin-impact-game-2021-ig.jpg"
+                      sx={{
+                        height: "100%",
+                        width: "100%",
                       }}
-                    >
-                      <Avatar
-                        size="100%"
-                        sx={{
-                          backgroundColor: "#7289DA",
-                          color: "#fff",
-                          fontSize: 32,
+                    />
+                  </div>
+                  <div className="relative">
+                    <div className="flex absolute w-full justify-center">
+                      <div
+                        className="-mt-12 w-16 h-16 object-cover rounded-full flex z-10 justify-center items-center -mt-20 object-cover rounded-full"
+                        style={{
+                          width: 100,
+                          height: 100,
+                          border: "6px solid #fff",
                         }}
-                        className="rounded-full"
-                        src="https://cdn.discordapp.com/avatars/94490510688792576/a_84032ca2190d12afb662bb4a381a4199"
                       >
-                        {server.name[0].toUpperCase()}
-                      </Avatar>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-grow">
-                  <div
-                    className="h-full flex flex-col bg-slate-200 gap-2"
-                    style={{ padding: "24px 16px 16px" }}
-                  >
-                    <div className="flex items-center justify-center text-lg font-semibold">
-                      {server.name}
-                    </div>
-                    <div className="overflow-hidden text-xs">
-                      {server.description}
-                    </div>
-                    <div className="flex justify-between mt-auto">
-                      <div className="text-xs flex item-center">
-                        {server.members.length + 1} members
-                      </div>
-                      <div className="flex text-xs items-center">
-                        <span>low active</span>
+                        <Avatar
+                          size="100%"
+                          sx={{
+                            backgroundColor: "#7289DA",
+                            color: "#fff",
+                            fontSize: 32,
+                          }}
+                          className="rounded-full"
+                          src="https://cdn.discordapp.com/avatars/94490510688792576/a_84032ca2190d12afb662bb4a381a4199"
+                        >
+                          {server.name[0].toUpperCase()}
+                        </Avatar>
                       </div>
                     </div>
                   </div>
+                  <div className="flex-grow">
+                    <div
+                      className="h-full flex flex-col bg-slate-200 gap-2"
+                      style={{ padding: "24px 16px 16px" }}
+                    >
+                      <div className="flex items-center justify-center text-lg font-semibold">
+                        {server.name}
+                      </div>
+                      <div className="overflow-hidden text-xs">
+                        {server.description}
+                      </div>
+                      <div className="flex justify-between mt-auto">
+                        <div className="text-xs flex item-center">
+                          {/* {server.members.length + 1} members */}
+                          {server.totalMembers} members
+                        </div>
+                        <div className="flex text-xs items-center">
+                          <span>low active</span>
+                        </div>
+                      </div>
+                      <Group grow>
+                        {server?.meStatus === "JOINED" ? (
+                          <Button
+                            onClick={() => {
+                              // history(
+                              //   `/channel/${server.id}/${server.channels[0].channel}`
+                              // );
+                            }}
+                          >
+                            Access
+                          </Button>
+                        ) : server?.meStatus === "INVITED" ? (
+                          <Button>Accept</Button>
+                        ) : server?.meStatus === "PENDING" ? (
+                          <Button>Cancel</Button>
+                        ) : server?.meStatus === "NOT_MEMBER" &&
+                          server.type === "PUBLIC" ? (
+                          <Button>Join</Button>
+                        ) : (
+                          <Button>Request</Button>
+                        )}
+                      </Group>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </Box>
-          ))}
+              </Box>
+            ))}
         </SimpleGrid>
       </Stack>
     </ScrollArea>
