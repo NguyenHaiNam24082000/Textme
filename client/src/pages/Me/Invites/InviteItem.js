@@ -30,7 +30,7 @@ import { ME_SOCKET } from "../../../configs/socketRoute";
 import { GetMe } from "../../../store/userSlice";
 import ModalUserProfile from "../../Modals/ModalUserProfile";
 
-export default function FriendItem({ user, friend }) {
+export default function MemberItem({ user, friend }) {
   const me = GetMe();
   const [isLoading, setIsLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
@@ -41,62 +41,62 @@ export default function FriendItem({ user, friend }) {
   const socket = getSocket(me?.tokens?.access?.token);
   const history = useNavigate();
 
-  const openDM = async (e) => {
-    e.stopPropagation();
-    setIsLoading(true);
-    try {
-      const { data } = await getOrCreateDMChannel(
-        friendObject(user, friend).id
-      );
-      if (data) {
-        cache.invalidateQueries(OPEN_CHANNEL);
-        history(`/channel/@me/${data._id}`);
-      } else {
-        setIsLoading(false);
-      }
-    } catch (err) {
-      // const result = apiErrorHandler(err);
-      setIsLoading(false);
-    }
-  };
+  //   const openDM = async (e) => {
+  //     e.stopPropagation();
+  //     setIsLoading(true);
+  //     try {
+  //       const { data } = await getOrCreateDMChannel(
+  //         friendObject(user, friend).id
+  //       );
+  //       if (data) {
+  //         cache.invalidateQueries(OPEN_CHANNEL);
+  //         history(`/channel/@me/${data._id}`);
+  //       } else {
+  //         setIsLoading(false);
+  //       }
+  //     } catch (err) {
+  //       // const result = apiErrorHandler(err);
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-  const cancelPending = async (e) => {
-    e.stopPropagation();
-    setIsLoading(true);
-    try {
-      await cancelPendingRequestApi(friend.id);
-      cache.invalidateQueries(ALL_FRIENDS_KEY);
-      const receiverId =
-        friend.sender.id === me.id ? friend.receiver.id : friend.sender.id;
-      console.log(receiverId, "receiverId");
-      socket.emit(ME_SOCKET.SEND_CANCEL_FRIEND_REQUEST, {
-        receiverId: receiverId,
-      });
-      setIsLoading(false);
-    } catch (err) {
-      // const result = apiErrorHandler(err);
-      setIsLoading(false);
-    }
-  };
+  //   const cancelPending = async (e) => {
+  //     e.stopPropagation();
+  //     setIsLoading(true);
+  //     try {
+  //       await cancelPendingRequestApi(friend.id);
+  //       cache.invalidateQueries(ALL_FRIENDS_KEY);
+  //       const receiverId =
+  //         friend.sender.id === me.id ? friend.receiver.id : friend.sender.id;
+  //       console.log(receiverId, "receiverId");
+  //       socket.emit(ME_SOCKET.SEND_CANCEL_FRIEND_REQUEST, {
+  //         receiverId: receiverId,
+  //       });
+  //       setIsLoading(false);
+  //     } catch (err) {
+  //       // const result = apiErrorHandler(err);
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-  const blockedHandler = async (e) => {
-    e.stopPropagation();
-    setIsLoading(true);
-    try {
-      await blockFriendRequestApi(friend.id);
-      cache.invalidateQueries(ALL_FRIENDS_KEY);
-      cache.invalidateQueries(BLOCKED_FRIENDS_KEY);
-      const receiverId =
-        friend.sender.id === me.id ? friend.receiver.id : friend.sender.id;
-      socket.emit(ME_SOCKET.SEND_BLOCK_FRIEND_REQUEST, {
-        receiverId: receiverId,
-      });
-      setIsLoading(false);
-    } catch (err) {
-      // const result = apiErrorHandler(err);
-      setIsLoading(false);
-    }
-  };
+  //   const blockedHandler = async (e) => {
+  //     e.stopPropagation();
+  //     setIsLoading(true);
+  //     try {
+  //       await blockFriendRequestApi(friend.id);
+  //       cache.invalidateQueries(ALL_FRIENDS_KEY);
+  //       cache.invalidateQueries(BLOCKED_FRIENDS_KEY);
+  //       const receiverId =
+  //         friend.sender.id === me.id ? friend.receiver.id : friend.sender.id;
+  //       socket.emit(ME_SOCKET.SEND_BLOCK_FRIEND_REQUEST, {
+  //         receiverId: receiverId,
+  //       });
+  //       setIsLoading(false);
+  //     } catch (err) {
+  //       // const result = apiErrorHandler(err);
+  //       setIsLoading(false);
+  //     }
+  //   };
 
   return (
     <>
@@ -137,17 +137,6 @@ export default function FriendItem({ user, friend }) {
               {friendObject(user, friend).username[0].toUpperCase()}
             </Avatar>
           </Indicator>
-          {/* <Avatar
-            color={`#${Math.floor(
-              friendObject(user, friend).accent_color
-            ).toString(16)}`}
-            size="lg"
-            radius="xl"
-            src={friendObject(user, friend).avatar_url}
-          >
-            {!friendObject(user, friend).avatar_url &&
-              pendingUsername(user, friend)[0]}
-          </Avatar> */}
           <div>
             <div className="flex items-center">
               <Text size="lg" weight={500}>
@@ -204,19 +193,11 @@ export default function FriendItem({ user, friend }) {
               </ActionIcon>
             }
           >
-            <Menu.Item onClick={blockedHandler}>Blocked Friend</Menu.Item>
-            <Menu.Item onClick={cancelPending}>Remove Friend</Menu.Item>
+            {/* <Menu.Item onClick={blockedHandler}>Blocked Friend</Menu.Item>
+            <Menu.Item onClick={cancelPending}>Remove Friend</Menu.Item> */}
           </Menu>
         </Group>
       </Group>
-      <ModalUserProfile
-        opened={openedModalUserProfile}
-        onClose={() => {
-          setOpenedModalUserProfile(false);
-        }}
-        me={me.user}
-        friend={friend}
-      />
     </>
   );
 }

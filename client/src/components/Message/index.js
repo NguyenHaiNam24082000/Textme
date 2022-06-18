@@ -955,6 +955,11 @@ export default function Message({
                                 ></path>
                               </svg> */}
                               <Indicator
+                                sx={{
+                                  indicator: {
+                                    zIndex: "5",
+                                  },
+                                }}
                                 inline
                                 size={16}
                                 offset={7}
@@ -1126,6 +1131,11 @@ export default function Message({
                             ></path>
                           </svg> */}
                           <Indicator
+                            sx={{
+                              indicator: {
+                                zIndex: "5",
+                              },
+                            }}
                             inline
                             size={16}
                             offset={7}
@@ -1381,16 +1391,29 @@ export default function Message({
                   {!message.systemMessage && (
                     <Menu.Item
                       icon={<FontAwesomeIcon icon="fa-solid fa-reply" />}
+                      onClick={() => {
+                        const replyClone = replies[message.channel]
+                          ? [...new Set([...replies[message.channel], message])]
+                          : [message];
+                        if (replyClone.length <= 5) {
+                          dispatch(
+                            replyMessages({
+                              id: message.channel,
+                              messages: replyClone,
+                            })
+                          );
+                        }
+                      }}
                     >
                       Trả lời
                     </Menu.Item>
                   )}
-                  <Menu.Item>Tạo chủ đề</Menu.Item>
+                  {/* <Menu.Item>Tạo chủ đề</Menu.Item>
                   <Menu.Item
                     icon={<FontAwesomeIcon icon="fa-solid fa-map-pin" />}
                   >
                     Đánh dấu chưa đọc
-                  </Menu.Item>
+                  </Menu.Item> */}
                   <Menu.Item
                     onClick={() => clipboard.copy(message.content)}
                     icon={<FontAwesomeIcon icon="fa-solid fa-link" />}

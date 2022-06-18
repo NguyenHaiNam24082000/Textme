@@ -12,9 +12,13 @@ const slice = createSlice({
     isVoiceConnected: get("voiceConnected") ?? false,
     replies: get("replies") ?? {},
     theme: get("theme") ?? {},
+    nearBy: undefined,
     //isCallEnded:
   },
   reducers: {
+    setNearBy: function (state, action) {
+      state.nearBy = action.payload;
+    },
     replyMessages: (state, action) => {
       const { payload } = action;
       // set("replies", payload);
@@ -71,7 +75,7 @@ export const isDeafen = (state) => state.ui.isDeafen;
 export const isVoiceConnectedSelector = (state) => state.ui.isVoiceConnected;
 export const themeSelector = (state) => state.ui.theme;
 export const activeComplementSelector = (state) => state.ui.activeComplement;
-
+export const nearBySelector = (state) => state.ui.nearBy;
 // export const closeModal = (dispatch) => {
 //     dispatch(actions.closedModal());
 //     dispatch
@@ -91,4 +95,5 @@ export const {
   voiceConnected,
   setTheme,
   setActiveComplement,
+  setNearBy,
 } = slice.actions;

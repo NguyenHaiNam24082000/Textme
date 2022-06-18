@@ -18,6 +18,7 @@ import SidebarBase from "../../SidebarBase";
 import DMList from "./DMList";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
+import { ScrollArea } from "@mantine/core";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -165,27 +166,25 @@ export default function HomeSidebar({ channels }) {
 
   return (
     <SidebarBase>
-      <div>
-        <div className="flex w-full h-12 flex-shrink-0 px-2 cursor-pointer">
-          <div
-            className="flex w-full h-full items-center justify-center px-2"
-            style={{ borderBottom: "2px solid #e5e7eb" }}
-          >
-            <TextInput
-              placeholder="Search"
-              size="xs"
-              icon={<Search size={12} />}
-              rightSectionWidth={70}
-              rightSection={
-                <Code className={classes.searchCode}>Ctrl + K</Code>
-              }
-              styles={{ rightSection: { pointerEvents: "none" } }}
-              className="pointer-events-none cursor-pointer"
-              onClick={spotlight.openSpotlight}
-            />
-          </div>
+      <div className="flex w-full h-12 flex-shrink-0 px-2 cursor-pointer">
+        <div
+          className="flex w-full h-full items-center justify-center px-2"
+          style={{ borderBottom: "2px solid #e5e7eb" }}
+        >
+          <TextInput
+            placeholder="Search"
+            size="xs"
+            icon={<Search size={12} />}
+            rightSectionWidth={70}
+            rightSection={<Code className={classes.searchCode}>Ctrl + K</Code>}
+            styles={{ rightSection: { pointerEvents: "none" } }}
+            className="pointer-events-none cursor-pointer"
+            onClick={spotlight.openSpotlight}
+          />
         </div>
-        <div className="flex flex-col flex-auto">
+      </div>
+      <ScrollArea scrollHideDelay={0}>
+        <div className="flex flex-col flex-auto min-h-0 overflow-x-hidden overflow-y-scroll scroll-smooth hover:scroll-auto">
           <div className="flex flex-col px-2 mt-2">
             {links &&
               links.map((link) => (
@@ -237,7 +236,7 @@ export default function HomeSidebar({ channels }) {
           </Group>
           <DMList channels={channels} />
         </div>
-      </div>
+      </ScrollArea>
     </SidebarBase>
   );
 }

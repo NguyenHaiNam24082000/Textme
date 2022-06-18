@@ -25,7 +25,7 @@ export const pinnedMessage = (channelId, messageId) => {
 };
 
 export const inviteFriendsToChannel = (channelId, data) => {
-  return postRequest(`/api/v1/channel/${channelId}/invite`, data);
+  return putRequest(`/api/v1/channel/${channelId}/invite`, data);
 };
 
 export const getAttachments = (channelId) => {

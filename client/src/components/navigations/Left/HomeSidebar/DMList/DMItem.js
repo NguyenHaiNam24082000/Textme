@@ -36,6 +36,9 @@ export default function DMItem({ user, channel, match }) {
                   width: "100%",
                   height: "100%",
                   position: "relative",
+                  indicator: {
+                    zIndex: "5",
+                  },
                 }}
               >
                 <Avatar
@@ -76,6 +79,11 @@ export default function DMItem({ user, channel, match }) {
               </Indicator>
             ) : (
               <Indicator
+                sx={{
+                  indicator: {
+                    zIndex: "5",
+                  },
+                }}
                 inline
                 size={16}
                 offset={7}

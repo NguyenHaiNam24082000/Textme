@@ -30,7 +30,7 @@ import { ME_SOCKET } from "../../../configs/socketRoute";
 import { GetMe } from "../../../store/userSlice";
 import ModalUserProfile from "../../Modals/ModalUserProfile";
 
-export default function FriendItem({ user, friend }) {
+export default function MemberItem({ user, friend }) {
   const me = GetMe();
   const [isLoading, setIsLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(true);

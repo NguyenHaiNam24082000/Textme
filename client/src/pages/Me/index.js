@@ -257,6 +257,11 @@ export default function Me() {
             <div className="h-full w-14 relative">
               {channelCall.type === "GROUP" ? (
                 <Indicator
+                  sx={{
+                    indicator: {
+                      zIndex: "5",
+                    },
+                  }}
                   inline
                   size={16}
                   offset={7}
@@ -315,6 +320,11 @@ export default function Me() {
                 </Indicator>
               ) : (
                 <Indicator
+                  sx={{
+                    indicator: {
+                      zIndex: "5",
+                    },
+                  }}
                   inline
                   size={16}
                   offset={7}

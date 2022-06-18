@@ -109,6 +109,7 @@ import {
   faArrowUpRightFromSquare as fasFaArrowUpRightFromSquare,
   faTicket as fasFaTicket,
   faExpand as fasFaExpand,
+  faNoteSticky as fasFaNoteSticky,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faUser as farFaUser,
@@ -129,6 +130,7 @@ import { IllustrationNoResultDark } from "@douyinfe/semi-illustrations";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 library.add(
+  fasFaNoteSticky,
   fasFaExpand,
   fasFaTicket,
   fasFaArrowUpRightFromSquare,

@@ -65,6 +65,11 @@ const editUserById = async (req, res) => {
   res.status(httpStatus.OK).send(user);
 };
 
+const getAllInviteServers = async (req, res) => {
+  const servers = await userService.getAllInviteServers(req.user.id);
+  res.status(httpStatus.OK).send(servers);
+};
+
 module.exports = {
   allUsers,
   getUsers,
@@ -74,4 +79,5 @@ module.exports = {
   getMutual,
   getUserById,
   editUserById,
+  getAllInviteServers,
 };

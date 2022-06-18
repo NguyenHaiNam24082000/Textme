@@ -110,6 +110,7 @@ import IconOther from "../../assets/images/icons/files-other.svg";
 import * as nsfwjs from "nsfwjs";
 import Giphy from "../Giphy";
 import Sticker from "../Sticker";
+import { Picker } from "emoji-mart";
 
 const IconFile = ({ type }) => {
   if (PDF_MIME_TYPE.includes(type))
@@ -315,12 +316,13 @@ const isShowEditor = (channel) => {
   return true;
 };
 
-export default function EditorDraft({ channel, user }) {
+export default function EditorDraft({ channel, user, scrollToBottom }) {
   const me = GetMe();
   const ref = useRef(null);
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty("")
   );
+  const [openedEmojiPicker, setOpenedEmojiPicker] = useState(false);
   const cache = useQueryClient();
   const [openStaticToolbar, setOpenStaticToolbar] = useState(false);
   const [openMembers, setOpenMembers] = useState(false);
@@ -496,6 +498,7 @@ export default function EditorDraft({ channel, user }) {
 
         return d;
       });
+      scrollToBottom();
     } catch (err) {
       console.log(err);
     }
@@ -757,7 +760,7 @@ export default function EditorDraft({ channel, user }) {
     setOpenChannels(_open);
   }, []);
   const onSearchChangeMembers = useCallback(({ trigger, value }) => {
-    console.log(value);
+    console.log(value, "mention search");
     setSuggestionsMembers(defaultSuggestionsFilter(value, mentions, trigger));
   }, []);
   const onSearchChangeChannels = useCallback(({ trigger, value }) => {
@@ -1196,34 +1199,34 @@ export default function EditorDraft({ channel, user }) {
                 >
                   Upload files
                 </Menu.Item>
-                <Menu.Item
+                {/* <Menu.Item
                   icon={
                     <FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />
                   }
                 >
                   Priority Message
-                </Menu.Item>
+                </Menu.Item> */}
                 <Menu.Item
                   icon={<FontAwesomeIcon icon="fa-solid fa-map-location-dot" />}
                   onClick={() => setOpenedShareLocation(!openedShareLocation)}
                 >
                   Location
                 </Menu.Item>
-                <Menu.Item
+                {/* <Menu.Item
                   icon={<FontAwesomeIcon icon="fa-solid fa-microphone" />}
                 >
                   Voice
-                </Menu.Item>
-                <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-video" />}>
+                </Menu.Item> */}
+                {/* <Menu.Item icon={<FontAwesomeIcon icon="fa-solid fa-video" />}>
                   Video
-                </Menu.Item>
-                <Menu.Item
+                </Menu.Item> */}
+                {/* <Menu.Item
                   icon={
                     <FontAwesomeIcon icon="fa-solid fa-square-poll-vertical" />
                   }
                 >
                   Create Polls
-                </Menu.Item>
+                </Menu.Item> */}
               </Menu>
               <div
                 className="editor flex-auto min-w-0"
@@ -1276,8 +1279,8 @@ export default function EditorDraft({ channel, user }) {
                 <EmojiSuggestions />
                 {/* {!openStaticToolbar && <InlineToolbar />} */}
                 <MentionMembersSuggestions
-                  // open={openMembers}
-                  open={false}
+                  open={openMembers}
+                  // open={false}
                   onOpenChange={onOpenMembersChange}
                   suggestions={suggestionsMembers}
                   onSearchChange={onSearchChangeMembers}
@@ -1370,9 +1373,26 @@ export default function EditorDraft({ channel, user }) {
                 >
                   <VscCaseSensitive size={24} />
                 </ActionIcon>
-                <ActionIcon variant="transparent">
-                  <span className="text-lg">😀</span>
-                </ActionIcon>
+                <Popover
+                  opened={openedEmojiPicker}
+                  onClose={() => setOpenedEmojiPicker(false)}
+                  target={
+                    <ActionIcon
+                      variant="transparent"
+                      onClick={() => setOpenedEmojiPicker(!openedEmojiPicker)}
+                    >
+                      <span className="text-lg">😀</span>
+                    </ActionIcon>
+                  }
+                  spacing={0}
+                  placement="end"
+                  width="100%"
+                  position="bottom"
+                >
+                  <Picker
+                  // set="all"
+                  />
+                </Popover>
                 <Popover
                   opened={openedSticker}
                   onClose={() => setOpenedSticker(false)}
@@ -1386,8 +1406,8 @@ export default function EditorDraft({ channel, user }) {
                       onClick={() => setOpenedSticker((v) => !v)}
                     >
                       <FontAwesomeIcon
-                        icon="fa-solid fa-icons"
-                        className="text-lg"
+                        icon="fa-solid fa-note-sticky"
+                        className="text-xl"
                       />
                     </ActionIcon>
                   }

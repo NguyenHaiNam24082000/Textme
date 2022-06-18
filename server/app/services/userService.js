@@ -221,7 +221,9 @@ const getMutualChannelIds = async (userAId, userBId) => {
         members: [userAId, userBId],
       },
     ],
-  }).populate("members");
+  })
+    .populate("members")
+    .populate("owner");
   return channels;
 };
 
@@ -244,6 +246,14 @@ const getMutualServerIds = async (userAId, userBId) => {
   return servers;
 };
 
+const getAllInviteServers = async (userId) => {
+  const servers = await WorkspaceMember.find({
+    user: userId,
+    status: { $in: ["INVITED", "PENDING"] },
+  }).populate("workspace");
+  return servers;
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -255,4 +265,5 @@ module.exports = {
   getMutualUserIds,
   getMutualChannelIds,
   getMutualServerIds,
+  getAllInviteServers,
 };

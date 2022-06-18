@@ -170,9 +170,7 @@
   }
 }
 
-
-#defaultCanvas0
-{
+#defaultCanvas0 {
   width: 100% !important;
   height: auto !important;
   overflow: hidden;
@@ -253,4 +251,8 @@
 .reactEasyCrop_CropArea:hover:before,
 .reactEasyCrop_CropArea:hover:after {
   opacity: 1;
+}
+
+.mantine-Indicator-indicator {
+  z-index: 2 !important;
 }

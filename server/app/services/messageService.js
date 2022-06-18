@@ -120,13 +120,13 @@ const queryMessages = async (filter, options, user) => {
       ? parseInt(options.limit, 10)
       : 10;
   if (options.nearBy) {
-    let a = this.find({
+    let a = Message.find({
       ...filter,
       _id: {
         $gte: options.nearBy,
       },
     }).limit(limit / 2 + 1);
-    let b = this.find({
+    let b = Message.find({
       ...filter,
       _id: {
         $lt: options.nearBy,
@@ -151,9 +151,14 @@ const queryMessages = async (filter, options, user) => {
         );
       });
     }
-    messages = Promise.all([a.exec(), b.exec()]).then(([a, b]) => {
-      return [...a, ...b];
+    messages = await Promise.all([a.exec(), b.exec()]).then(([a, b]) => {
+      return [...b, ...a];
     });
+    messages = {
+      results: messages,
+      after: messages[messages.length - 1].id,
+      before: messages[0].id,
+    };
     //combine two objects moongoose  docsPromise
   } else if (options.before || options.after) {
     if (options.before) {
@@ -184,7 +189,12 @@ const queryMessages = async (filter, options, user) => {
         );
       });
     }
-    messages = messages.exec();
+    messages = await messages.exec();
+    messages = {
+      results: messages,
+      ...(options.after && { after: messages[messages.length - 1].id }),
+      ...(options.before && { before: messages[0].id }),
+    };
   } else {
     messages = await Message.paginate(filterClone, options);
   }

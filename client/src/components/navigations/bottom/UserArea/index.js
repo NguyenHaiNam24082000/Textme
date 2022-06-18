@@ -34,7 +34,7 @@ export default function UserArea() {
   return (
     <>
       <section
-        className="flex flex-col justify-between w-full h-auto items-center px-2 z-[1]"
+        className="flex flex-col justify-between w-full h-auto items-center px-2 z-[2]"
         style={{ flex: "0 0 auto", background: "#ebedef" }}
       >
         {isVoiceConnected && (
@@ -233,6 +233,11 @@ export default function UserArea() {
               className="menu justify-center items-center flex-shrink-0"
               control={
                 <Indicator
+                  sx={{
+                    indicator: {
+                      zIndex: "5",
+                    },
+                  }}
                   inline
                   size={16}
                   offset={5}

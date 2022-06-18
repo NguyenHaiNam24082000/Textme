@@ -75,6 +75,11 @@ export default function PendingItem({ user, pending }) {
     >
       <Group spacing="sm">
         <Indicator
+          sx={{
+            indicator: {
+              zIndex: "5",
+            },
+          }}
           inline
           size={16}
           offset={7}

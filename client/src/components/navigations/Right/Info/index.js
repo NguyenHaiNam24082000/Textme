@@ -77,6 +77,11 @@ export default function Info({ messages, channel }) {
       <div className="flex flex-col items-center">
         {channel.type === "GROUP" ? (
           <Indicator
+            sx={{
+              indicator: {
+                zIndex: "5",
+              },
+            }}
             inline
             size={16}
             offset={7}
@@ -133,6 +138,11 @@ export default function Info({ messages, channel }) {
           </Indicator>
         ) : (
           <Indicator
+            sx={{
+              indicator: {
+                zIndex: "5",
+              },
+            }}
             inline
             size={20}
             offset={12}

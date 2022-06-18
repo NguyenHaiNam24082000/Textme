@@ -175,6 +175,11 @@ export default function PinnedList({ channel }) {
                         </svg>
                       </a> */}
                       <Indicator
+                        sx={{
+                          indicator: {
+                            zIndex: "5",
+                          },
+                        }}
                         inline
                         size={16}
                         offset={7}

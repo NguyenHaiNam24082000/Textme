@@ -1,5 +1,5 @@
 const httpStatus = require("http-status");
-const { Channel, Friend, Message } = require("../models");
+const { Channel, Friend, Message, User } = require("../models");
 const ApiError = require("../utils/ApiError");
 
 /**
@@ -424,7 +424,7 @@ const inviteMembersToChannel = async (user, params, data) => {
     throw new ApiError(httpStatus.NOT_FOUND, `there is no such a user!`);
   }
   const newMembers = users.map((user) => user._id);
-  channel.members = [...channel.members, ...newMembers];
+  channel.members = newMembers;
   await channel.save();
   return channel.populate("members");
 };

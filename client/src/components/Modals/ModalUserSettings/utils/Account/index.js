@@ -186,6 +186,11 @@ export default function Account({ me }) {
                 control={
                   <div className="flex items-center relative">
                     <Indicator
+                      sx={{
+                        indicator: {
+                          zIndex: "5",
+                        },
+                      }}
                       inline
                       size={28}
                       offset={20}

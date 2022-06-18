@@ -200,9 +200,9 @@ export default function SelectFriends({
     try {
       if (!server) {
         if (channel.type === "DM") {
-          const members = channel.members.filter(
-            (member) => member.id !== me.id
-          );
+          const members = channel.members
+            .filter((member) => member.id !== me.user.id)
+            .map((member) => member.id);
           const { data: channelId } = await createGroupChannel({
             members: [...value, ...members],
           });
@@ -211,8 +211,8 @@ export default function SelectFriends({
             history(`/channel/@me/${channelId._id}`);
           }
         } else if (channel.type === "GROUP") {
-          const { data: channelId } = await inviteFriendsToChannel({
-            members: [...value, ...channel.members],
+          const { data: channelId } = await inviteFriendsToChannel(channel.id, {
+            members: [...channel.members.map((member) => member.id), ...value],
             type: channel.type,
           });
           if (channelId) {
@@ -306,6 +306,11 @@ export default function SelectFriends({
                   >
                     <Group spacing="xs">
                       <Indicator
+                        sx={{
+                          indicator: {
+                            zIndex: "5",
+                          },
+                        }}
                         inline
                         size={16}
                         offset={7}

@@ -19,3 +19,7 @@ export const getUsers = (payload) => {
 export const getMutualIds = (payload) => {
   return getRequest(`/api/v1/users/${payload}/mutual`);
 };
+
+export const getAllInviteServers = (payload) => {
+  return getRequest(`/api/v1/users/${payload}/invite-servers`);
+};

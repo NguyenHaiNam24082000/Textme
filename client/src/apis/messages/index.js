@@ -16,10 +16,19 @@ export const editMessage = (messageId, payload) => {
   });
 };
 
-export const getMessages = (channelId, page, limit = 50) => {
+export const getMessages = (
+  channelId,
+  page,
+  before,
+  after,
+  nearBy,
+  limit = 25
+) => {
   return getRequest(
     `/api/v1/messages/${channelId}${limit ? `?limit=${limit}` : ""}${
       page ? `&page=${page}` : ""
+    }${before ? `&before=${before}` : ""}${after ? `&after=${after}` : ""}${
+      nearBy ? `&nearBy=${nearBy}` : ""
     }`
   );
 };

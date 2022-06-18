@@ -55,13 +55,11 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
         const { data } = await getMutualIds(
           friend.sender.id === me.id ? friend.receiver.id : friend.sender.id
         );
-        console.log(data, "pofile");
         setProfile(data);
       }
     };
     fetchProfile();
   }, [friend.receiver.id, friend.sender.id, me.id, opened]);
-  console.log(profile, "pofile");
 
   return (
     <Modal
@@ -202,6 +200,11 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
                 >
                   <Group spacing="sm">
                     <Indicator
+                      sx={{
+                        indicator: {
+                          zIndex: "5",
+                        },
+                      }}
                       inline
                       size={16}
                       offset={7}
@@ -225,17 +228,6 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
                         {user.username[0].toUpperCase()}
                       </Avatar>
                     </Indicator>
-                    {/* <Avatar
-                  color={`#${Math.floor(
-                    friendObject(user, friend).accent_color
-                  ).toString(16)}`}
-                  size="lg"
-                  radius="xl"
-                  src={friendObject(user, friend).avatar_url}
-                >
-                  {!friendObject(user, friend).avatar_url &&
-                    pendingUsername(user, friend)[0]}
-                </Avatar> */}
                     <div>
                       <div className="flex items-center">
                         <Text size="lg" weight={500}>
@@ -277,6 +269,11 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
                   <Group spacing="sm">
                     {channel.type === "GROUP" ? (
                       <Indicator
+                        sx={{
+                          indicator: {
+                            zIndex: "5",
+                          },
+                        }}
                         inline
                         size={16}
                         offset={7}
@@ -314,7 +311,7 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
                             },
                           }}
                         >
-                          {channel.owner.username[0]}
+                          {channel.owner.username[0].toUpperCase()}
                         </Avatar>
                         <Avatar
                           src={channel.members[0].avatar_url}
@@ -330,11 +327,16 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
                             },
                           }}
                         >
-                          {channel.members[0].username[0]}
+                          {channel.members[0].username[0].toUpperCase()}
                         </Avatar>
                       </Indicator>
                     ) : (
                       <Indicator
+                        sx={{
+                          indicator: {
+                            zIndex: "5",
+                          },
+                        }}
                         inline
                         size={16}
                         offset={7}
@@ -374,8 +376,8 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
                           }}
                         >
                           {channel.members[0]._id !== me._id
-                            ? channel.members[0].username[0]
-                            : channel.members[1].username[0]}
+                            ? channel.members[0].username[0].toUpperCase()
+                            : channel.members[1].username[0].toUpperCase()}
                         </Avatar>
                       </Indicator>
                     )}
@@ -392,11 +394,6 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
                             ? channel.members[0].username
                             : channel.members[1].username}
                         </Text>
-                        {/* <Text
-                          color="dimmed"
-                          size="sm"
-                          className="group-hover:opacity-100 opacity-0"
-                        >{`#${user.discriminator}`}</Text> */}
                       </div>
                       <Text color="dimmed" size="xs">
                         {channel?.type === "GROUP"
@@ -444,17 +441,6 @@ export default function ModalUserProfile({ opened, onClose, me, friend }) {
           </Tabs.Tab>
         </Tabs>
       </div>
-      {/* <Tabs type="line">
-          <TabPane tab="Document" itemKey="1">
-            Document
-          </TabPane>
-          <TabPane tab="Quick Start" itemKey="2">
-            Quick Start
-          </TabPane>
-          <TabPane tab="Help" itemKey="3">
-            Help
-          </TabPane>
-        </Tabs> */}
     </Modal>
   );
 }

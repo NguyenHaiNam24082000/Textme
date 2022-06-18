@@ -1,4 +1,4 @@
-import { Group } from "@mantine/core";
+import { Group, ScrollArea } from "@mantine/core";
 import React from "react";
 import { useSelector } from "react-redux";
 import { useMatch } from "react-router";
@@ -33,7 +33,7 @@ export default function DMList({ channels }) {
     <>
       {channels && channels?.length ? (
         // {/* {!isLoading && channelList && channelList?.length ? ( */}
-        <Group spacing={4} className="flex flex-col overflow-y-auto">
+        <Group spacing={4} className="flex flex-col">
           <ShowOpenDMChannel user={user} channels={channels} />
         </Group>
       ) : (

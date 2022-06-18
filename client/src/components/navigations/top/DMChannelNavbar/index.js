@@ -108,63 +108,75 @@ export default function DMChannelNavbar({ channel, user }) {
             onClick={() => setShowUserProfile(true)}
           >
             {channel.type === "GROUP" ? (
-              <Indicator
-                inline
-                size={16}
-                offset={7}
-                position="bottom-end"
-                color={
-                  channel.owner?.status?.online
-                    ? "green"
-                    : channel.members.some((member) => member?.status?.online)
-                    ? "green"
-                    : "gray"
-                }
-                withBorder
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                  position: "relative",
-                }}
-              >
-                <Avatar
-                  src={channel.owner.avatar_url}
-                  radius="xl"
-                  style={{
-                    height: "calc(100% * (2/3))",
-                    border: "2px solid #fff",
-                  }}
-                  className="absolute left-0 bottom-0 z-[1]"
-                  styles={{
-                    placeholder: {
-                      color: "#fff",
-                      backgroundColor: `#${Math.floor(
-                        channel.owner.accent_color
-                      ).toString(16)}`,
+              <div className="h-[38px] w-10 relative">
+                <Indicator
+                  inline
+                  size={12}
+                  offset={7}
+                  position="bottom-end"
+                  color={
+                    channel.owner?.status?.online
+                      ? "green"
+                      : channel.members.some((member) => member?.status?.online)
+                      ? "green"
+                      : "gray"
+                  }
+                  withBorder
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    position: "relative",
+                    indicator: {
+                      zIndex: "5",
                     },
                   }}
                 >
-                  {channel.owner.username[0]}
-                </Avatar>
-                <Avatar
-                  src={channel.members[0].avatar_url}
-                  radius="xl"
-                  style={{ height: "calc(100% * (2/3))" }}
-                  className="absolute right-0 top-0 z-0"
-                  styles={{
-                    placeholder: {
-                      color: "#fff",
-                      backgroundColor: `#${Math.floor(
-                        channel.members[0].accent_color
-                      ).toString(16)}`,
-                    },
-                  }}
-                >
-                  {channel.members[0].username[0]}
-                </Avatar>
-              </Indicator>
+                  <Avatar
+                    src={channel.owner.avatar_url}
+                    radius="xl"
+                    size="sm"
+                    style={{
+                      height: "calc(100% * (2/3))",
+                      border: "2px solid #fff",
+                    }}
+                    className="absolute left-0 bottom-0 z-[1]"
+                    styles={{
+                      placeholder: {
+                        color: "#fff",
+                        backgroundColor: `#${Math.floor(
+                          channel.owner.accent_color
+                        ).toString(16)}`,
+                      },
+                    }}
+                  >
+                    {channel.owner.username[0]}
+                  </Avatar>
+                  <Avatar
+                    src={channel.members[0].avatar_url}
+                    radius="xl"
+                    size="sm"
+                    style={{ height: "calc(100% * (2/3))" }}
+                    className="absolute right-0 top-0 z-0"
+                    styles={{
+                      placeholder: {
+                        color: "#fff",
+                        backgroundColor: `#${Math.floor(
+                          channel.members[0].accent_color
+                        ).toString(16)}`,
+                      },
+                    }}
+                  >
+                    {channel.members[0].username[0]}
+                  </Avatar>
+                </Indicator>
+              </div>
             ) : (
               <Indicator
+                sx={{
+                  indicator: {
+                    zIndex: "5",
+                  },
+                }}
                 inline
                 size={16}
                 offset={7}
