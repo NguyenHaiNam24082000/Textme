@@ -17,7 +17,7 @@ const uploadFile = async (req, res, next) => {
   // console.log(req.files);
   const user = req.user;
   const { channelId } = req.body;
-  const attachments= JSON.parse(req.body.attachments);
+  const attachments = JSON.parse(req.body.attachments);
   const channel = await Channel.findOne({
     $or: [{ owner: user._id }, { members: user._id }],
     _id: channelId,
@@ -37,9 +37,9 @@ const uploadFile = async (req, res, next) => {
     return next();
   }
   const files = req.files;
-  console.log(files,attachments);
+  console.log(files, attachments);
   const results = await Promise.all(
-    files.map(async (file,index) => {
+    files.map(async (file, index) => {
       return new Promise(async (resolve, reject) => {
         console.log(attachments[index]);
         const attachment = await Attachment.create({
@@ -85,6 +85,32 @@ const uploadFile = async (req, res, next) => {
   //   `there is no room between you and your friend!`
   // );
   next();
+};
+
+const uploadAvatar = async (req, res, next) => {
+  const user = req.user;
+  const { avatar } = req.files;
+  const fileUrl = `${user._id}/avatar`;
+  const fileUpload = bucket.file(fileUrl);
+  const stream = fileUpload.createWriteStream({
+    metadata: {
+      contentType: avatar.type,
+    },
+  });
+  stream.on("error", (err) => {
+    console.log(err);
+    // req.file.cloudStorageError = err;
+  });
+  stream.on("finish", async () => {
+    await fileUpload.makePublic();
+    const url = `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(
+      fileUrl
+    )}?alt=media`;
+    user.avatar = url;
+    await user.save();
+    next();
+  });
+  stream.end(avatar.buffer);
 };
 
 module.exports = uploadFile;

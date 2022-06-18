@@ -84,7 +84,15 @@ const getDiscoverServers = async (user) => {
     },
     {
       $addFields: {
-        totalMembers: { $size: "$members" },
+        totalMembers: {
+          $size: {
+            $filter: {
+              input: "$members",
+              as: "member",
+              cond: { $eq: ["$$member.status", "JOINED"] },
+            },
+          },
+        },
         //get all status from status of members where user is current user
         me: {
           $filter: {
@@ -170,27 +178,72 @@ const inviteMember = async (user, params, body) => {
 };
 
 const sendJoinServerRequest = async (user, params, body) => {
-  const { workspaceId } = params;
-  const { sender } = body;
+  const { serverId: workspaceId } = params;
   const workspace = await Workspace.findById(workspaceId);
   if (!workspace) {
     throw new ApiError(httpStatus.NOT_FOUND, "Workspace not found");
   }
   const alreadyMember = await WorkspaceMember.findOne({
     workspace: workspaceId,
-    user: receiver,
+    user: user.id,
   });
   let member;
-  if (!alreadyMember) {
-    member = await WorkspaceMember.create({
-      workspace: workspace._id,
-      user: receiver,
-      roles: "MEMBER",
-      status: "PENDING",
+  if (workspace.type === "PUBLIC") {
+    if (!alreadyMember) {
+      workspace.members.push(user.id);
+      await workspace.save();
+      member = await WorkspaceMember.create({
+        workspace: workspace._id,
+        user: user.id,
+        roles: "MEMBER",
+        status: "JOINED",
+      });
+      //update all channels in workspace
+      const channelIds = workspace.channels.map((channel) => channel.channel);
+      const channels = await Channel.find({
+        _id: { $in: channelIds },
+      });
+      channels.forEach((channel) => {
+        channel.members.push(user.id);
+        channel.save();
+      });
+    } else {
+      member = alreadyMember;
+    }
+  } else {
+    if (!alreadyMember) {
+      member = await WorkspaceMember.create({
+        workspace: workspace._id,
+        user: user.id,
+        roles: "MEMBER",
+        status: "PENDING",
+      });
+    } else {
+      member = alreadyMember;
+      // return member;
+    }
+  }
+  return member;
+};
+
+const cancelJoinServerRequest = async (user, params, body) => {
+  const { serverId: workspaceId } = params;
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Workspace not found");
+  }
+  const alreadyMember = await WorkspaceMember.findOne({
+    workspace: workspaceId,
+    user: user.id,
+  });
+  let member;
+  if (alreadyMember) {
+    member = await WorkspaceMember.findOneAndDelete({
+      workspace: workspaceId,
+      user: user.id,
     });
   } else {
     member = alreadyMember;
-    // return member;
   }
   return member;
 };
@@ -210,7 +263,7 @@ const acceptJoinServerRequest = async (user, params, body) => {
   if (!member) {
     throw new ApiError(httpStatus.NOT_FOUND, "Member not found");
   }
-  member.status = "ACCEPTED";
+  member.status = "JOINED";
   await member.save();
   return member;
 };
@@ -309,6 +362,45 @@ const setupRoles = async (user, params, body) => {
   return member;
 };
 
+const getAllInviteMembers = async (req, res, next) => {
+  const { serverId: workspaceId } = req.params;
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Workspace not found");
+  }
+  const members = await WorkspaceMember.find({
+    workspace: workspace._id,
+    status: "INVITED",
+  }).populate("user");
+  return members;
+};
+
+const getAllPendingMembers = async (req, res, next) => {
+  const { serverId: workspaceId } = req.params;
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Workspace not found");
+  }
+  const members = await WorkspaceMember.find({
+    workspace: workspace._id,
+    status: "PENDING",
+  }).populate("user");
+  return members;
+};
+
+const getAllBlockedMembers = async (req, res, next) => {
+  const { serverId: workspaceId } = req.params;
+  const workspace = await Workspace.findById(workspaceId);
+  if (!workspace) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Workspace not found");
+  }
+  const members = await WorkspaceMember.find({
+    workspace: workspace._id,
+    status: "BLOCKED",
+  }).populate("user");
+  return members;
+};
+
 module.exports = {
   createWorkspace,
   getAllWorkspaces,
@@ -316,4 +408,8 @@ module.exports = {
   inviteMember,
   getDiscoverServers,
   sendJoinServerRequest,
+  cancelJoinServerRequest,
+  getAllInviteMembers,
+  getAllPendingMembers,
+  getAllBlockedMembers,
 };

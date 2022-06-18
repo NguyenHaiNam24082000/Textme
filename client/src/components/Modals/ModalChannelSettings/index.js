@@ -50,6 +50,7 @@ export default function ModalChannelSettings({ opened, onClose, channel }) {
   return (
     // <Delayed show={opened}>
     <Transition
+      key={"ModalChannelSettings"}
       mounted={opened}
       transition={transition}
       duration={340}
@@ -99,7 +100,7 @@ export default function ModalChannelSettings({ opened, onClose, channel }) {
                             key={index}
                             className="category text-xs font-bold py-1 pl-2 mb-1 mt-1"
                           >
-                            {channel ? channel.name: "Channel Settings"}
+                            {channel ? channel.name : "Channel Settings"}
                           </div>
                           {sidebarItems}
                         </>

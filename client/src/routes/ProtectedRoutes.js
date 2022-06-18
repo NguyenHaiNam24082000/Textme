@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router";
+import { Navigate, Outlet } from "react-router";
 
 const useAuth = () => {
   const user = localStorage.getItem("user");
@@ -6,10 +6,9 @@ const useAuth = () => {
 };
 
 const ProtectedRoutes = () => {
-  const history = useNavigate();
   const isAuth = useAuth();
   if (!isAuth) {
-    history("/login");
+    return <Navigate to="/login" replace />;
   }
   return <Outlet />;
 };

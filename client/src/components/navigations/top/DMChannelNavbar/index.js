@@ -50,13 +50,14 @@ export default function DMChannelNavbar({ channel, user }) {
     if (voiceCall || videoCall) {
       const receiverId =
         channel.type === "DM"
-          ? channel.members[0]._id === user.user.id
-            ? channel.members[1]._id
-            : channel.members[0]._id
+          ? channel.members[0].id === user.user.id
+            ? [channel.members[1].id]
+            : [channel.members[0].id]
           : [
               channel.owner.id,
               ...channel.members.map((member) => member.id),
             ].filter((id) => id !== user.user.id);
+      console.log(receiverId, user, "receiver");
       socket.emit("start-call", {
         receiverId,
         channel,

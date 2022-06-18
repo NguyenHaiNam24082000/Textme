@@ -213,11 +213,10 @@ module.exports = [
   },
   {
     name: ME_SOCKET.LOGOUT,
-    controller: async (socket, io, userId) => {
+    controller: async (socket, io, { userId }) => {
       redis.del(`${ONLINE_USER}${socket.id}`);
       redis.del(`${SOCKET_ID_IN_ROOM}${socket.id}`);
-
-      await userService.updateUserStatus(userId, {
+      await userService.updateUserById(userId, {
         status: {
           ...this.status,
           online: false,

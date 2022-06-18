@@ -12,6 +12,30 @@ router.post(
 );
 router.post("/:serverId/invite", auth(), workspaceController.inviteMember);
 router.get("/discover", auth(), workspaceController.getDiscoverServers);
-// router
+router.post(
+  "/:serverId/join",
+  auth(),
+  workspaceController.sendJoinServerRequest
+);
+router.post(
+  "/:serverId/cancelJoin",
+  auth(),
+  workspaceController.cancelJoinServerRequest
+);
+router.get(
+  "/:serverId/allInvite",
+  auth(),
+  workspaceController.getAllInviteMembers
+);
+router.get(
+  "/:serverId/allPending",
+  auth(),
+  workspaceController.getAllPendingMembers
+);
+router.get(
+  "/:serverId/allBlocked",
+  auth(),
+  workspaceController.getAllBlockedMembers
+);
 
 module.exports = router;

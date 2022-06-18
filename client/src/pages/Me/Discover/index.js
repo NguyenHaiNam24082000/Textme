@@ -13,8 +13,14 @@ import {
   ScrollArea,
   Button,
 } from "@mantine/core";
-import { getDiscoverServers } from "../../../apis/workspace";
+import {
+  getDiscoverServers,
+  sendJoinServerRequest,
+  cancelJoinServerRequest,
+} from "../../../apis/workspace";
 import { useNavigate } from "react-router";
+import { useQuery, useQueryClient } from "react-query";
+import { OPEN_SERVER } from "../../../configs/queryKeys";
 
 // "PENDING",
 // "INVITED",
@@ -24,29 +30,53 @@ import { useNavigate } from "react-router";
 // "BANNED",
 // "KICKED",
 
+const GetDiscoverServers = () => {
+  return useQuery("DiscoverServers", async () => {
+    const { data } = await getDiscoverServers();
+    return data;
+  });
+};
+
 export default function Discover() {
-  const [discoverServers, setDiscoverServers] = useState([]);
+  // const [discoverServers, setDiscoverServers] = useState([]);
   const history = useNavigate();
-  useEffect(() => {
-    const fetchDiscoverServers = async () => {
-      const { data } = await getDiscoverServers();
-      // const serverIds = servers.map((item)=>item.id);
-      // const s= data.map((server) => {
-      //   let joined=false;
-      //   if(serverIds.includes(server.id))
-      //   {
-      //     joined=true;
-      //   }
-      //   return {
-      //     ...server,
-      //     joined,
-      //   };
-      // })
-      console.log(data);
-      setDiscoverServers(data);
-    };
-    fetchDiscoverServers();
-  }, []);
+  const cache = useQueryClient();
+  const { data: discoverServers } = GetDiscoverServers();
+  // useEffect(() => {
+  //   const fetchDiscoverServers = async () => {
+  //     const { data } = await GetDiscoverServers();
+  //     // const serverIds = servers.map((item)=>item.id);
+  //     // const s= data.map((server) => {
+  //     //   let joined=false;
+  //     //   if(serverIds.includes(server.id))
+  //     //   {
+  //     //     joined=true;
+  //     //   }
+  //     //   return {
+  //     //     ...server,
+  //     //     joined,
+  //     //   };
+  //     // })
+  //     setDiscoverServers(data);
+  //   };
+  //   fetchDiscoverServers();
+  // }, []);
+
+  const sendRequestJoinWorkspace = async (serverId) => {
+    const { data } = await sendJoinServerRequest({ serverId });
+    if (data) {
+      cache.invalidateQueries("DiscoverServers");
+      cache.invalidateQueries(OPEN_SERVER);
+    }
+  };
+
+  const cancelRequestJoinWorkspace = async (serverId) => {
+    const { data } = await cancelJoinServerRequest({ serverId });
+    if (data) {
+      cache.invalidateQueries("DiscoverServers");
+      // cache.invalidateQueries(OPEN_SERVER);
+    }
+  };
 
   return (
     <ScrollArea
@@ -104,7 +134,7 @@ export default function Discover() {
           {discoverServers &&
             discoverServers.map((server) => (
               <Box
-                key={server.id}
+                key={server._id}
                 sx={{
                   height: "100%",
                   width: "100%",
@@ -184,12 +214,26 @@ export default function Discover() {
                         ) : server?.meStatus === "INVITED" ? (
                           <Button>Accept</Button>
                         ) : server?.meStatus === "PENDING" ? (
-                          <Button>Cancel</Button>
+                          <Button
+                            onClick={() =>
+                              cancelRequestJoinWorkspace(server._id)
+                            }
+                          >
+                            Cancel
+                          </Button>
                         ) : server?.meStatus === "NOT_MEMBER" &&
                           server.type === "PUBLIC" ? (
-                          <Button>Join</Button>
+                          <Button
+                            onClick={() => sendRequestJoinWorkspace(server._id)}
+                          >
+                            Join
+                          </Button>
                         ) : (
-                          <Button>Request</Button>
+                          <Button
+                            onClick={() => sendRequestJoinWorkspace(server._id)}
+                          >
+                            Request
+                          </Button>
                         )}
                       </Group>
                     </div>

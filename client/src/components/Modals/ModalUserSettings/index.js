@@ -2,7 +2,7 @@ import { IconClose } from "@douyinfe/semi-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ActionIcon, Box, Divider, Transition } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -263,16 +263,20 @@ export default function ModalUsersSetting({ opened, onClose }) {
   const [active, setActive] = useState(sidebar[0].items[0].value);
 
   const logoutHandler = async () => {
-    if (user) {
+    if (localStorage.getItem("user")) {
       try {
-        await logout(user?.tokens?.refresh?.token);
-        cache.clear();
-        dispatch(logoutSuccess());
-        history("/login");
-
-        //disconnect socket after logout.
+        // console.log("logout", JSON.parse(localStorage.getItem("user"))?.tokens);
+        await logout(
+          JSON.parse(localStorage.getItem("user"))?.tokens?.refresh?.token
+        );
         socket.emit(ME_SOCKET.LOGOUT, { userId: user?.user?.id });
         socket.close();
+        cache.clear();
+        console.log("logout");
+        history("/login");
+        dispatch(logoutSuccess());
+
+        //disconnect socket after logout.
       } catch (err) {
         console.log("err: ", err);
       }
@@ -280,6 +284,7 @@ export default function ModalUsersSetting({ opened, onClose }) {
   };
   return (
     <Transition
+      key={"modal-users-setting"}
       mounted={opened}
       transition={transition}
       duration={340}

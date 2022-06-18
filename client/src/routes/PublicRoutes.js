@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router";
+import { Navigate, Outlet } from "react-router";
 
 const useAuth = () => {
   const user = localStorage.getItem("user");
@@ -6,10 +6,9 @@ const useAuth = () => {
 };
 
 const PublicRoutes = () => {
-  const history = useNavigate();
   const isAuth = useAuth();
   if (isAuth) {
-    history("/channel/@me");
+    return <Navigate to="/@channel/me" replace />;
   }
   return <Outlet />;
 };

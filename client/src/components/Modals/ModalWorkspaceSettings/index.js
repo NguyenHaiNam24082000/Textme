@@ -3,6 +3,7 @@ import { ActionIcon, Divider, Transition } from "@mantine/core";
 import React, { useState } from "react";
 import "./index.css";
 import Categories from "./utils/Categories";
+import Invites from "./utils/Invites";
 import Moderation from "./utils/Moderation";
 import Overview from "./utils/Overview";
 import Roles from "./utils/Roles";
@@ -26,16 +27,16 @@ const sidebar = [
         value: "roles",
         icon: "cog",
       },
-      {
-        title: "Điều chỉnh",
-        value: "settings",
-        icon: "cog",
-      },
-      {
-        title: "Nhật ký chỉnh sửa",
-        value: "history",
-        icon: "cog",
-      },
+      // {
+      //   title: "Điều chỉnh",
+      //   value: "settings",
+      //   icon: "cog",
+      // },
+      // {
+      //   title: "Nhật ký chỉnh sửa",
+      //   value: "history",
+      //   icon: "cog",
+      // },
     ],
   },
   {
@@ -80,13 +81,14 @@ const transition = {
     opacity: 1,
   },
   transitionProperty: "opacity, transform",
-} 
+};
 
 export default function ModalWorkspaceSettings({ onClose, opened }) {
   const [active, setActive] = useState(sidebar[0].items[0].value);
 
   return (
     <Transition
+      key={"modal-workspace-settings"}
       mounted={opened}
       transition={transition}
       duration={340}
@@ -95,7 +97,7 @@ export default function ModalWorkspaceSettings({ onClose, opened }) {
       {(styles) => (
         <div
           className="flex w-full h-full absolute top-0 left-0 bottom-0 right-0 bg-white"
-          style={{ zIndex: 500,...styles }}
+          style={{ zIndex: 500, ...styles }}
         >
           <div
             className="flex justify-end bg-slate-300 pt-10"
@@ -151,7 +153,10 @@ export default function ModalWorkspaceSettings({ onClose, opened }) {
               {active && active === "categories" && <Categories />}
               {active && active === "overview" && <Overview />}
               {active && active === "roles" && <Roles />}
-              {active && active === "settings" && <Moderation />}
+              {active && active === "members" && <Invites />}
+              {active && active === "invites" && <Invites />}
+              {active && active === "blocked" && <Invites />}
+              {/* {active && active === "settings" && <Moderation />} */}
             </div>
             <div className="ml-5 relative w-16" style={{ flex: "0 0 36px" }}>
               <ActionIcon className="fixed" onClick={onClose}>

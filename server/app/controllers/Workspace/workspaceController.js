@@ -37,8 +37,43 @@ const getDiscoverServers = catchAsync(async (req, res, next) => {
 });
 
 const sendJoinServerRequest = catchAsync(async (req, res, next) => {
-  const workspaces = await workspaceService.sendJoinServerRequest();
+  const workspaces = await workspaceService.sendJoinServerRequest(
+    req.user,
+    req.params
+  );
   res.status(httpStatus.OK).send(workspaces);
+});
+
+const cancelJoinServerRequest = catchAsync(async (req, res, next) => {
+  const workspace = await workspaceService.cancelJoinServerRequest(
+    req.user,
+    req.params
+  );
+  res.status(httpStatus.OK).send(workspace);
+});
+
+const getAllInviteMembers = catchAsync(async (req, res, next) => {
+  const workspace = await workspaceService.getAllInviteMembers(
+    req.user,
+    req.params
+  );
+  res.status(httpStatus.OK).send(workspace);
+});
+
+const getAllPendingMembers = catchAsync(async (req, res, next) => {
+  const workspace = await workspaceService.getAllPendingMembers(
+    req.user,
+    req.params
+  );
+  res.status(httpStatus.OK).send(workspace);
+});
+
+const getAllBlockedMembers = catchAsync(async (req, res, next) => {
+  const workspace = await workspaceService.getAllBlockedMembers(
+    req.user,
+    req.params
+  );
+  res.status(httpStatus.OK).send(workspace);
 });
 
 module.exports = {
@@ -48,4 +83,8 @@ module.exports = {
   inviteMember,
   getDiscoverServers,
   sendJoinServerRequest,
+  cancelJoinServerRequest,
+  getAllInviteMembers,
+  getAllPendingMembers,
+  getAllBlockedMembers,
 };

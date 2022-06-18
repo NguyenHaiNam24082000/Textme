@@ -31,12 +31,8 @@ export default function Overview() {
             <div className="relative">
               <div className="flex absolute w-full justify-center">
                 <div
-                  className="-mt-12 w-16 h-16 object-cover rounded-full"
-                  style={{ width: 100, height: 100 }}
-                  className="flex z-10 justify-center items-center -mt-20 object-cover rounded-full"
-                  style={{
-                    border: "6px solid #fff",
-                  }}
+                  className="w-16 h-16 object-cover rounded-full flex z-10 justify-center items-center -mt-20"
+                  style={{ width: 100, height: 100, border: "6px solid #fff" }}
                 >
                   <img
                     className="rounded-full"
