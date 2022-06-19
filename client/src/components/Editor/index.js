@@ -1485,19 +1485,13 @@ export default function EditorDraft({ channel, user, scrollToBottom }) {
             } 6px 6px`,
             padding: 8,
           }}
-          onClick={() => setOpenedEditor(true)}
         >
-          <div className="text-gray-500 text-sm overflow-ellipsis truncate flex flex-1 gap-1">
-            <div style={{ color: "red" }}>Draft:</div>
-            <div
-              className="inline-block flex-1 min-w-0 overflow-ellipsis truncate"
-              style={{ maxWidth: 128 }}
-            >
-              aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          <div className="text-gray-500 text-xl overflow-ellipsis truncate flex flex-1 gap-1">
+            <div className="inline-block flex-1 min-w-0 overflow-ellipsis truncate font-bold select-none">
+              {["BLOCKED_BY_RECEIVER", "BLOCKED_BY_SENDER"].includes(
+                channel.with_status
+              ) && "You cannot send messages to a user."}
             </div>
-          </div>
-          <div>
-            <Kbd>Ctrl+R</Kbd>
           </div>
         </div>
       )}

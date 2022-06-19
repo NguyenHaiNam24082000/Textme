@@ -53,7 +53,8 @@ export const useMeSocket = () => {
     }
     return () => {
       if (socket) {
-        socket.disconnect();
+        // socket.emit("disconnect");
+        // socket.disconnect();
       }
     };
   }, [me?.user._id, cache, me?.tokens?.access?.token, me?.user, history]);

@@ -2,9 +2,11 @@ import { IconClose } from "@douyinfe/semi-icons";
 import { ActionIcon, Divider, Transition } from "@mantine/core";
 import React, { useState } from "react";
 import "./index.css";
+import Blocked from "./utils/Blocked";
 import Categories from "./utils/Categories";
 import Invites from "./utils/Invites";
-import Moderation from "./utils/Moderation";
+import Members from "./utils/Members";
+// import Moderation from "./utils/Moderation";
 import Overview from "./utils/Overview";
 import Roles from "./utils/Roles";
 
@@ -83,7 +85,7 @@ const transition = {
   transitionProperty: "opacity, transform",
 };
 
-export default function ModalWorkspaceSettings({ onClose, opened }) {
+export default function ModalWorkspaceSettings({ onClose, opened, server }) {
   const [active, setActive] = useState(sidebar[0].items[0].value);
 
   return (
@@ -151,11 +153,11 @@ export default function ModalWorkspaceSettings({ onClose, opened }) {
           >
             <div className="w-full h-full">
               {active && active === "categories" && <Categories />}
-              {active && active === "overview" && <Overview />}
-              {active && active === "roles" && <Roles />}
-              {active && active === "members" && <Invites />}
-              {active && active === "invites" && <Invites />}
-              {active && active === "blocked" && <Invites />}
+              {active && active === "overview" && <Overview server={server} />}
+              {active && active === "roles" && <Roles server={server} />}
+              {active && active === "members" && <Members server={server} />}
+              {active && active === "invites" && <Invites server={server} />}
+              {active && active === "blocked" && <Blocked server={server} />}
               {/* {active && active === "settings" && <Moderation />} */}
             </div>
             <div className="ml-5 relative w-16" style={{ flex: "0 0 36px" }}>

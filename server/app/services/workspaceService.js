@@ -34,14 +34,17 @@ const createWorkspace = async (user, body) => {
 const getAllWorkspaces = async (user) => {
   const workspaces = await Workspace.find({
     $or: [{ owner: user.id }, { members: user.id }],
-  }).populate([
-    {
-      path: "channels",
-      populate: {
-        path: "channel",
+  })
+    .populate([
+      {
+        path: "channels",
+        populate: {
+          path: "channel",
+        },
       },
-    },
-  ]);
+    ])
+    .populate("members")
+    .populate("owner");
   return workspaces;
 };
 
@@ -190,7 +193,8 @@ const sendJoinServerRequest = async (user, params, body) => {
   let member;
   if (workspace.type === "PUBLIC") {
     if (!alreadyMember) {
-      workspace.members.push(user.id);
+      console.log(workspace.members);
+      workspace.members = [...workspace.members, user.id];
       await workspace.save();
       member = await WorkspaceMember.create({
         workspace: workspace._id,

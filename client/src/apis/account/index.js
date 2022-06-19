@@ -5,11 +5,11 @@ export const getAllUsers = () => {
 };
 
 export const getProfile = (id) => {
-  return getRequest(`/api/v1/users/${id}`);
+  return getRequest(`/api/v1/users/${id}/me`);
 };
 
 export const updateProfile = (id, payload) => {
-  return putRequest(`/api/v1/users/${id}`, payload);
+  return putRequest(`/api/v1/users/${id}/me`, payload);
 };
 
 export const getUsers = (payload) => {
@@ -20,6 +20,6 @@ export const getMutualIds = (payload) => {
   return getRequest(`/api/v1/users/${payload}/mutual`);
 };
 
-export const getAllInviteServers = (payload) => {
-  return getRequest(`/api/v1/users/${payload}/invite-servers`);
+export const getAllInviteServers = () => {
+  return getRequest(`/api/v1/users/invites`);
 };

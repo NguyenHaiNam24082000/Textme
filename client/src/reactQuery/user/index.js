@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { getProfile } from "../../apis/account";
+import { getAllInviteServers, getProfile } from "../../apis/account";
 import usersOnline from "../../apis/socket/useMeSocket";
 import { ACCOUNT_KEY, USERS_ONLINE } from "../../configs/queryKeys";
 
@@ -13,5 +13,12 @@ export const Me = (user) => {
 export const GetAllUsersOnline = (user) => {
   return useQuery(USERS_ONLINE, () => {
     return usersOnline;
+  });
+};
+
+export const GetAllInvitesServers = () => {
+  return useQuery("ALL_INVITES_SERVERS", async () => {
+    const { data } = await getAllInviteServers();
+    return data;
   });
 };

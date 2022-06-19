@@ -19,6 +19,7 @@ export default function Online({ friends }) {
         icon={<Search size={18} />}
         size="md"
         placeholder="Search"
+        mb={8}
         // onChange={handleSearch}
       />
       <div className="flex flex-col">

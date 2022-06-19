@@ -53,26 +53,17 @@ const cancelJoinServerRequest = catchAsync(async (req, res, next) => {
 });
 
 const getAllInviteMembers = catchAsync(async (req, res, next) => {
-  const workspace = await workspaceService.getAllInviteMembers(
-    req.user,
-    req.params
-  );
+  const workspace = await workspaceService.getAllInviteMembers(req, res, next);
   res.status(httpStatus.OK).send(workspace);
 });
 
 const getAllPendingMembers = catchAsync(async (req, res, next) => {
-  const workspace = await workspaceService.getAllPendingMembers(
-    req.user,
-    req.params
-  );
+  const workspace = await workspaceService.getAllPendingMembers(req, res, next);
   res.status(httpStatus.OK).send(workspace);
 });
 
 const getAllBlockedMembers = catchAsync(async (req, res, next) => {
-  const workspace = await workspaceService.getAllBlockedMembers(
-    req.user,
-    req.params
-  );
+  const workspace = await workspaceService.getAllBlockedMembers(req, res, next);
   res.status(httpStatus.OK).send(workspace);
 });
 

@@ -148,17 +148,18 @@ export default function Discover() {
                 >
                   <div className="h-32 overflow-hidden">
                     <BackgroundImage
-                      src="https://images.hdqwalls.com/wallpapers/genshin-impact-game-2021-ig.jpg"
+                      // src="https://images.hdqwalls.com/wallpapers/genshin-impact-game-2021-ig.jpg"
                       sx={{
                         height: "100%",
                         width: "100%",
+                        backgroundColor: "#7289DA",
                       }}
                     />
                   </div>
                   <div className="relative">
                     <div className="flex absolute w-full justify-center">
                       <div
-                        className="-mt-12 w-16 h-16 object-cover rounded-full flex z-10 justify-center items-center -mt-20 object-cover rounded-full"
+                        className="w-16 h-16 flex z-10 justify-center items-center -mt-20 object-cover rounded-full"
                         style={{
                           width: 100,
                           height: 100,
@@ -167,10 +168,12 @@ export default function Discover() {
                       >
                         <Avatar
                           size="100%"
-                          sx={{
-                            backgroundColor: "#7289DA",
-                            color: "#fff",
-                            fontSize: 32,
+                          styles={{
+                            placeholder: {
+                              backgroundColor: "#7289DA",
+                              color: "#fff",
+                              fontSize: 32,
+                            },
                           }}
                           className="rounded-full"
                           src="https://cdn.discordapp.com/avatars/94490510688792576/a_84032ca2190d12afb662bb4a381a4199"

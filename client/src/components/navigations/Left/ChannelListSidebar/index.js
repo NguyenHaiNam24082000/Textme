@@ -334,6 +334,7 @@ export default function ChannelListSidebar({ server }) {
         onClose={() => {
           setOpenedModalWorkspaceSettings(false);
         }}
+        server={server}
       />
     </SidebarBase>
   );

@@ -19,6 +19,7 @@ import DMList from "./DMList";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { ScrollArea } from "@mantine/core";
+import { GetAllInvitesServers } from "../../../../reactQuery/user";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -140,6 +141,7 @@ export default function HomeSidebar({ channels }) {
   const { classes } = useStyles();
   const spotlight = useSpotlight();
   const { data: pendingRequestsData } = PendingRequests();
+  const { data: allInvites } = GetAllInvitesServers();
   const { t } = useTranslation();
   const location = useLocation();
   const links = [
@@ -158,7 +160,7 @@ export default function HomeSidebar({ channels }) {
     {
       icon: <FontAwesomeIcon icon="fa-solid fa-ticket" />,
       label: t("Invites"),
-      notifications: 0,
+      notifications: allInvites?.length,
       to: "/invites",
     },
     // { icon: User, label: "Contacts" },

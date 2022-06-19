@@ -86,6 +86,7 @@ export default function FriendItem({ user, friend }) {
       await blockFriendRequestApi(friend.id);
       cache.invalidateQueries(ALL_FRIENDS_KEY);
       cache.invalidateQueries(BLOCKED_FRIENDS_KEY);
+      cache.invalidateQueries(OPEN_CHANNEL);
       const receiverId =
         friend.sender.id === me.id ? friend.receiver.id : friend.sender.id;
       socket.emit(ME_SOCKET.SEND_BLOCK_FRIEND_REQUEST, {

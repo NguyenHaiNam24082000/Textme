@@ -122,7 +122,7 @@ const VideoCard = (props) => {
   }, [peer]);
 
   return (
-    <div className="bg-white flex relative w-full h-full rounded-md overflow-hidden">
+    <div className="flex relative w-full h-full rounded-md overflow-hidden">
       <video muted playsInline autoPlay ref={ref} />
       <canvas
         ref={canvasRef}

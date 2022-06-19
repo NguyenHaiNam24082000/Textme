@@ -30,7 +30,14 @@ module.exports = [
         },
       });
       console.log("user connected", user);
-      usersOnline[user.id] = { user, socketId: socket.id };
+      let socketId = [];
+      if (usersOnline[userId]) {
+        socketId = usersOnline[userId].socketId;
+      }
+      usersOnline[user.id] = {
+        user,
+        socketId: [...socketId, socket.id],
+      };
       io.emit("updateUserStatus", usersOnline);
       socket.join(userId);
     },
@@ -109,9 +116,11 @@ module.exports = [
       if (receiverId) {
         receiverId.forEach((id) => {
           if (usersOnline[id]) {
-            io.to(usersOnline[id].socketId).emit("startedCall", {
-              call: true,
-              channel,
+            usersOnline[id].socketId.forEach((socketId) => {
+              io.to(socketId).emit("startedCall", {
+                call: true,
+                channel,
+              });
             });
           }
         });
@@ -231,26 +240,27 @@ module.exports = [
     name: "disconnect",
     controller: async (socket, io) => {
       let userId = "";
-      Object.values(usersOnline).forEach((value) => {
-        if (value.socketId === socket.id) {
-          userId = value.user.id;
-          console.log(userId, "userId");
-          delete usersOnline[value.user.id];
-        }
-      });
-      redis.del(`${ONLINE_USER}${socket.id}`);
-      redis.del(`${SOCKET_ID_IN_ROOM}${socket.id}`);
-
-      await userService.updateUserById(userId, {
-        status: {
-          ...this.status,
-          online: false,
-          last_online: Date.now(),
-        },
-      });
+      // Object.values(usersOnline).forEach((value) => {
+      //   if (value.socketId === socket.id) {
+      //     userId = value.user.id;
+      //     console.log(userId, "userId");
+      //     delete usersOnline[value.user.id];
+      //   }
+      // });
+      // redis.del(`${ONLINE_USER}${socket.id}`);
+      // redis.del(`${SOCKET_ID_IN_ROOM}${socket.id}`);
+      if (userId) {
+        await userService.updateUserById(userId, {
+          status: {
+            ...this.status,
+            online: false,
+            last_online: Date.now(),
+          },
+        });
+      }
       io.emit("updateUserStatus", usersOnline);
       console.log("socket disconnected", socket.id);
-      socket.leave(userId);
+      // socket.leave(userId);
     },
   },
 ];

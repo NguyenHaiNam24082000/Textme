@@ -1510,12 +1510,12 @@ const Embed = ({ embed }) => {
   });
   useEffect(() => {
     if (!embed.map) return;
-    console.log(
-      `${embed.map.longitude}`,
-      `${embed.map.latitude}`,
-      "embed1",
-      mapContainerRef.current
-    );
+    // console.log(
+    //   `${embed.map.longitude}`,
+    //   `${embed.map.latitude}`,
+    //   "embed1",
+    //   mapContainerRef.current
+    // );
     console.log("render map", embed.map.longitude, embed.map.latitude);
     map.current = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -1602,7 +1602,6 @@ const Embed = ({ embed }) => {
                         }
                       /> */}
                   <Image
-                    component="motion.img"
                     className="w-20 h-20 rounded object-contain"
                     onClick={() => setOpenedImagePreview(true)}
                     layoutId={

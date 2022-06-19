@@ -46,7 +46,7 @@ export default function DMChannelNavbar({ channel, user }) {
   const dispatch = useDispatch();
   const history = useNavigate();
   useEffect(() => {
-    let ringSound = null;
+    // let ringSound = null;
     if (voiceCall || videoCall) {
       const receiverId =
         channel.type === "DM"
@@ -62,26 +62,26 @@ export default function DMChannelNavbar({ channel, user }) {
         receiverId,
         channel,
       });
-      play();
-      ringSound = setInterval(() => {
-        if (!isPlaying) {
-          play();
-        }
-      }, duration);
-    } else {
-      stop();
+      //   play();
+      //   ringSound = setInterval(() => {
+      //     if (!isPlaying) {
+      //       play();
+      //     }
+      //   }, duration);
+      // } else {
+      //   stop();
+      // }
+      // const ring = setTimeout(() => {
+      //   setVoiceCall(false);
+      //   setVideoCall(false);
+      //   dispatch(voiceConnected(false));
+      //   clearInterval(ringSound);
+      // }, 30000);
+      // return () => {
+      //   stop();
+      //   clearInterval(ringSound);
+      //   clearTimeout(ring);
     }
-    const ring = setTimeout(() => {
-      setVoiceCall(false);
-      setVideoCall(false);
-      dispatch(voiceConnected(false));
-      clearInterval(ringSound);
-    }, 30000);
-    return () => {
-      stop();
-      clearInterval(ringSound);
-      clearTimeout(ring);
-    };
   }, [voiceCall, videoCall]);
 
   return (
@@ -248,27 +248,27 @@ export default function DMChannelNavbar({ channel, user }) {
             </div>
           </Group>
           <Group>
-            {!(voiceCall || videoCall) && (
-              <>
-                <FontAwesomeIcon
-                  icon="fa-solid fa-phone-volume"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setVoiceCall(true);
-                    window.open(
-                      `/channel/${channel.id}/videoCall`,
-                      "Video Call",
-                      `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${
-                        window.innerWidth - 50
-                      },height=${window.innerHeight - 50},left=${
-                        window.screenX + 25
-                      },top=${window.screenY + 25}`
-                    );
-                    dispatch(mute(false));
-                    dispatch(voiceConnected(true));
-                  }}
-                />
-                <FontAwesomeIcon
+            {/* {!(voiceCall || videoCall) && ( */}
+            <>
+              <FontAwesomeIcon
+                icon="fa-solid fa-phone-volume"
+                className="cursor-pointer"
+                onClick={() => {
+                  setVoiceCall(true);
+                  window.open(
+                    `/channel/${channel.id}/videoCall`,
+                    "Video Call",
+                    `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${
+                      window.innerWidth - 50
+                    },height=${window.innerHeight - 50},left=${
+                      window.screenX + 25
+                    },top=${window.screenY + 25}`
+                  );
+                  dispatch(mute(false));
+                  // dispatch(voiceConnected(true));
+                }}
+              />
+              {/* <FontAwesomeIcon
                   icon="fa-solid fa-video"
                   className="cursor-pointer"
                   onClick={() => {
@@ -276,9 +276,9 @@ export default function DMChannelNavbar({ channel, user }) {
                     dispatch(mute(false));
                     dispatch(voiceConnected(true));
                   }}
-                />
-              </>
-            )}
+                /> */}
+            </>
+            {/* )} */}
             <FontAwesomeIcon
               icon="fa-solid fa-user-plus"
               className="cursor-pointer"
@@ -319,162 +319,6 @@ export default function DMChannelNavbar({ channel, user }) {
             />
           </Group>
         </div>
-        {(voiceCall || videoCall) && (
-          <div
-            className="flex flex-col justify-center py-5 gap-5"
-            style={{
-              borderBottom: "2px solid #e1e1e1",
-            }}
-          >
-            {/* {!video ? ( */}
-            {/* <VideoCall channel={channel} /> */}
-            {/* <div className="gap-5 flex justify-center">
-              <div className="relative rounded-full w-fit h-fit inline-block">
-                <Avatar
-                  radius="50%"
-                  size="xl"
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
-                />
-                {isMute ? (
-                  <div
-                    className="rounded-full w-9 h-9 bg-red-500 absolute right-0 bottom-0 flex justify-center items-center text-white"
-                    style={{ border: "5px solid #f3f4f6" }}
-                  >
-                    <FontAwesomeIcon icon="fa-solid fa-microphone-slash" />
-                  </div>
-                ) : (
-                  <div
-                    className="absolute -inset-1 rounded-full"
-                    style={{ border: "3px solid #000" }}
-                  ></div>
-                )}
-              </div>
-              <div className="avatar-ring rounded-full w-fit h-fit inline-block">
-                <Avatar
-                  radius="50%"
-                  size="xl"
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
-                />
-              </div>
-              <div className="avatar-ring rounded-full w-fit h-fit inline-block">
-                <Avatar
-                  radius="50%"
-                  size="xl"
-                  className="avatar-ring"
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=250&q=80"
-                />
-              </div>
-            </div> */}
-            {/* //   ) : (
-        //     <VideoCall />
-        //   )} */}
-            {/* <div className="flex justify-center gap-3">
-              <ActionIcon
-                color={!video ? "red" : ""}
-                size="xl"
-                radius="xl"
-                variant="filled"
-                onClick={() => setVideo((v) => !v)}
-              >
-                <FontAwesomeIcon
-                  icon={`fa-solid ${video ? "fa-video" : "fa-video-slash"}`}
-                />
-              </ActionIcon>
-              <ActionIcon size="xl" radius="xl" variant="filled">
-                <MdScreenShare />
-              </ActionIcon>
-              <ActionIcon
-                color={isMute ? "red" : ""}
-                size="xl"
-                radius="xl"
-                variant="filled"
-                onClick={() => dispatch(mute(!isMute))}
-              >
-                <FontAwesomeIcon
-                  icon={`fa-solid ${
-                    isMute ? "fa-microphone-slash" : "fa-microphone"
-                  }`}
-                />
-              </ActionIcon>
-              <Popover
-                opened={openedMenuReactions}
-                onClose={() => setOpenedMenuReactions(false)}
-                target={
-                  <ActionIcon
-                    size="xl"
-                    radius="xl"
-                    variant="filled"
-                    onClick={() => setOpenedMenuReactions((v) => !v)}
-                  >
-                    <FontAwesomeIcon icon="fa-solid fa-phone-volume" />
-                  </ActionIcon>
-                }
-                width={365}
-                position="bottom"
-                withArrow
-                radius="md"
-              >
-                <div className="flex flex-col gap-2">
-                  <Text weight={600}>Reactions</Text>
-                  <Group direction="column" grow spacing="xs">
-                    <Group grow spacing="xs" className="w-full">
-                      <Button variant="subtle" leftIcon={"🧠"}>
-                        I agree
-                      </Button>
-                      <Button variant="subtle" leftIcon={"😀"}>
-                        I disagree
-                      </Button>
-                    </Group>
-                    <Group grow spacing="xs" className="w-full">
-                      <Button variant="subtle" leftIcon={"😀"}>
-                        Hahahahaha
-                      </Button>
-                      <Button variant="subtle" leftIcon={"😀"}>
-                        I LOVE THIS
-                      </Button>
-                    </Group>
-                    <Group grow spacing="xs" className="w-full">
-                      <Button variant="subtle" leftIcon={"😀"}>
-                        Wooohooo!
-                      </Button>
-                      <Button variant="subtle" leftIcon={"😀"}>
-                        Excellent!
-                      </Button>
-                    </Group>
-                    <Group grow spacing="xs" className="w-full">
-                      <Button variant="subtle" leftIcon={"😀"}>
-                        Hmmm...
-                      </Button>
-                      <Button variant="subtle" leftIcon={"🤫"}>
-                        Shhh...
-                      </Button>
-                    </Group>
-                    <Group grow spacing="xs" className="w-full">
-                      <Button variant="subtle" leftIcon={""}>
-                        I don't get it?
-                      </Button>
-                      <Button variant="subtle" leftIcon={"🧠"}>
-                        Big brain!
-                      </Button>
-                    </Group>
-                  </Group>
-                </div>
-              </Popover>
-              <ActionIcon
-                color="red"
-                size="xl"
-                radius="xl"
-                variant="filled"
-                onClick={() => playEnd()}
-              >
-                <FontAwesomeIcon
-                  icon="fa-solid fa-phone"
-                  className="rotate-[135deg]"
-                />
-              </ActionIcon>
-            </div> */}
-          </div>
-        )}
       </div>
       {/* <ModalUserProfile
         opened={showUserProfile}

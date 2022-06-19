@@ -6,6 +6,10 @@
 
 .fullscreen {
   width: 100%;
+  /* flex: auto; */
+  /* min-width: 0; */
+  /* gap: 8px; */
+  /* padding: 8px; */
   /* height: calc(100vh - 80px); */
   /* background-color: black; */
 }

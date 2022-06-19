@@ -1,6 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled from "@emotion/styled";
-import { ActionIcon, AspectRatio, Drawer, Grid, Popover } from "@mantine/core";
+import {
+  ActionIcon,
+  AspectRatio,
+  Badge,
+  Drawer,
+  Grid,
+  Popover,
+} from "@mantine/core";
 import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
 import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
 import { Player } from "@lottiefiles/react-lottie-player";
@@ -297,7 +304,54 @@ export default function VideoCall({ channel: channelInfo }) {
           const peerIndex = findPeer(user.id);
           peerIndex.peer.signal(user.signal);
         });
+
+        //TODO:
+        socket.on("user-leave-call", ({ userId, userName }) => {
+          const peerIdx = findPeer(userId);
+          peerIdx.peer.destroy();
+          setPeers((users) => {
+            users = users.filter((user) => user.peerID !== peerIdx.peer.peerID);
+            return [...users];
+          });
+          peersRef.current = peersRef.current.filter(
+            ({ peerID }) => peerID !== userId
+          );
+        });
       });
+
+    socket.on("FE-toggle-camera", ({ userId, switchTarget }) => {
+      const peerIdx = findPeer(userId);
+
+      setUserVideoAudio((preList) => {
+        let video = preList[peerIdx.userName].video;
+        let audio = preList[peerIdx.userName].audio;
+
+        if (switchTarget === "video") video = !video;
+        else audio = !audio;
+
+        return {
+          ...preList,
+          [peerIdx.userName]: { video, audio },
+        };
+      });
+    });
+
+    socket.on("change-background", ({ userId, switchTarget }) => {
+      const peerIdx = findPeer(userId);
+
+      setUserVideoAudio((preList) => {
+        let video = preList[peerIdx.userName].video;
+        let audio = preList[peerIdx.userName].audio;
+
+        if (switchTarget === "video") video = !video;
+        else audio = !audio;
+
+        return {
+          ...preList,
+          [peerIdx.userName]: { video, audio },
+        };
+      });
+    });
 
     selfieSegmentation.setOptions({
       modelSelection: 1,
@@ -646,34 +700,48 @@ export default function VideoCall({ channel: channelInfo }) {
         className="fullscreen"
         updateLayoutRef={updateLayoutRef}
       >
-        <div className="flex justify-center items-center relative w-full h-full rounded-md overflow-hidden">
-          <video
-            autoPlay
-            muted
-            playsInline
-            ref={userVideoRef}
-            className="absolute inset-0 z-10 w-full h-auto rounded-md top-auto bottom-auto"
-          />
-          {/* <video
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div className="flex relative w-full h-full rounded-md overflow-hidden">
+            <video autoPlay muted playsInline ref={userVideoRef} />
+            {/* <video
           autoPlay
           ref={webcamRef}
           className="absolute inset-0 z-10 w-full h-auto rounded-md"
         /> */}
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 z-10 rounded-md top-auto bottom-auto"
-            style={{
-              width: userVideoRef.current?.clientWidth || "100%",
-              height: userVideoRef.current?.clientHeight || "100%",
-            }}
-          />
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 z-10 rounded-md"
+              style={{
+                width: userVideoRef.current?.clientWidth || "100%",
+                height: userVideoRef.current?.clientHeight || "100%",
+              }}
+            />
+            <Badge
+              size="xl"
+              radius="sm"
+              sx={{
+                position: "absolute",
+                left: 12,
+                bottom: 12,
+              }}
+            >
+              {me.user.username}
+            </Badge>
+          </div>
         </div>
         {peers &&
           peers.map((peer, index, arr) => createUserVideo(peer, index, arr))}
       </PackedGrid>
-      <div className="px-2 w-full h-14 flex items-center justify-between absolute bottom-2 left-0">
+      <div className="px-2 w-full h-14 flex items-center justify-between absolute bottom-2 left-0 z-50">
         <div>
-          <Popover
+          {/* <Popover
             opened={false}
             // onClose={() => setOpenedMenuReactions(false)}
             target={
@@ -736,7 +804,7 @@ export default function VideoCall({ channel: channelInfo }) {
                 </Group>
               </Group>
             </div>
-          </Popover>
+          </Popover> */}
         </div>
         <Group spacing="xs">
           <div className="w-auto h-auto relative">
@@ -852,7 +920,14 @@ export default function VideoCall({ channel: channelInfo }) {
           >
             <FontAwesomeIcon icon="fa-solid fa-ellipsis-vertical" />
           </ActionIcon>
-          <ActionIcon size={56} radius="xl" variant="light">
+          <ActionIcon
+            size={56}
+            radius="xl"
+            variant="light"
+            onClick={() => {
+              window.close();
+            }}
+          >
             <FontAwesomeIcon
               icon="fa-solid fa-phone"
               className="rotate-[135deg]"

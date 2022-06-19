@@ -43,12 +43,18 @@ export default function AddFriend() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         rightSection={
-          <Button variant="filled" size="xs" onClick={handleSendFriendRequest}>
+          <Button
+            disabled={!search.length}
+            variant="filled"
+            size="xs"
+            onClick={handleSendFriendRequest}
+          >
             Send friend request
           </Button>
         }
         placeholder="Enter a username#0000"
         rightSectionWidth={150}
+        mb={8}
       />
       {listUsers.length > 0 ? (
         listUsers.map((user) => <AddFriendItem user={user} />)

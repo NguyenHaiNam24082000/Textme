@@ -53,22 +53,22 @@ const getMutual = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send({ user, channel, server });
 });
 
-const getUserById = async (req, res) => {
+const getUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const user = await userService.getUserById(id);
   res.status(httpStatus.OK).send(user);
-};
+});
 
-const editUserById = async (req, res) => {
+const editUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const user = await userService.updateUserById(id, req.body);
   res.status(httpStatus.OK).send(user);
-};
+});
 
-const getAllInviteServers = async (req, res) => {
+const getAllInviteServers = catchAsync(async (req, res) => {
   const servers = await userService.getAllInviteServers(req.user.id);
   res.status(httpStatus.OK).send(servers);
-};
+});
 
 module.exports = {
   allUsers,

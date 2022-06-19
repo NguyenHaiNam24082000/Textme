@@ -2,11 +2,13 @@
 import { Loader } from "@mantine/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "react-bubble-ui/dist/index.css";
+import { MdSignalCellular3Bar } from "react-icons/md";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { useInfiniteQuery } from "react-query";
-// import { useDispatch } from "react-redux";
+import { useInfiniteQuery, useQueryClient } from "react-query";
+import { useDispatch, useSelector } from "react-redux";
 import { getMessages } from "../../../apis/messages";
 import { CHANNEL_MESSAGES_KEY } from "../../../configs/queryKeys";
+import { nearBySelector, setNearBy } from "../../../store/uiSlice";
 import Editor from "../../Editor";
 // import Editor from "../../LexicalEditor";
 import Message from "../../Message";
@@ -101,22 +103,38 @@ function ChatArea({ channel, user, setMessages = null }) {
   // const [messages, setMessages] = useState([]);
   const [currentEditMessageId, setCurrentEditMessageId] = useState(null);
   const [currentMessageSelected, setCurrentMessageSelected] = useState(null);
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const messagesEndRef = useRef(null);
+  const cache = useQueryClient();
+  const nearBy = useSelector(nearBySelector);
   const observer = useRef();
-  console.log(channel, "aAaaaaa");
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery(
       CHANNEL_MESSAGES_KEY(channel?._id),
       async ({ pageParam }) => {
-        const { data } = await getMessages(channel?._id, pageParam);
+        const { data } = await getMessages(
+          channel?._id,
+          pageParam && pageParam?.page,
+          pageParam && pageParam?.before,
+          pageParam && pageParam?.after,
+          nearBy
+        );
         return data;
       },
       {
         getNextPageParam: (lastPage) => {
-          const { page, totalPages } = lastPage;
-          console.log(lastPage);
-          return page < totalPages ? page + 1 : undefined;
+          const { page, totalPages, after, before } = lastPage;
+          if (page && totalPages) {
+            return {
+              page: page < totalPages ? page + 1 : undefined,
+              before,
+              after,
+            };
+          } else if (after || before) {
+            const near = undefined;
+            dispatch(setNearBy(near));
+            return { page, before, after };
+          }
         },
       }
     );
@@ -137,26 +155,26 @@ function ChatArea({ channel, user, setMessages = null }) {
     [isLoading, hasNextPage, fetchNextPage]
   );
   const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
+  const msgIds = msg.map((m) => m?._id);
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
   useEffect(() => {
     // const msg = data ? data.pages.flatMap((page) => page?.results ?? []) : [];
     // setMessages(msg.reverse());
     typeof setMessages === "function" && setMessages(msg);
     scrollToBottom();
   }, [data]);
-  // scrollToBottom();
-
   useEffect(() => {
-    document
-      .getElementById(`chat-messages-${currentMessageSelected}`)
-      ?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center",
-      });
+    if (currentMessageSelected && msgIds.includes(currentMessageSelected)) {
+      document
+        .getElementById(`chat-messages-${currentMessageSelected}`)
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "center",
+        });
+    }
     // scroller.scrollTo(`chat-messages-${currentMessageSelected}`, {
     //   duration: 1500,
     //   delay: 0,
@@ -167,7 +185,6 @@ function ChatArea({ channel, user, setMessages = null }) {
       const resetCurrentMessages = setTimeout(() => {
         setCurrentMessageSelected(null);
       }, 3000);
-      // console.log("aaaaaaazzzzz");
       return () => clearTimeout(resetCurrentMessages);
     }
   }, [currentMessageSelected]);
@@ -182,18 +199,6 @@ function ChatArea({ channel, user, setMessages = null }) {
     );
     setMembers(mems);
   }, [searchMember]);
-
-  function calcHeight(el) {
-    const height = el.offsetHeight;
-    setMenuHeight(height);
-  }
-
-  // const scrollToBottom = () =>
-  //   viewportRef.current.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-
-  const onSearchChangeMembers = (e) => {
-    setSearchMember(e.target.value);
-  };
 
   useEffect(() => {
     console.log(inputRef?.current);
@@ -232,15 +237,8 @@ function ChatArea({ channel, user, setMessages = null }) {
                 <MessageBeginner channel={channel} />
                 {msg &&
                   msg.reverse().map((message, index) => (
-                    // <InfinityGauntlet snap={true}>
-                    // <AnimatePresence key={index}>
-                    // <Element
-                    //   key={message.id}
-                    //   name={`chat-messages-${message.id}`}
-                    // >
                     <React.Fragment key={message.id}>
                       <div
-                        // key={message.id}
                         id={`chat-messages-${message.id}`}
                         ref={lastMessageRef}
                       >
@@ -257,9 +255,6 @@ function ChatArea({ channel, user, setMessages = null }) {
                         />
                       </div>
                     </React.Fragment>
-                    // </Element>
-                    // </AnimatePresence>
-                    // </InfinityGauntlet>
                   ))}
                 <div ref={messagesEndRef} className="h-8 w-full"></div>
               </InfiniteScroll>

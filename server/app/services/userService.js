@@ -1,6 +1,12 @@
 const httpStatus = require("http-status");
 const ShortUniqueId = require("short-unique-id");
-const { User, Friend, Channel, Workspace } = require("../models");
+const {
+  User,
+  Friend,
+  Channel,
+  Workspace,
+  WorkspaceMember,
+} = require("../models");
 const ApiError = require("../utils/ApiError");
 const { removeAccents } = require("../commons/removeAccents");
 // const {COLORS}=
@@ -50,6 +56,18 @@ const queryUsers = async (user, filter) => {
   });
   const mutualUsersFriends = await Promise.all(
     users.map(async (u) => {
+      const friend = await Friend.findOne({
+        $or: [
+          {
+            sender: user._id,
+            receiver: u._id,
+          },
+          {
+            sender: u._id,
+            receiver: user._id,
+          },
+        ],
+      });
       return {
         id: u.id,
         name: u.name,
@@ -57,6 +75,7 @@ const queryUsers = async (user, filter) => {
         avatar_url: u.avatar_url,
         discriminator: u.discriminator,
         accent_color: u.accent_color,
+        status: friend?.status || null,
         mutualFriends: await getMutualUserIds(user._id, u._id),
       };
     })
@@ -124,11 +143,14 @@ const getMutualUserIds = async (userAId, userBId) => {
     $or: [
       {
         sender: userAId,
+        receiver: { $ne: userBId },
       },
       {
         receiver: userAId,
+        sender: { $ne: userBId },
       },
     ],
+
     status: "FRIEND",
   })
     .populate({
@@ -157,9 +179,11 @@ const getMutualUserIds = async (userAId, userBId) => {
     $or: [
       {
         sender: userBId,
+        receiver: { $ne: userAId },
       },
       {
         receiver: userBId,
+        sender: { $ne: userAId },
       },
     ],
     status: "FRIEND",
@@ -186,11 +210,14 @@ const getMutualUserIds = async (userAId, userBId) => {
         "discriminator",
       ],
     });
+  //get mutual details
   const mutualFriends = userA.filter((friend) => {
     return userB.some((friend2) => {
       return (
         friend.sender._id.equals(friend2.sender._id) ||
-        friend.receiver._id.equals(friend2.receiver._id)
+        friend.receiver._id.equals(friend2.receiver._id) ||
+        friend.sender._id.equals(friend2.receiver._id) ||
+        friend.receiver._id.equals(friend2.sender._id)
       );
     });
   });
