@@ -59,6 +59,72 @@
   --padding-large: 1.5rem; /* 24px */
 
   --speed: 250ms;
+
+  --color: #f06d06;
+}
+
+@property --start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 100px;
+}
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 45deg;
+}
+
+.woosh {
+  background: repeating-linear-gradient(
+    var(--angle, 45deg),
+    var(--color, black),
+    var(--color, black) var(--start),
+    transparent var(--start),
+    transparent var(--end)
+  );
+  animation: woosh 2s;
+}
+
+/* 
+@media screen and (prefers-reduced-motion: no-preference) {
+  .woosh {
+    animation: woosh 2s;
+  }
+} */
+
+@keyframes woosh {
+  50%,
+  75% {
+    --start: var(--end);
+  }
+  100% {
+    --start: 0px;
+  }
+}
+
+.open-modal-settings {
+  animation: open-settings 0.34s cubic-bezier(0.2, 0.9, 0.5, 1.16) forwards;
+}
+
+@keyframes open-settings {
+  0% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .shake {
@@ -104,13 +170,19 @@
   }
 }
 
+#defaultCanvas0 {
+  width: 100% !important;
+  height: auto !important;
+  overflow: hidden;
+}
+
 ::-webkit-scrollbar,
 ::-webkit-scrollbar-thumb {
   background-color: transparent;
 }
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 120px;
+  width: 6px;
+  height: 6px;
 }
 :hover::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
@@ -151,13 +223,12 @@
   transform: scale(-1);
 }
 
-.animated-avatar:hover .cutout-container{
+.animated-avatar:hover .cutout-container {
   top: 0px;
   right: 0px;
 }
 
-.cutout-container
-{
+.cutout-container {
   transition: all 0.2s ease-out 0s;
   right: -50px;
   top: -50px;
@@ -171,13 +242,17 @@
   transition: transform 0.2s ease-out 0s;
 }
 
-.reactEasyCrop_CropArea:before, .reactEasyCrop_CropArea:after
-{
+.reactEasyCrop_CropArea:before,
+.reactEasyCrop_CropArea:after {
   opacity: 0;
   transition: opacity 0.2s ease-out 0s;
 }
 
-.reactEasyCrop_CropArea:hover:before,.reactEasyCrop_CropArea:hover:after
-{
+.reactEasyCrop_CropArea:hover:before,
+.reactEasyCrop_CropArea:hover:after {
   opacity: 1;
+}
+
+.mantine-Indicator-indicator {
+  z-index: 2 !important;
 }

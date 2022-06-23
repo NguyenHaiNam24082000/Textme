@@ -13,32 +13,73 @@ const workspaceSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "https://i.imgur.com/X2JhY8y.png",
+      default: null,
+      // default: "https://i.imgur.com/X2JhY8y.png",
     },
-    members: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    banner: {
+      type: String,
+      // default: "https://i.imgur.com/X2JhY8y.png",
+    },
+    type: {
+      type: String,
+      enum: ["PUBLIC", "PRIVATE", "SECRET"],
+      default: "PUBLIC",
+    },
+    nsfw_level: {
+      type: String,
+      enum: ["DEFAULT", "EXPLICIT", "SAFE", "AGE_RESTRICTED"],
+      default: "DEFAULT",
+    },
+    max_members: {
+      type: Number,
+      default: 100,
+    },
+    channels: [
+      {
+        _id: false,
+        channel: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Channel",
+        },
+        position: {
+          type: String,
+        },
+      },
+    ],
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "WorkspaceMember",
+      },
+    ],
+    verification_level: {
+      type: String,
+      enum: ["DEFAULT", "LOW", "MEDIUM", "HIGH", "VERY_HIGH"],
+      default: "DEFAULT",
+    },
+    tags: [
+      {
+        type: String,
+      },
+    ],
   },
   {
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
-  { timestamp: true }
+  }
 );
 
-workspaceSchema.virtual("membersCount", {
-    ref: "User",
-    localField: "_id",
-    foreignField: "workspaces",
-    count: true
-});
+// workspaceSchema.virtual("membersCount", {
+//     ref: "User",
+//     localField: "_id",
+//     foreignField: "workspaces",
+//     count: true
+// });
 
 const Workspace = mongoose.model("Workspace", workspaceSchema);
 

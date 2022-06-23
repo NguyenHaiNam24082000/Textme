@@ -5,6 +5,7 @@
  * @returns {Object}
  */
 const pick = (object, keys) => {
+  // console.log(object,keys,"objkkkk");
   return keys.reduce((obj, key) => {
     if (object && Object.prototype.hasOwnProperty.call(object, key)) {
       // eslint-disable-next-line no-param-reassign

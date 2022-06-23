@@ -1,24 +1,55 @@
-const moongoose = require("moongoose");
+const mongoose = require("mongoose");
 
-const workspaceMemberSchema = new moongoose.Schema(
-    {
-        user: {
-            type: moongoose.Schema.Types.ObjectId,
-            ref: "User",
-        },
-        guild: {
-            type: moongoose.Schema.Types.ObjectId,
-            ref: "Guild",
-        },
-        role: {
-            type: [moongoose.Schema.Types.ObjectId],
-            ref: "Role",
-        },
+const workspaceMemberSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    {
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true },
+    workspace: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Workspace",
     },
-    { timestamp: true }
+    roles: [
+      {
+        type: String,
+        default: "MEMBER",
+        enum: [
+          "MEMBER",
+          "OWNER",
+          "MANAGE_CHANNEL",
+          "MANAGE_SERVER",
+          "MANAGE_ROLES",
+          "KICK_MEMBER",
+          "BAN_MEMBER",
+          "INVITE_MEMBER",
+        ],
+      },
+    ],
+    status: {
+      type: String,
+      enum: [
+        "PENDING",
+        "INVITED",
+        "JOINED",
+        "BLOCKED",
+        "LEFT",
+        "BANNED",
+        "KICKED",
+      ],
+      default: "PENDING",
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
+const WorkspaceMember = mongoose.model(
+  "WorkspaceMember",
+  workspaceMemberSchema
+);
+
+module.exports = WorkspaceMember;

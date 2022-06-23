@@ -5,7 +5,7 @@
   user-select: none;
 }
 .semi-tree-option-selected {
-  background-color: #e2e8f0 !important;
+  background-color: var(--semi-tree-option-selected) !important;
 }
 .semi-tree-option.semi-tree-option-level-1:not(:first-child) {
   margin-top: 1rem;

@@ -14,7 +14,7 @@ const axiosClient = axios.create({
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Credentials": true,
-    "Accept": "application/json",
+    Accept: "application/json",
     "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH",
   },
   paramsSerializer: function (params) {
@@ -24,8 +24,8 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   async (config) => {
-    if(localStorage.user) {
-      const userStorage = JSON.parse(localStorage.getItem('user'));
+    if (localStorage.user) {
+      const userStorage = JSON.parse(localStorage.getItem("user"));
       config.headers.Authorization = `Bearer ${userStorage?.tokens?.access?.token}`;
     }
     // Do something before request is sent
@@ -52,7 +52,7 @@ axiosClient.interceptors.response.use(
 );
 
 //All request will wait 2 seconds before timeout
-axiosClient.defaults.timeout = 2000;
+// axiosClient.defaults.timeout = 5000;
 
 axiosClient.defaults.withCredentials = true;
 

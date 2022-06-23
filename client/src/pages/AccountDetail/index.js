@@ -12,11 +12,11 @@ import {
   ActionIcon,
   Slider,
 } from "@mantine/core";
+import {IMAGE_MIME_TYPE} from "@mantine/dropzone"
 import { Button, SplitButtonGroup } from "@douyinfe/semi-ui";
-import InlineEdit from "@atlaskit/inline-edit";
-import Modal from "../../components/Modal";
+// import InlineEdit from "@atlaskit/inline-edit";
+import Modal from "../../components/Modals/Modal";
 import { RiFileGifLine } from "react-icons/ri";
-import { FullScreenDropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import Cropper from "react-easy-crop";
 import { CSSTransition } from "react-transition-group";
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -167,7 +167,13 @@ export default function AccountDetail() {
             style={{ borderTop: "1px solid #e1e1e1" }}
             position="apart"
           >
-            <InlineEdit
+            <TextInput
+                  value={editValue}
+                  className="w-full"
+                  size="xs"
+                  onChange={(event) => setEditValue(event.currentTarget.value)}
+                />
+            {/* <InlineEdit
               defaultValue={editValue}
               label="Display name"
               onConfirm={(value) => setEditValue(value)}
@@ -183,8 +189,8 @@ export default function AccountDetail() {
               readView={() => (
                 <div>{editValue || "Click to enter a value"}</div>
               )}
-              onConfirm={(value) => setEditValue(value)}
-            />
+              // onConfirm={(value) => setEditValue(value)}
+            /> */}
             <Checkbox
               label="Use"
               size="xs"
@@ -281,7 +287,7 @@ export default function AccountDetail() {
                   mode="normal"
                   src="https://assets8.lottiefiles.com/packages/lf20_GxMZME.json"
                   style={{ width: 128, height: 128 }}
-                  class="bg-yellow-400 rounded-full"
+                  className="bg-yellow-400 rounded-full"
                 ></lottie-player>
 
                 <Text weight={500} size="md" className="text-inherit">
@@ -390,7 +396,7 @@ export default function AccountDetail() {
                     mode="normal"
                     src="https://assets3.lottiefiles.com/private_files/lf30_BQDoDk.json"
                     style={{ width: 128, height: 128 }}
-                    class="bg-yellow-400 rounded-full"
+                    className="bg-yellow-400 rounded-full"
                   ></lottie-player>
                 </div>
 
@@ -503,11 +509,6 @@ export default function AccountDetail() {
           <div>aaaa</div>
         </CSSTransition>
       </Modal>
-      <FullScreenDropzone accept={IMAGE_MIME_TYPE}>
-        {() => {
-          return <div>jeejej</div>;
-        }}
-      </FullScreenDropzone>
     </div>
   );
 }

@@ -1,5 +1,16 @@
 import { IconFilter } from "@douyinfe/semi-icons";
-import { ActionIcon, Button, TextInput, Select, Popover } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  TextInput,
+  Select,
+  Popover,
+  Box,
+  Divider,
+  Text,
+  Stack,
+  Avatar,
+} from "@mantine/core";
 import {
   DragDropContext,
   Draggable,
@@ -8,6 +19,8 @@ import {
 } from "react-beautiful-dnd";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { DndTable } from "../../../../DnDTable";
+import Checkbox from "../../../../Checkbox";
 
 const ROOT_NODE_ID = "root";
 
@@ -95,7 +108,34 @@ function ConjunctionSelect({
   );
 }
 
-export default function Roles() {
+const roles = [
+  {
+    id: 1,
+    label: "Manage Channel",
+    value: "MANAGE_CHANNEL",
+    description: "Allows members to edit the channel.",
+  },
+  {
+    id: 2,
+    label: "Manage Server",
+    value: "MANAGE_SERVER",
+    description: "Allows members to edit the server.",
+  },
+  {
+    id: 3,
+    label: "Manage Roles",
+    value: "MANAGE_ROLES",
+    description: "Allows members to edit roles.",
+  },
+  {
+    id: 4,
+    label: "Invite Members",
+    value: "INVITE_MEMBERS",
+    description: "Allows members to invite new members.",
+  },
+];
+
+export default function Roles({ server }) {
   const [tree, setTree] = useState([]);
   const [columns, setColumns] = useState([]);
   const [opened, setOpened] = useState(false);
@@ -130,14 +170,14 @@ export default function Roles() {
             <div className="flex flex-col">
               <div className="font-bold mb-1">Quyền mặc định</div>
               <div className="text-xs">
-                @everyone • áp dụng cho tất cả thành viên máy chủ
+                Allow members to message the server and view the channel.
               </div>
             </div>
           </div>
         </div>
         <div className="flex w-full">
-          <TextInput className="w-full" />
-          <Popover
+          {/* <TextInput className="w-full" /> */}
+          {/* <Popover
             opened={opened}
             onClose={() => setOpened(false)}
             position="bottom"
@@ -180,9 +220,148 @@ export default function Roles() {
               })}
               <AddFilterButton onClick={onAddClick} />
             </div>
-          </Popover>
-          <Button className="ml-4">Thêm vai trò</Button>
+          </Popover> */}
         </div>
+        <Box
+          sx={{
+            gap: 24,
+            display: "flex",
+            padding: 8,
+          }}
+        >
+          <Box
+            sx={{
+              width: 120,
+              flexShrink: 0,
+              gap: 4,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+              py={10}
+            >
+              <Text size="lg" weight={600}>
+                Members
+              </Text>
+            </Box>
+            <Divider />
+            <Stack spacing={4}>
+              {server.members &&
+                server.members.map((member) => (
+                  <Box
+                    className={`hover:bg-slate-200 flex w-full h-11 p-1 rounded justify-between items-center cursor-pointer`}
+                  >
+                    <Avatar
+                      src={member.avatar_url}
+                      radius="xl"
+                      size="lg"
+                      styles={{
+                        placeholder: {
+                          color: "#fff",
+                          backgroundColor: `#${Math.floor(
+                            member.accent_color
+                          ).toString(16)}`,
+                        },
+                      }}
+                    >
+                      {member.username[0].toUpperCase()}
+                    </Avatar>
+                    <div className="flex items-center">
+                      <Text size="lg" weight={500}>
+                        {member.username}
+                      </Text>
+                      <Text
+                        color="dimmed"
+                        size="sm"
+                        className="group-hover:opacity-100 opacity-0"
+                      >{`#${member.discriminator}`}</Text>
+                    </div>
+                  </Box>
+                ))}
+            </Stack>
+          </Box>
+          <Box
+            sx={{
+              flexGrow: 1,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+              py={8}
+            >
+              <Text size="lg" weight={600}>
+                Edit
+              </Text>
+              <Button>Edit</Button>
+            </Box>
+            <Divider />
+            <Stack spacing={4}>
+              <Text size="lg" weight={600}>
+                Edit Roles
+              </Text>
+              {roles &&
+                roles.map((role) => (
+                  <Checkbox
+                    key={role.id}
+                    // isChecked={value.includes(friendObject(me, user).id)}
+                    onClick={() => {}}
+                    className={`hover:bg-slate-200 flex w-full h-11 p-1 rounded justify-between items-center cursor-pointer`}
+                  >
+                    <div className="select-none">
+                      <Text weight={600}>{role.label}</Text>
+                      <Text size="xs" color="dimmed">
+                        {role.description}
+                      </Text>
+                    </div>
+                  </Checkbox>
+                ))}
+            </Stack>
+          </Box>
+        </Box>
+        {/* <DndTable
+          data={[
+            {
+              position: 6,
+              mass: 12.011,
+              symbol: "C",
+              name: "Carbon",
+            },
+            {
+              position: 7,
+              mass: 14.007,
+              symbol: "N",
+              name: "Nitrogen",
+            },
+            {
+              position: 39,
+              mass: 88.906,
+              symbol: "Y",
+              name: "Yttrium",
+            },
+            {
+              position: 56,
+              mass: 137.33,
+              symbol: "Ba",
+              name: "Barium",
+            },
+            {
+              position: 58,
+              mass: 140.12,
+              symbol: "Ce",
+              name: "Cerium",
+            },
+          ]}
+        /> */}
       </div>
     </div>
   );

@@ -13,6 +13,6 @@ export const usernameRequirements = [
 
 export const emailRequirements = [
     { re: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, label: "Email is in correct format" },
-    { re: /^[^\.]|[^\.]+|[^\.]$/, label: "Not the first, last character and after the other" },
+    { re: /^[^.]|[^.]+|[^.]$/, label: "Not the first, last character and after the other" },
     { re: /[^\s]/, label: "No whitespace" },
   ];

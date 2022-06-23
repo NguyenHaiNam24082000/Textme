@@ -112,29 +112,18 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     email: {
-      type: Object,
-      properties: {
-        verified: {
-          type: Boolean,
-        },
-        verified_at: {
-          type: String,
-          format: "date-time",
-        },
-      },
-      additionalProperties: false,
-      patternProperties: {
-        address: {
-          type: String,
-          format: "email",
-        },
-      },
+      type: String,
     },
     username: {
       type: String,
     },
+    description: {
+      type: String,
+      default: null,
+    },
     password: {
       type: String,
+      // select: false,
     },
     discriminator: {
       type: String,
@@ -142,20 +131,8 @@ const userSchema = new mongoose.Schema(
       maxLength: 5,
     },
     phone: {
-      type: Object,
-      properties: {
-        number: {
-          type: String,
-        },
-        verified: {
-          type: Boolean,
-          default: false,
-        },
-        verified_at: {
-          type: String,
-          format: "date-time",
-        },
-      },
+      type: String,
+      default: null,
       // required: ["number"],
     },
     accounts: {
@@ -180,41 +157,23 @@ const userSchema = new mongoose.Schema(
     birthday: {
       type: String,
       format: "date-time",
+      default: null,
     },
-    nickname: {
+    // nickname: {
+    //   type: String,
+    //   default: null,
+    // },
+    avatar_url: {
       type: String,
-    },
-    avatar_urls: {
-      type: Object,
-      properties: {
-        s32: {
-          type: String,
-          format: "uri",
-        },
-        s64: {
-          type: String,
-          format: "uri",
-        },
-        s128: {
-          type: String,
-          format: "uri",
-        },
-        s256: {
-          type: String,
-          format: "uri",
-        },
-      },
-    },
-    mfa_enabled: {
-      type: Boolean,
-      default: false,
+      default: null,
     },
     banner: {
       type: String,
+      default: null,
     },
     accent_color: {
       type: Number,
-      default: 0,
+      default: Math.floor(Math.random() * 16777215),
     },
     locale: {
       type: String,
@@ -228,19 +187,48 @@ const userSchema = new mongoose.Schema(
       type: Number,
       enum: [12, 24],
     },
-    off_days: {
-      type: Array,
-      items: {
-        type: Number,
+    status: {
+      type: Object,
+      properties: {
+        online: {
+          type: Boolean,
+          default: false,
+        },
+        last_online: {
+          type: String,
+          format: "date-time",
+        },
+        text: {
+          type: String,
+          default: null,
+        },
+        presence: {
+          type: String,
+          enum: ["online", "idle", "dnd", "offline"],
+          default: "offline",
+        },
+        type: {
+          type: String,
+          enum: ["online", "idle", "dnd", "offline", "custom"],
+          default: "offline",
+        },
+        emoji: {
+          type: String,
+          default: null,
+        },
       },
     },
   },
-  { timestamp: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
 // add plugin that converts mongoose to json
-// userSchema.plugin(toJSON);
-// userSchema.plugin(paginate);
+userSchema.plugin(toJSON);
+userSchema.plugin(paginate);
 
 /**
  * Check if email is taken
@@ -277,6 +265,7 @@ userSchema.methods.isPasswordMatch = async function (password) {
 userSchema.pre("save", async function (next) {
   const user = this;
   if (user.isModified("password")) {
+    user.accent_color = Math.floor(Math.random() * 16777215);
     user.password = await bcrypt.hash(user.password, 8);
   }
   next();

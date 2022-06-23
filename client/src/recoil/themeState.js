@@ -6,7 +6,7 @@ export const themeState = atom({
         theme: 'light',
         mode: 'light',
         palette: {
-            background: "#000000",
+            background: "#ffffff",
             sidebar: "#000000",
         },
     },

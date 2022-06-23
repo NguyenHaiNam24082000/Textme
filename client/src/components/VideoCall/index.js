@@ -1,23 +1,84 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled from "@emotion/styled";
-import { ActionIcon } from "@mantine/core";
-// import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
-// import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
-// import { Player } from "@lottiefiles/react-lottie-player";
+import {
+  ActionIcon,
+  AspectRatio,
+  Badge,
+  Drawer,
+  Grid,
+  Popover,
+} from "@mantine/core";
+import FloatingReactionItem from "../FloatingReactions/FloatingReactionItem";
+import GiantReactionMotionWrapper from "../FloatingReactions/GiantReactionMotionWrapper";
+import { Player } from "@lottiefiles/react-lottie-player";
 import {
   BsMicMuteFill,
   BsMicFill,
   BsCameraVideoOffFill,
   BsCameraVideoFill,
 } from "react-icons/bs";
+// import "@tensorflow/tfjs-core";
+// import "@tensorflow/tfjs-conferer";
+// import "@tensorflow/tfjs-backend-webgl";
 import { Modal } from "@mantine/core";
-import { Badge } from "@douyinfe/semi-ui";
-import { MdOutlineScreenShare, MdOutlineStopScreenShare } from "react-icons/md";
-import { HiOutlineDesktopComputer } from "react-icons/hi";
+// import * as Kalidokit from "kalidokit";
+// import { Badge } from "@douyinfe/semi-ui";
+// import * as bodyPix from "@tensorflow-models/body-pix";
+// import Webcam from "react-webcam";
+import {
+  MdBlurOff,
+  MdBlurOn,
+  MdOutlineScreenShare,
+  // MdOutlineStopScreenShare,
+} from "react-icons/md";
+// import { HiOutlineDesktopComputer } from "react-icons/hi";
 import { Group } from "@mantine/core";
 import { Button } from "@mantine/core";
-import { IconCaretdown, IconChevronDown } from "@douyinfe/semi-icons";
+import {
+  // IconCaretdown,
+  IconChevronDown,
+} from "@douyinfe/semi-icons";
 import { Menu, Divider, Text } from "@mantine/core";
+import { SelfieSegmentation } from "@mediapipe/selfie_segmentation";
+import "./index.css";
+import bg1 from "../../assets/images/backgrounds/bg1.jpg";
+import bg2 from "../../assets/images/backgrounds/bg2.jpg";
+import bg3 from "../../assets/images/backgrounds/bg3.jpeg";
+import bg4 from "../../assets/images/backgrounds/bg4.jpg";
+import bg5 from "../../assets/images/backgrounds/bg5.jpg";
+import bg6 from "../../assets/images/backgrounds/bg6.jpg";
+import bg7 from "../../assets/images/backgrounds/bg7.jpg";
+import bg8 from "../../assets/images/backgrounds/bg8.jpg";
+import bg9 from "../../assets/images/backgrounds/bg9.jpg";
+import bg10 from "../../assets/images/backgrounds/bg10.webp";
+import bg11 from "../../assets/images/backgrounds/bg11.webp";
+import bg12 from "../../assets/images/backgrounds/bg12.jpg";
+import Peer from "simple-peer";
+import { GetMe } from "../../store/userSlice";
+import getSocket from "../../apis/socket";
+import { CHANNEL_SOCKET } from "../../configs/socketRoute";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useFullscreen } from "@mantine/hooks";
+import { PackedGrid } from "react-packed-grid";
+import VideoCard from "./Video";
+import { getChannelById } from "../../apis/channel";
+import { useParams } from "react-router";
+
+const backgrounds = [
+  bg1,
+  bg2,
+  bg3,
+  bg4,
+  bg5,
+  bg6,
+  bg7,
+  bg8,
+  bg9,
+  bg10,
+  bg11,
+  bg12,
+];
+
 const FloatingTrackContainer = styled.div`
   position: absolute;
   right: 0;
@@ -29,47 +90,597 @@ const FloatingTrackContainer = styled.div`
   //   background: rgba(0, 0, 0, 0.5);
 `;
 
-export default function VideoCall() {
+const VideoBox = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  > video {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  :hover {
+    > i {
+      display: block;
+    }
+  }
+`;
+
+const selfieSegmentation = new SelfieSegmentation({
+  locateFile: (file) =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
+});
+
+export default function VideoCall({ channel: channelInfo }) {
+  const me = GetMe();
+  const socket = getSocket(me?.tokens?.access?.token);
+  const [channel, setChannel] = useState(channelInfo);
+  const { ref, toggle, fullscreen } = useFullscreen();
   const [openedModalPreviewVideo, setOpenedModalPreviewVideo] = useState(false);
   const [audioInput, setAudioInput] = useState([]);
   const [videoInput, setVideoInput] = useState([]);
-  const videoRef = useRef(null);
+  const [audioOutput, setAudioOutput] = useState([]);
+  const userVideoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const contextRef = useRef(null);
+  const webcamRef = useRef(null);
+  // const imgRef = useRef(null);
+  // const [bodypixnet, setBodypixnet] = useState();
+  // const [prevClassName, setPrevClassName] = useState();
+  const [openedSetting, setOpenedSetting] = useState(false);
+  const [background, setBackground] = useState("none");
+  // const [stream, setStream] = useState();
+  // const [callerSignal, setCallerSignal] = useState();
+  const screenTrackRef = useRef();
+  const [userVideoAudio, setUserVideoAudio] = useState({
+    localUser: { video: true, audio: true },
+  });
+  const peersRef = useRef([]);
+  const [peers, setPeers] = useState([]);
+  const userStream = useRef();
+  const [aspectRatio, setAspectRatio] = useState(1);
+  const updateLayoutRef = useRef();
+  const [screenShare, setScreenShare] = useState(false);
+  const params = useParams();
+  // const webcamCanvasRef = useRef();
+  // const webcamContextRef = useRef();
   useEffect(() => {
-    console.log("VideoCall");
-    //get enumerateMediaDevices
+    async function getChannel() {
+      if (!channel) {
+        const { channel: channelId } = params;
+        const { data } = await getChannelById(channelId);
+        console.log("data", data);
+        setChannel(data);
+      } else {
+        setChannel(channel);
+      }
+    }
+    getChannel();
+  }, []);
+
+  const onResults = (results) => {
+    contextRef.current.save();
+    contextRef.current.clearRect(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+    contextRef.current.drawImage(
+      results.segmentationMask,
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+    // Only overwrite existing pixels.
+    contextRef.current.globalCompositeOperation = "source-out";
+    // contextRef.current.fillStyle = "#00FF00";
+    // contextRef.current.fillRect(
+    //   0,
+    //   0,
+    //   canvasRef.current.width,
+    //   canvasRef.current.height
+    // );
+    const image = new Image();
+    image.src = background;
+    if (background === "blur(5px)") {
+      contextRef.current.filter = "blur(5px)";
+    } else if (background === "blur(10px)") {
+      contextRef.current.filter = "blur(10px)";
+    } else {
+      contextRef.current.drawImage(
+        image,
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+    }
+
+    // Only overwrite missing pixels.
+    contextRef.current.globalCompositeOperation = "destination-atop";
+    contextRef.current.drawImage(
+      results.image,
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+
+    contextRef.current.restore();
+  };
+
+  useEffect(() => {
+    if (background !== "none") {
+      selfieSegmentation.onResults(onResults);
+    }
+  }, [background]);
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      const audioInputs = devices.filter(
+        (device) => device.kind === "audioinput"
+      );
+      const videoInputs = devices.filter(
+        (device) => device.kind === "videoinput"
+      );
+      const audioOutputs = devices.filter(
+        (device) => device.kind === "audiooutput"
+      );
+      setAudioInput(audioInputs);
+      setVideoInput(videoInputs);
+      setAudioOutput(audioOutputs);
+    });
+
     navigator.mediaDevices
-      .getUserMedia({ video: false, audio: true })
-      .then(() => {
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-          devices.forEach((device) => {
-            if (device.kind === "audioinput") {
-              setAudioInput([...audioInput, device]);
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        console.log(channel, "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+        contextRef.current = canvasRef.current.getContext("2d");
+        userVideoRef.current.srcObject = stream;
+        userStream.current = stream;
+        sendToMediaPipe();
+        socket.emit(CHANNEL_SOCKET.CALL, {
+          to: channel.id,
+          from: me.user,
+        });
+
+        socket.on("join-call", (users) => {
+          const listPeers = [];
+          users.forEach((user) => {
+            if (user.id !== me.user.id) {
+              const peer = createPeer(user.id, socket.id, stream);
+              peer.peerId = user.id;
+              console.log(peer, "listPeers1");
+              listPeers.push(peer);
+              console.log("listPeers1");
+              peersRef.current = [
+                ...peersRef.current,
+                {
+                  peerId: user.id,
+                  peer: peer,
+                },
+              ];
+              setUserVideoAudio((preList) => {
+                return {
+                  ...preList,
+                  [user.id]: { video: user.info.video, audio: user.info.audio },
+                };
+              });
             }
-            if (device.kind === "videoinput") {
-              setVideoInput([...videoInput, device]);
-              console.log(device);
-            }
-            // console.log(
-            //   device.kind + ": " + device.label + " id = " + device.deviceId
-            // );
           });
+          console.log(listPeers, "peers");
+          setPeers(listPeers);
+        });
+
+        socket.on("receive-call", (user) => {
+          console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX1");
+          const peerIndex = findPeer(user.id);
+          console.log(peerIndex, "peerIndex");
+          if (!peerIndex) {
+            const peer = addPeer(user.signal, user.id, stream);
+            peer.peerId = user.id;
+            peersRef.current.push({
+              peerId: user.id,
+              peer: peer,
+            });
+            setPeers((preList) => {
+              return [...preList, peer];
+            });
+            setUserVideoAudio((preList) => {
+              return {
+                ...preList,
+                [user.id]: { video: user.info.video, audio: user.info.audio },
+              };
+            });
+          }
+        });
+
+        socket.on("call-accepted", (user) => {
+          console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX2");
+          const peerIndex = findPeer(user.id);
+          peerIndex.peer.signal(user.signal);
+        });
+
+        //TODO:
+        socket.on("user-leave-call", ({ userId, userName }) => {
+          const peerIdx = findPeer(userId);
+          peerIdx.peer.destroy();
+          setPeers((users) => {
+            users = users.filter((user) => user.peerId !== peerIdx.peer.peerId);
+            return [...users];
+          });
+          peersRef.current = peersRef.current.filter(
+            ({ peerId }) => peerId !== userId
+          );
         });
       });
-  }, []);
+
+    socket.on("toggle-camera", ({ userId, switchTarget }) => {
+      const peerIdx = findPeer(userId);
+
+      setUserVideoAudio((preList) => {
+        let video = preList[peerIdx.userName].video;
+        let audio = preList[peerIdx.userName].audio;
+
+        if (switchTarget === "video") video = !video;
+        else audio = !audio;
+
+        return {
+          ...preList,
+          [peerIdx.userName]: { video, audio },
+        };
+      });
+    });
+
+    socket.on("change-background", ({ userId, switchTarget }) => {
+      const peerIdx = findPeer(userId);
+
+      setUserVideoAudio((preList) => {
+        let video = preList[peerIdx.userName].video;
+        let audio = preList[peerIdx.userName].audio;
+
+        if (switchTarget === "video") video = !video;
+        else audio = !audio;
+
+        return {
+          ...preList,
+          [peerIdx.userName]: { video, audio },
+        };
+      });
+    });
+
+    selfieSegmentation.setOptions({
+      modelSelection: 1,
+      selfieMode: true,
+    });
+
+    if (background !== "none") {
+      selfieSegmentation.onResults(onResults);
+    }
+    const sendToMediaPipe = async () => {
+      if (!userVideoRef.current.videoWidth) {
+        // console.log(userVideoRef.current.videoWidth);
+        requestAnimationFrame(sendToMediaPipe);
+      } else {
+        await selfieSegmentation.send({ image: userVideoRef.current });
+        requestAnimationFrame(sendToMediaPipe);
+      }
+    };
+  }, [channel, me.user, socket]);
+
+  console.log(peers, "listPeers");
+
+  const toggleCameraAudio = (target) => {
+    setUserVideoAudio((preList) => {
+      let videoSwitch = preList["localUser"].video;
+      let audioSwitch = preList["localUser"].audio;
+
+      if (target === "video") {
+        console.log(target, "target");
+        const userVideoTrack =
+          userVideoRef.current.srcObject.getVideoTracks()[0];
+        videoSwitch = !videoSwitch;
+        if (videoSwitch) {
+          userVideoTrack.enabled = true;
+          // userVideoTrack.play();
+        } else {
+          userVideoTrack.enabled = false;
+          // userVideoTrack.stop();
+        }
+      } else {
+        const userAudioTrack =
+          userVideoRef.current.srcObject.getAudioTracks()[0];
+        audioSwitch = !audioSwitch;
+
+        if (userAudioTrack) {
+          userAudioTrack.enabled = audioSwitch;
+        } else {
+          userStream.current.getAudioTracks()[0].enabled = audioSwitch;
+        }
+      }
+
+      return {
+        ...preList,
+        localUser: { video: videoSwitch, audio: audioSwitch },
+      };
+    });
+
+    socket.emit("toggle-camera-audio", {
+      channelId: channel.id,
+      switchTarget: target,
+    });
+  };
+
+  function createPeer(userId, caller, stream) {
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream,
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:global.stun.twilio.com:3478?transport=udp" },
+        ],
+      },
+    });
+
+    peer.on("signal", (signal) => {
+      socket.emit("call-user", {
+        to: channel.id,
+        from: caller,
+        signal,
+      });
+    });
+    peer.on("disconnect", () => {
+      peer.destroy();
+    });
+
+    return peer;
+  }
+
+  function addPeer(incomingSignal, callerId, stream) {
+    const peer = new Peer({
+      initiator: false,
+      trickle: false,
+      stream,
+    });
+
+    peer.on("signal", (signal) => {
+      socket.emit("accept-call", { signal, to: channel.id, from: socket.id });
+    });
+
+    peer.on("disconnect", () => {
+      peer.destroy();
+    });
+
+    peer.signal(incomingSignal);
+
+    return peer;
+  }
+
+  function findPeer(id) {
+    return peersRef.current.find((p) => p.peerId === id);
+  }
+
+  function createUserVideo(peer, index, arr) {
+    return (
+      <VideoBox
+        className={`width-peer${peers.length > 8 ? "" : peers.length}`}
+        // onClick={expandScreen}
+        key={index}
+      >
+        {/* {writeUserName(peer.userName)} */}
+        {/* <FaIcon className='fas fa-expand' /> */}
+        <VideoCard key={index} peer={peer} number={arr.length} />
+      </VideoBox>
+    );
+  }
+
+  // useEffect(() => {
+  //   console.log("VideoCall");
+  //   // get enumerateMediaDevices
+  //   navigator.mediaDevices
+  //     .getUserMedia({ video: true, audio: false })
+  //     .then((stream) => {
+  //       webcamRef.current.srcObject = stream;
+  //       // navigator.mediaDevices.enumerateDevices().then((devices) => {
+  //       //   devices.forEach((device) => {
+  //       //     if (device.kind === "audioinput") {
+  //       //       setAudioInput([...audioInput, device]);
+  //       //     }
+  //       //     if (device.kind === "videoinput") {
+  //       //       setVideoInput([...videoInput, device]);
+  //       //       console.log(device);
+  //       //     }
+  //       //     // console.log(
+  //       //     //   device.kind + ": " + device.label + " id = " + device.deviceId
+  //       //     // );
+  //       //   });
+  //       // });
+  //     });
+  //   bodyPix.load({
+  //     architecture: "MobileNetV1",
+  //     outputStride: 16,
+  //     multiplier: 0.75,
+  //     quantBytes: 2,
+  //   }).then((net) => {
+  //     setBodypixnet(net);
+  //   });
+  // }, []);
+
+  // const drawimage = async (webcam, context, canvas) => {
+  //   // create tempCanvas
+  //   const tempCanvas = document.createElement("canvas");
+  //   tempCanvas.width = webcam.clientWidth;
+  //   tempCanvas.height = webcam.clientHeight;
+  //   const tempCtx = tempCanvas.getContext("2d");
+  //   (async function drawMask() {
+  //     requestAnimationFrame(drawMask);
+  //     // draw mask on tempCanvas
+  //     const segmentation = await bodypixnet.segmentPerson(webcam,{
+  //       internalResolution: "high",
+  //     });
+  //     const mask = bodyPix.toMask(segmentation);
+  //     tempCtx.putImageData(mask, 0, 0);
+  //     // draw original image
+  //     context.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+  //     // use destination-out, then only masked area will be removed
+  //     context.save();
+  //     context.globalCompositeOperation = "destination-out";
+  //     context.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+  //     context.restore();
+  //   })();
+  // };
+
+  // const clickHandler = async (className) => {
+  //   const webcam = webcamRef.current;
+  //   const canvas = canvasRef.current;
+  //   webcam.width = canvas.width = webcam.clientWidth;
+  //   webcam.height = canvas.height = webcam.clientHeight;
+  //   const context = canvas.getContext("2d");
+  //   context.clearRect(0, 0, canvas.width, canvas.height);
+  //   if (prevClassName) {
+  //     canvas.classList.remove(prevClassName);
+  //     setPrevClassName(className);
+  //   } else {
+  //     setPrevClassName(className);
+  //   }
+  //   canvas.classList.add(className);
+  //   if (bodypixnet) {
+  //     drawimage(webcam, context, canvas);
+  //   }
+  // };
 
   // const getVideo = () => {
   //   navigator.mediaDevices
   //     .getUserMedia({ video: true, audio: true })
   //     .then((stream) => {
-  //       videoRef.current.srcObject = stream;
-  //       videoRef.current.play();
+  //       userVideoRef.current.srcObject = stream;
+  //       userVideoRef.current.play();
   //     });
   // };
   // useEffect(() => {
   //   getVideo();
-  // }, [videoRef]);
+  // }, [userVideoRef]);
+
+  // const getDisplayMedia = () => {
+  //   try {
+  //     navigator.mediaDevices
+  //       .getDisplayMedia({
+  //         video: false,
+  //       })
+  //       .then((stream) => {
+  //         webcamRef.current.srcObject = stream;
+  //       });
+  //   } catch (e) {
+  //     console.log("Unable to acquire screen capture: " + e);
+  //   }
+  // };
+
+  const call = (id) => {
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream: webcamRef.current.srcObject,
+    });
+    peer.on("signal", (data) => {
+      socket.emit(CHANNEL_SOCKET.CALL, {
+        to: id,
+        signalData: data,
+        from: socket.id,
+      });
+    });
+    peer.on("stream", (stream) => {
+      // setPeer(peer)
+      // setStream(stream)
+      // setCall(true)
+      webcamRef.current.srcObject = stream;
+    });
+    socket.on("callAccepted", ({ signalData }) => {
+      peer.signal(signalData);
+    });
+  };
+
+  const clickScreenSharing = () => {
+    if (!screenShare) {
+      navigator.mediaDevices
+        .getDisplayMedia({ cursor: true })
+        .then((stream) => {
+          const screenTrack = stream.getTracks()[0];
+
+          peersRef.current.forEach(({ peer }) => {
+            // replaceTrack (oldTrack, newTrack, oldStream);
+            peer.replaceTrack(
+              peer.streams[0]
+                .getTracks()
+                .find((track) => track.kind === "video"),
+              screenTrack,
+              userStream.current
+            );
+          });
+
+          // Listen click end
+          screenTrack.onended = () => {
+            peersRef.current.forEach(({ peer }) => {
+              peer.replaceTrack(
+                screenTrack,
+                peer.streams[0]
+                  .getTracks()
+                  .find((track) => track.kind === "video"),
+                userStream.current
+              );
+            });
+            userVideoRef.current.srcObject = userStream.current;
+            setScreenShare(false);
+          };
+
+          userVideoRef.current.srcObject = stream;
+          screenTrackRef.current = screenTrack;
+          setScreenShare(true);
+        });
+    } else {
+      screenTrackRef.current.onended();
+    }
+  };
+
+  const clickCameraDevice = (id) => {
+    if (id) {
+      const deviceId = id;
+      const enabledAudio =
+        userVideoRef.current.srcObject.getAudioTracks()[0].enabled;
+      console.log(id);
+
+      navigator.mediaDevices
+        .getUserMedia({ video: { deviceId }, audio: enabledAudio })
+        .then((stream) => {
+          const newStreamTrack = stream
+            .getTracks()
+            .find((track) => track.kind === "video");
+          const oldStreamTrack = userStream.current
+            .getTracks()
+            .find((track) => track.kind === "video");
+
+          userStream.current.removeTrack(oldStreamTrack);
+          userStream.current.addTrack(newStreamTrack);
+
+          peersRef.current.forEach(({ peer }) => {
+            // replaceTrack (oldTrack, newTrack, oldStream);
+            peer.replaceTrack(
+              oldStreamTrack,
+              newStreamTrack,
+              userStream.current
+            );
+          });
+        });
+    }
+  };
+
   return (
-    <div className="bg-white flex w-full h-full relative">
+    <div ref={ref} className="bg-black flex w-full h-full relative">
       {/* <FloatingTrackContainer>
         <FloatingReactionItem />
       </FloatingTrackContainer>
@@ -85,24 +696,138 @@ export default function VideoCall() {
           ></Player>
         }
       /> */}
-      <video
-        style={{ borderRadius: 4, objectFit: "cover" }}
-        className="w-60 h-60"
-        src="https://www.w3schools.com/html/mov_bbb.mp4"
-      ></video>
-      <div className="px-2 w-full h-14 flex items-center justify-between absolute bottom-2 left-0">
+      <PackedGrid
+        boxAspectRatio={aspectRatio}
+        className="fullscreen"
+        updateLayoutRef={updateLayoutRef}
+      >
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div className="flex relative w-full h-full rounded-md overflow-hidden">
+            <video autoPlay muted playsInline ref={userVideoRef} />
+            {/* <video
+          autoPlay
+          ref={webcamRef}
+          className="absolute inset-0 z-10 w-full h-auto rounded-md"
+        /> */}
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 z-10 rounded-md"
+              style={{
+                width: userVideoRef.current?.clientWidth || "100%",
+                height: userVideoRef.current?.clientHeight || "100%",
+              }}
+            />
+            <Badge
+              size="xl"
+              radius="sm"
+              sx={{
+                position: "absolute",
+                left: 12,
+                bottom: 12,
+              }}
+            >
+              {me.user.username}
+            </Badge>
+          </div>
+        </div>
+        {peers &&
+          peers.map((peer, index, arr) => createUserVideo(peer, index, arr))}
+      </PackedGrid>
+      <div className="px-2 w-full h-14 flex items-center justify-between absolute bottom-2 left-0 z-50">
+        <div>
+          {/* <Popover
+            opened={false}
+            // onClose={() => setOpenedMenuReactions(false)}
+            target={
+              <ActionIcon
+                size="xl"
+                radius="xl"
+                variant="filled"
+                // onClick={() => setOpenedMenuReactions((v) => !v)}
+              >
+                <FontAwesomeIcon icon="fa-solid fa-phone-volume" />
+              </ActionIcon>
+            }
+            width={365}
+            position="bottom"
+            withArrow
+            radius="md"
+          >
+            <div className="flex flex-col gap-2">
+              <Text weight={600}>Reactions</Text>
+              <Group direction="column" grow spacing="xs">
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={"🧠"}>
+                    I agree
+                  </Button>
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    I disagree
+                  </Button>
+                </Group>
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    Hahahahaha
+                  </Button>
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    I LOVE THIS
+                  </Button>
+                </Group>
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    Wooohooo!
+                  </Button>
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    Excellent!
+                  </Button>
+                </Group>
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={"😀"}>
+                    Hmmm...
+                  </Button>
+                  <Button variant="subtle" leftIcon={"🤫"}>
+                    Shhh...
+                  </Button>
+                </Group>
+                <Group grow spacing="xs" className="w-full">
+                  <Button variant="subtle" leftIcon={""}>
+                    I don't get it?
+                  </Button>
+                  <Button variant="subtle" leftIcon={"🧠"}>
+                    Big brain!
+                  </Button>
+                </Group>
+              </Group>
+            </div>
+          </Popover> */}
+        </div>
         <Group spacing="xs">
           <div className="w-auto h-auto relative">
-            <ActionIcon size={56} radius="xl" variant="light">
+            <ActionIcon
+              size={56}
+              radius="xl"
+              variant="light"
+              onClick={() => toggleCameraAudio("video")}
+              data-switch="video"
+            >
               <BsCameraVideoFill className="w-6 h-auto" />
             </ActionIcon>
             <Menu
+              size="xl"
+              closeOnItemClick={false}
               control={
                 <ActionIcon
                   size={20}
                   radius="xl"
                   variant="filled"
                   className="absolute bottom-0 right-0"
+                  // onClick={() => clickHandler("video-background")}
                 >
                   <IconChevronDown />
                 </ActionIcon>
@@ -114,25 +839,31 @@ export default function VideoCall() {
                 videoInput.map((device) => (
                   <Menu.Item
                     key={device.deviceId}
-                    onClick={() => {
-                      console.log(device.deviceId);
-                    }}
+                    data-value={device.deviceId}
+                    onClick={() => clickCameraDevice(device.deviceId)}
                   >
                     {device.label}
                   </Menu.Item>
                 ))}
               <Divider />
-              <Menu.Item onClick={() => setOpenedModalPreviewVideo(true)}>Xem trước camera</Menu.Item>
+              <Menu.Item onClick={() => setOpenedModalPreviewVideo(true)}>
+                Xem trước camera
+              </Menu.Item>
             </Menu>
           </div>
           <div className="w-auto h-auto relative">
-            <ActionIcon size={56} radius="xl" variant="light">
+            <ActionIcon
+              size={56}
+              radius="xl"
+              variant="light"
+              onClick={() => toggleCameraAudio("audio")}
+              data-switch="audio"
+            >
               <BsMicFill className="w-6 h-auto" />
             </ActionIcon>
             <Menu
-              gutter={40}
               closeOnItemClick={false}
-              placement="center"
+              size="xl"
               control={
                 <ActionIcon
                   size={20}
@@ -145,47 +876,157 @@ export default function VideoCall() {
               }
               className="absolute bottom-0 right-0"
             >
-              <Menu.Label>Application</Menu.Label>
-              <Menu.Item>Settings</Menu.Item>
-              <Menu.Item>Messages</Menu.Item>
-              <Menu.Item>Gallery</Menu.Item>
+              <Menu.Label>MICROPHONE</Menu.Label>
+              {audioInput &&
+                audioInput.map((device) => (
+                  <Menu.Item
+                    key={device.deviceId}
+                    onClick={() => {
+                      console.log(device.deviceId);
+                    }}
+                  >
+                    {device.label}
+                  </Menu.Item>
+                ))}
+              <Divider />
+              <Menu.Label>OUTPUT</Menu.Label>
+              {audioOutput &&
+                audioOutput.map((device) => (
+                  <Menu.Item
+                    key={device.deviceId}
+                    onClick={() => {
+                      console.log(device.deviceId);
+                    }}
+                  >
+                    {device.label}
+                  </Menu.Item>
+                ))}
             </Menu>
           </div>
-          <Badge
-            count={<IconChevronDown />}
-            theme="solid"
-            position="rightBottom"
-            style={{
-              backgroundColor: "var(--semi-color-primary)",
-              borderRadius: "50%",
-              width: 20,
-              height: 20,
-              padding: 2,
-              bottom: 10,
-              right: 10,
-              cursor: "pointer",
+          <ActionIcon
+            size={56}
+            radius="xl"
+            variant="light"
+            onClick={clickScreenSharing}
+          >
+            <MdOutlineScreenShare className="w-6 h-auto" />
+          </ActionIcon>
+          <ActionIcon
+            size={56}
+            radius="xl"
+            variant="light"
+            onClick={() => {
+              setOpenedSetting(!openedSetting);
             }}
           >
-            <ActionIcon size={56} radius="xl" variant="light">
-              <MdOutlineScreenShare className="w-6 h-auto" />
-            </ActionIcon>
-          </Badge>
+            <FontAwesomeIcon icon="fa-solid fa-ellipsis-vertical" />
+          </ActionIcon>
+          <ActionIcon
+            size={56}
+            radius="xl"
+            variant="light"
+            onClick={(e) => {
+              e.preventDefault();
+              socket.emit("leave-room", { channel, leaver: me.user.id });
+              window.close();
+            }}
+          >
+            <FontAwesomeIcon
+              icon="fa-solid fa-phone"
+              className="rotate-[135deg]"
+            />
+          </ActionIcon>
         </Group>
         <Group>
-          <Button variant="light">Controls</Button>
-          <Button variant="light" color="red">
-            Leave
-          </Button>
+          <ActionIcon onClick={toggle} size={56} radius="xl" variant="light">
+            <FontAwesomeIcon icon="fa-solid fa-expand" />
+          </ActionIcon>
         </Group>
       </div>
-      <Modal opened={openedModalPreviewVideo}
+      <Drawer
+        opened={openedSetting}
+        onClose={() => setOpenedSetting(false)}
+        title="Settings"
+        padding="xl"
+        size="xl"
+      >
+        {/* <AspectRatio ratio={16 / 9}>
+          <div className="flex relative w-full rounded-md overflow-hidden">
+            <video
+              autoPlay
+              ref={webcamRef}
+              className="absolute inset-0 z-10 w-full h-auto rounded-md"
+            />
+            <canvas
+              ref={webcamCanvasRef}
+              className="absolute inset-0 z-10 rounded-md"
+              style={{
+                width: webcamRef.current?.clientWidth || "100%",
+                height: webcamRef.current?.clientHeight || "100%",
+              }}
+            />
+          </div>
+        </AspectRatio> */}
+        <div className="flex flex-col gap-2 mt-2">
+          <Text weight={500}>Semibold</Text>
+          <Grid>
+            <Grid.Col span={3}>
+              <ActionIcon size="100%" variant="outline">
+                <MdBlurOff className="w-6 h-auto" />
+              </ActionIcon>
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <ActionIcon
+                onClick={() => setBackground("blur(5px)")}
+                size="100%"
+                variant="outline"
+              >
+                <MdBlurOn className="w-6 h-auto" />
+              </ActionIcon>
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <ActionIcon
+                onClick={() => setBackground("blur(10px)")}
+                size="100%"
+                variant="outline"
+              >
+                <MdBlurOn className="w-12 h-auto" />
+              </ActionIcon>
+            </Grid.Col>
+          </Grid>
+          <Text weight={500}>Semibold</Text>
+          <Grid gutter="xs">
+            {backgrounds &&
+              backgrounds.map((bg, index) => (
+                <Grid.Col span={3} key={index}>
+                  <img
+                    onClick={() => {
+                      setBackground(bg);
+                    }}
+                    style={{
+                      border: background === bg && "2px solid #000",
+                    }}
+                    className="rounded"
+                    src={bg}
+                    alt="bg"
+                    width="100%"
+                    height="100%"
+                  />
+                </Grid.Col>
+              ))}
+          </Grid>
+        </div>
+      </Drawer>
+      <Modal
+        opened={openedModalPreviewVideo}
         onClose={() => setOpenedModalPreviewVideo(false)}
-      centered>
+        centered
+      >
         <div className="flex flex-col items-center justify-center">
           <video
             className="w-96 h-52"
             style={{ borderRadius: 6, objectFit: "cover" }}
-            ref={videoRef}
+            // ref={userVideoRef}
           ></video>
         </div>
       </Modal>

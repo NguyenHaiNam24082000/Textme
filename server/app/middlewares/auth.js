@@ -5,7 +5,7 @@ const { roleRights } = require("../configs/roles");
 
 const verifyCallback =
   (req, resolve, reject, requiredRights) => async (err, user, info) => {
-    console.log("verifyCallback",err, user, info);
+    console.log("verifyCallback", err, user, info);
     if (err || info || !user) {
       return reject(
         new ApiError(httpStatus.UNAUTHORIZED, "Please authenticate")
@@ -29,7 +29,7 @@ const verifyCallback =
 const auth =
   (...requiredRights) =>
   async (req, res, next) => {
-    console.log("auth",requiredRights);
+    // console.log("auth",requiredRights);
     return new Promise((resolve, reject) => {
       passport.authenticate(
         "jwt",

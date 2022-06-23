@@ -1,294 +1,434 @@
-import React, { useEffect, useRef, useState } from "react";
-import Modal from "../../Modal";
-import { Text, Divider } from "@mantine/core";
-import { useUA } from "../../../hooks/use-ua-parser-js";
+import { IconClose } from "@douyinfe/semi-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ActionIcon, Box, Divider, Transition } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
+import React, { useState } from "react";
+import { useQueryClient } from "react-query";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router";
+import { themeSelector } from "../../../store/uiSlice";
+import { GetMe, logoutSuccess } from "../../../store/userSlice";
+import { logout } from "../../../apis/auth";
+import getSocket from "../../../apis/socket";
+import { ME_SOCKET } from "../../../configs/socketRoute";
+import Account from "./utils/Account";
+import AudioVideo from "./utils/AudioVideo";
+import Display from "./utils/Display";
+// import Hotkeys from "./utils/Hotkeys";
+import Language from "./utils/Language";
+import Sessions from "./utils/Sessions";
+import { useTranslation } from "react-i18next";
+import i18next from "i18next";
+import { Me } from "../../../reactQuery/user";
 
-const sidebar = [
-  {
-    title: "Cài đặt người dùng",
-    items: [
-      {
-        title: "Tài khoản của tôi",
-        value: "account",
-        icon: "user",
-      },
-      {
-        title: "Hồ sơ người dùng",
-        value: "profile",
-        icon: "cog",
-      },
-      {
-        title: "Bảo mật & an toàn",
-        value: "security",
-        icon: "cog",
-      },
-      {
-        title: "Quản lý phiên",
-        value: "sessions",
-        icon: "cog",
-      },
-      {
-        title: "Kết nối",
-        value: "connections",
-        icon: "cog",
-      },
-    ],
+// const sidebar = [
+//   {
+//     title: "Cài đặt người dùng",
+//     items: [
+//       {
+//         title: "Tài khoản của tôi",
+//         value: "account",
+//         icon: "fa-user",
+//       },
+//       // {
+//       //   title: "Hồ sơ người dùng",
+//       //   value: "profile",
+//       //   icon: "fa-id-card",
+//       // },
+//       // {
+//       //   title: "Bảo mật & an toàn",
+//       //   value: "security",
+//       //   icon: "fa-shield",
+//       // },
+//       // {
+//       //   title: "Quản lý phiên",
+//       //   value: "sessions",
+//       //   icon: "fa-circle-check",
+//       // },
+//       // {
+//       //   title: "Kết nối",
+//       //   value: "connections",
+//       //   icon: "fa-plug",
+//       // },
+//     ],
+//   },
+//   {
+//     title: "Cài đặt ứng dụng",
+//     items: [
+//       {
+//         title: "Hiển thị",
+//         value: "display",
+//         icon: "fa-tv",
+//       },
+//       // {
+//       //   title: "Trợ năng",
+//       //   value: "help",
+//       //   icon: "fa-tachograph-digital",
+//       // },
+//       {
+//         title: "Giọng nói và Video",
+//         value: "audio",
+//         icon: "fa-headset",
+//       },
+//       // {
+//       //   title: "Văn bản và Hình ảnh",
+//       //   value: "text",
+//       //   icon: "fa-file-image",
+//       // },
+//       // {
+//       //   title: "Các thông báo",
+//       //   value: "notifications",
+//       //   icon: "fa-bell",
+//       // },
+//       // {
+//       //   title: "Các phím nóng",
+//       //   value: "hotkeys",
+//       //   icon: "fa-keyboard",
+//       // },
+//       {
+//         title: "Ngôn ngữ",
+//         value: "language",
+//         icon: "fa-earth-asia",
+//       },
+//       // {
+//       //   title: "Chế độ streamer",
+//       //   value: "streamer",
+//       //   icon: "key",
+//       // },
+//       // {
+//       //   title: "Nâng cao",
+//       //   value: "advanced",
+//       //   icon: "key",
+//       // },
+//     ],
+//   },
+//   // {
+//   //   title: "Textme",
+//   //   items: [
+//   //     {
+//   //       title: "Bot của tôi",
+//   //       value: "bots",
+//   //       icon: "fa-robot",
+//   //     },
+//   //     {
+//   //       title: "Labs",
+//   //       value: "labs",
+//   //       icon: "fa-flask",
+//   //     },
+//   //     {
+//   //       title: "Nhật ký thay đổi",
+//   //       value: "logs",
+//   //       icon: "fa-history",
+//   //     },
+//   //     {
+//   //       title: "Phản hồi",
+//   //       value: "feedback",
+//   //       icon: "fa-comment-alt",
+//   //     },
+//   //   ],
+//   // },
+// ];
+
+const transition = {
+  out: {
+    transform: "scale(1.2)",
+    opacity: 0,
   },
-  {
-    title: "Cài đặt ứng dụng",
-    items: [
-      {
-        title: "Hiển thị",
-        value: "display",
-        icon: "lock",
-      },
-      {
-        title: "Trợ năng",
-        value: "help",
-        icon: "key",
-      },
-      {
-        title: "Giọng nói và Video",
-        value: "audio",
-        icon: "key",
-      },
-      {
-        title: "Văn bản và Hình ảnh",
-        value: "text",
-        icon: "key",
-      },
-      {
-        title: "Các thông báo",
-        value: "notifications",
-        icon: "key",
-      },
-      {
-        title: "Các phím nóng",
-        value: "hotkeys",
-        icon: "key",
-      },
-      {
-        title: "Ngôn ngữ",
-        value: "language",
-        icon: "key",
-      },
-      {
-        title: "Chế độ streamer",
-        value: "streamer",
-        icon: "key",
-      },
-      {
-        title: "Nâng cao",
-        value: "advanced",
-        icon: "key",
-      },
-    ],
+  in: {
+    transform: "scale(1)",
+    opacity: 1,
   },
-  {
-    title: "Textme",
-    items: [
-      {
-        title: "Bot của tôi",
-        value: "bots",
-        icon: "key",
-      },
-      {
-        title: "Nhật ký thay đổi",
-        value: "logs",
-        icon: "key",
-      },
-      {
-        title: "Phản hồi",
-        value: "feedback",
-        icon: "key",
-      },
-      {
-        title: "Đăng xuất",
-        value: "logout",
-        icon: "key",
-      },
-    ],
-  },
-];
+  transitionProperty: "opacity, transform",
+};
 
 export default function ModalUsersSetting({ opened, onClose }) {
+  useHotkeys([["escape", () => onClose()]]);
+  const theme = useSelector(themeSelector);
+  const user = GetMe();
+  // console.log(user, "aaaa");
+  const { data: me } = Me(user.user);
+  console.log("user", me);
+  const history = useNavigate();
+  const dispatch = useDispatch();
+  const cache = useQueryClient();
+  const socket = getSocket(user?.tokens?.access?.token);
+  const { t } = useTranslation();
+  const sidebar = [
+    {
+      title: t("User Settings"),
+      items: [
+        {
+          title: t("My Account"),
+          value: "account",
+          icon: "fa-user",
+        },
+        // {
+        //   title: "Hồ sơ người dùng",
+        //   value: "profile",
+        //   icon: "fa-id-card",
+        // },
+        // {
+        //   title: "Bảo mật & an toàn",
+        //   value: "security",
+        //   icon: "fa-shield",
+        // },
+        // {
+        //   title: "Quản lý phiên",
+        //   value: "sessions",
+        //   icon: "fa-circle-check",
+        // },
+        // {
+        //   title: "Kết nối",
+        //   value: "connections",
+        //   icon: "fa-plug",
+        // },
+      ],
+    },
+    {
+      title: t("App Settings"),
+      items: [
+        {
+          title: t("Display"),
+          value: "display",
+          icon: "fa-tv",
+        },
+        // {
+        //   title: "Trợ năng",
+        //   value: "help",
+        //   icon: "fa-tachograph-digital",
+        // },
+        {
+          title: t("Voice & Video"),
+          value: "audio",
+          icon: "fa-headset",
+        },
+        // {
+        //   title: "Văn bản và Hình ảnh",
+        //   value: "text",
+        //   icon: "fa-file-image",
+        // },
+        // {
+        //   title: "Các thông báo",
+        //   value: "notifications",
+        //   icon: "fa-bell",
+        // },
+        // {
+        //   title: "Các phím nóng",
+        //   value: "hotkeys",
+        //   icon: "fa-keyboard",
+        // },
+        {
+          title: t("Language"),
+          value: "language",
+          icon: "fa-earth-asia",
+        },
+        // {
+        //   title: "Chế độ streamer",
+        //   value: "streamer",
+        //   icon: "key",
+        // },
+        // {
+        //   title: "Nâng cao",
+        //   value: "advanced",
+        //   icon: "key",
+        // },
+      ],
+    },
+    // {
+    //   title: "Textme",
+    //   items: [
+    //     {
+    //       title: "Bot của tôi",
+    //       value: "bots",
+    //       icon: "fa-robot",
+    //     },
+    //     {
+    //       title: "Labs",
+    //       value: "labs",
+    //       icon: "fa-flask",
+    //     },
+    //     {
+    //       title: "Nhật ký thay đổi",
+    //       value: "logs",
+    //       icon: "fa-history",
+    //     },
+    //     {
+    //       title: "Phản hồi",
+    //       value: "feedback",
+    //       icon: "fa-comment-alt",
+    //     },
+    //   ],
+    // },
+  ];
   const [active, setActive] = useState(sidebar[0].items[0].value);
-  const [showPhone, setShowPhone] = useState(false);
-  const [showEmail, setShowEmail] = useState(false);
-  const [info, setInfo] = useState({
-    username: "NguyenHaiNam",
-    email: "nghainam2000@gmail.com",
-    phone: "0989898989",
-    password: "********",
-  });
-  const UADetails = useUA(); //get current browser data
+
+  const logoutHandler = async () => {
+    if (localStorage.getItem("user")) {
+      try {
+        // console.log("logout", JSON.parse(localStorage.getItem("user"))?.tokens);
+        await logout(
+          JSON.parse(localStorage.getItem("user"))?.tokens?.refresh?.token
+        );
+        socket.emit(ME_SOCKET.LOGOUT, { userId: user?.user?.id });
+        socket.close();
+        cache.clear();
+        console.log("logout");
+        history("/login");
+        dispatch(logoutSuccess());
+
+        //disconnect socket after logout.
+      } catch (err) {
+        console.log("err: ", err);
+      }
+    }
+  };
   return (
-    <Modal
-      size="75%"
-      opened={opened}
-      onClose={onClose}
-      classNames={{
-        modal: "h-full",
-        body: "h-full overflow-hidden flex",
-        header: "hidden",
-      }}
-      styles={{ body: { maxHeight: "100%", borderRadius: "inherit" } }}
-      padding={0}
-      zIndex="200"
-      hideCloseButton={true}
+    <Transition
+      key={"modal-users-setting"}
+      mounted={opened}
+      transition={transition}
+      duration={340}
+      timingFunction={"cubic-bezier(.2,.9,.5,1.16)"}
     >
-      <div
-        className="sidebar w-64 h-full flex flex-col bg-slate-300 py-6 pl-6 pr-4 overflow-y-auto flex-shrink-0"
-        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-      >
-        <div>
-          {sidebar &&
-            sidebar.map((item, index) => {
-              const sidebarItems = item.items.map((it, index) => (
-                <div
-                  key={item.value}
-                  className={`flex items-center h-8 px-2 text-base cursor-pointer hover:bg-gray-200 ${
-                    active === it.value && "bg-gray-200"
-                  }`}
-                  style={{ marginBottom: 2, borderRadius: 6 }}
-                  onClick={() => {
-                    setActive(it.value);
-                  }}
-                >
-                  {it.title}
-                </div>
-              ));
-
-              return (
-                <>
-                  <div
-                    key={index}
-                    className="category text-xs font-bold py-1 pl-2 mb-1 mt-1 uppercase"
-                  >
-                    {item.title}
-                  </div>
-                  {sidebarItems}
-                </>
-              );
-            })}
-        </div>
-      </div>
-      <div className="flex-auto flex-col h-full overflow-y-auto py-6 px-12">
-        {/* Tài khoản người dùng */}
-        {/* <div className="flex flex-col w-full h-full">
-          <div className="flex flex-col w-full">
-            <h3 className="text-xl font-semibold mb-3">Tài khoản người dùng</h3>
-            <div className="flex flex-col w-full h-auto bg-gray-200 rounded-lg">
+      {(styles) => (
+        <div
+          className="flex w-full h-full absolute top-0 left-0 bottom-0 right-0 bg-white overflow-hidden"
+          style={{ zIndex: 9999, ...styles }}
+        >
+          <div
+            className="flex justify-end bg-slate-300 pt-10"
+            style={{ flex: "1 0 200px", background: theme.sidebarBackground }}
+          >
+            <div
+              style={{ flex: "1 0 auto", overflow: "hidden scroll" }}
+              className="pr-0 flex-row items-start flex justify-end"
+            >
               <div
-                className="flex flex-col mx-4 mb-4 mt-2 bg-white flex-auto p-4"
-                style={{ borderRadius: "inherit" }}
+                className="sidebar w-64 h-full flex flex-col pb-6 pl-6 pr-4 overflow-y-auto flex-shrink-0"
+                style={{
+                  borderTopRightRadius: 0,
+                  borderBottomRightRadius: 0,
+                  color: theme.textColor,
+                }}
               >
-                <div className="flex w-full h-full justify-between items-center">
-                  <div className="flex flex-col">
-                    <div className="flex uppercase text-xs font-semibold mb-1">
-                      Tên đăng nhập
-                    </div>
-                    <div className="flex">{info.username}</div>
-                  </div>
-                  <div className="flex">button</div>
-                </div>
-                <div className="flex w-full h-full justify-between items-center mt-6">
-                  <div className="flex flex-col">
-                    <div className="flex uppercase text-xs font-semibold mb-1">
-                      Email
-                    </div>
-                    <div className="flex items-center">
-                      {showEmail
-                        ? info.email
-                        : info.email.replace(/[^@.]/g, "*")}
-                      <Text
-                        variant="link"
-                        className="ml-1 cursor-pointer"
-                        onClick={() => setShowEmail((v) => !v)}
-                      >
-                        {showEmail ? <>Ẩn</> : <>Hiện</>}
-                      </Text>
-                    </div>
-                  </div>
-                  <div className="flex">button</div>
-                </div>
-                <div className="flex w-full h-full justify-between items-center mt-6">
-                  <div className="flex flex-col">
-                    <div className="flex uppercase text-xs font-semibold mb-1">
-                      Số điện thoại
-                    </div>
-                    <div className="flex items-center">
-                      {showPhone ? info.phone : info.phone.replace(/./g, "*")}
-                      <Text
-                        variant="link"
-                        className="ml-1 cursor-pointer"
-                        onClick={() => setShowPhone((v) => !v)}
-                      >
-                        {showPhone ? <>Ẩn</> : <>Hiện</>}
-                      </Text>
-                    </div>
-                  </div>
-                  <div className="flex">button</div>
-                </div>
-                <div className="flex w-full h-full justify-between items-center mt-6">
-                  <div className="flex flex-col">
-                    <div className="flex uppercase text-xs font-semibold mb-1">
-                      Mật khẩu
-                    </div>
-                    <div className="flex">{info.password}</div>
-                  </div>
-                  <div className="flex">button</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <Divider className="my-6" />
-          <div className="flex flex-col w-full">
-            <h3 className="text-xl font-semibold mb-3">Bảo mật hai lớp</h3>
-            <h6 className="text-xs font-medium">
-              Two-factor authentication is currently work-in-progress. Bảo vệ
-              tài khoản Discord bằng một lớp bảo mật bổ sung. Sau khi điều
-              chỉnh, bạn sẽ được yêu cầu nhập cả mật khẩu và mã xác thực từ điện
-              thoại di động để đăng nhập.
-            </h6>
-          </div>
-          <Divider className="my-6" />
-          <div className="flex flex-col w-full">
-            <h3 className="text-xl font-semibold mb-3">Quản lý tài khoản</h3>
-            <h6 className="text-xs font-medium">
-              Vô hiệu hoá hoặc xoá tài khoản của bạn bất cứ lúc nào. Hành động
-              này sẽ đăng xuất và xoá hoàn toàn tài khoản của bạn, bao gồm lịch
-              sử trò chuyện và bạn bè.
-            </h6>
-          </div>
-        </div> */}
+                <div>
+                  {sidebar &&
+                    sidebar.map((item, index) => {
+                      const sidebarItems = item.items.map((it, index) => (
+                        <Box
+                          key={item.value}
+                          sx={(t) => ({
+                            background:
+                              active === it.value &&
+                              `${theme.activeItem}!important`,
+                            color:
+                              active === it.value &&
+                              `${theme.activeItemText}!important`,
+                            "&:hover": {
+                              background: `${theme.hoverItem}!important`,
+                            },
+                          })}
+                          className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200 ${
+                            active === it.value && "bg-gray-200"
+                          }`}
+                          style={{ marginBottom: 2, borderRadius: 6 }}
+                          onClick={() => {
+                            setActive(it.value);
+                          }}
+                        >
+                          <div className="flex items-center justify-center w-5 contrast-50">
+                            <FontAwesomeIcon icon={`fa-solid ${it.icon}`} />
+                          </div>
+                          <div>{it.title}</div>
+                        </Box>
+                      ));
 
-        {/* Quản lý phiên */}
-        <div className="flex flex-col w-full h-full">
-          <div className="flex flex-col w-full">
-            <h3 className="text-xl font-semibold mb-3">Các phiên đăng nhập</h3>
-            <h6 className="text-xs font-medium">
-              Vô hiệu hoá hoặc xoá tài khoản của bạn bất cứ lúc nào. Hành động
-              này sẽ đăng xuất và xoá hoàn toàn tài khoản của bạn, bao gồm lịch
-              sử trò chuyện và bạn bè.
-            </h6>
-            <div className="flex flex-col w-full">
-              <div className="flex flex-col w-full bg-slate-300 p-3 rounded-lg my-3">
-                <div className="flex w-full mb-2 text-xs font-semibold">
-                  Thiết bị này
-                </div>
-                <div className="flex flex-col w-full">
-                  <div className="text-sm font-semibold">
-                    {`${UADetails.browser.name} on ${UADetails.os.name} ${UADetails.os.version}`}
-                  </div>
-                  <div className="text-xs">Đăng nhập từ 7 giờ trước</div>
+                      return (
+                        <>
+                          <div
+                            key={index}
+                            className="category text-xs font-bold py-1 pl-2 mb-1 mt-1 uppercase"
+                          >
+                            {item.title}
+                          </div>
+                          {sidebarItems}
+                        </>
+                      );
+                    })}
+                  <Divider m={4} />
+                  <Box
+                    sx={(t) => ({
+                      "&:hover": {
+                        background: `${theme.hoverItem}!important`,
+                      },
+                    })}
+                    className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200`}
+                    style={{ marginBottom: 2, borderRadius: 6 }}
+                    onClick={() => {
+                      logoutHandler();
+                    }}
+                  >
+                    <div className="flex items-center justify-center w-5 contrast-50">
+                      <FontAwesomeIcon icon="fa-solid fa-sign-out-alt" />
+                    </div>
+                    <div>{t("Logout")}</div>
+                  </Box>
                 </div>
               </div>
             </div>
-            <Divider className="my-6" />
+          </div>
+          <div
+            className="flex h-full overflow-y-auto pb-6 pt-16 px-12"
+            style={{ flex: "1 1 800px", overflow: "hidden auto" }}
+          >
+            <div className="w-full h-full">
+              {/* Tài khoản người dùng */}
+              {active && active === "account" && <Account me={me} />}
+
+              {/* Quản lý phiên */}
+              {active && active === "sessions" && <Sessions />}
+
+              {/* Hồ sơ người dùng */}
+              {active && active === "profile" && <div>Profile</div>}
+
+              {/* Bảo mật & an toàn */}
+              {active && active === "security" && <div>Security</div>}
+
+              {/* Hiển thị */}
+              {active && active === "display" && <Display />}
+
+              {/* Trợ năng */}
+              {active && active === "help" && <div>Help</div>}
+
+              {/* Giọng nói và Video */}
+              {active && active === "audio" && <AudioVideo />}
+
+              {/* Văn bản và Hình ảnh */}
+              {/* {active && active === "text" && <TextImage />} */}
+
+              {/* Các thông báo */}
+              {/* {active && active === "notifications" && <div>Notifications</div>} */}
+
+              {/* Các phím nóng */}
+              {/* {active && active === "hotkeys" && <Hotkeys />} */}
+
+              {/* Ngôn ngữ */}
+              {active && active === "language" && <Language me={me} />}
+            </div>
+            <div className="ml-5 relative w-16" style={{ flex: "0 0 36px" }}>
+              <ActionIcon
+                className="fixed"
+                onClick={() => {
+                  i18next.changeLanguage(me.locale.replace("-", "_"));
+                  onClose();
+                }}
+              >
+                <IconClose />
+              </ActionIcon>
+            </div>
           </div>
         </div>
-      </div>
-    </Modal>
+      )}
+    </Transition>
   );
 }

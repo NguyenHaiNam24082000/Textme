@@ -9,10 +9,12 @@ const connectDB = async () => {
       useUnifiedTopology: true,
     });
     console.log("DB connection established");
+    return true;
   } catch (err) {
     console.error(err.message);
     process.exit(1);
   }
+  return false;
 };
 
 module.exports = { connectDB };

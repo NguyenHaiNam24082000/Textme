@@ -1,37 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import AuthForm from "../../components/AuthForm";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { At, Lock, Key, Copy } from "tabler-icons-react";
+import { At, Lock } from "tabler-icons-react";
 import {
   TextInput,
-  Select,
   PasswordInput,
   Text,
   Button,
   ActionIcon,
   Tooltip,
-  Autocomplete,
   Group,
   Checkbox,
   Divider,
-  Drawer,
-  NumberInput,
-  Progress,
-  Popover,
-  Box,
   LoadingOverlay,
   Loader,
 } from "@mantine/core";
-import { useClipboard, useForm } from "@mantine/hooks";
-import { CheckIcon, Cross1Icon } from "@modulz/radix-icons";
-import Fab from "@mui/material/Fab";
+import { useForm } from "@mantine/hooks";
 import Facebook from "../../assets/images/logos/facebook.svg";
 import Google from "../../assets/images/logos/google.svg";
 import { NavLink } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+// import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { login } from "../../apis/auth";
 import { loginSuccess } from "../../store/userSlice";
 
@@ -68,67 +59,78 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const history = useNavigate();
   const dispatch = useDispatch();
-  const [type, setType] = useState("email");
-  const [token, setToken] = useState(null);
-  const captchaRef = useRef(null);
-  const [values, setValues] = useState();
+  // const [type, setType] = useState("email");
+  // const [token, setToken] = useState(null);
+  // const captchaRef = useRef(null);
+  // const [values, setValues] = useState();
   const [serverError, setServerError] = useState(null);
   const form = useForm({
     initialValues: {
-      username: "",
+      // username: "",
       email: "",
       password: "",
       rememberMe: false,
     },
-    // validationRules: {
-    //   username: (value) => {
-    //     if (!value) return "Username is required";
-    //   },
-    //   email: (value) => {
-    //     if (value === "") return "Email is required";
-    //     else
-    //       return (
-    //         /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(
-    //           value
-    //         ) && "Email is invalid"
-    //       );
-    //   },
-    //   password: (value) => {
-    //     if (!value) return "Password is required";
-    //   },
-    // },
+    validationRules: {
+      // username: (value) => {
+      //   if (!value) return "Username is required";
+      // },
+      email: (value) =>
+        /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(
+          value
+        ),
+      password: (value) => value.length >= 8,
+    },
   });
 
-  useEffect(async () => {
+  // useEffect(async () => {
+  //   const payload = JSON.stringify({
+  //     // username: values.username,
+  //     email: values.email,
+  //     password: values.password,
+  //   });
+  //   const { data } = await login(payload);
+  //   console.log(data)
+  //   // const actionResult = await dispatch(getMe());
+  //   setTimeout(() => {
+  //     setLoading(false);
+  //     if (data.error?.email || data.error?.username) {
+  //       setServerError(data.error);
+  //     } else {
+  //       dispatch(loginSuccess(data));
+  //       history("/app");
+  //     }
+  //   }, 1500);
+  // }, [token]);
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    // setValues(values);
+    //test
     const payload = JSON.stringify({
       // username: values.username,
       email: values.email,
       password: values.password,
     });
     const { data } = await login(payload);
-    console.log(data)
+    console.log(data);
     // const actionResult = await dispatch(getMe());
     setTimeout(() => {
       setLoading(false);
-      if (data.error?.email || data.error?.username) {
+      if (data.error?.email || data.error?.password) {
         setServerError(data.error);
       } else {
         dispatch(loginSuccess(data));
-        history("/app");
+        history("/channel/@me");
       }
     }, 1500);
-  }, [token]);
-  const handleSubmit = (values) => {
-    setLoading(true);
-    setValues(values);
   };
-  const onLoad = () => {
-    // this reaches out to the hCaptcha JS API and runs the
-    // execute function on it. you can use other functions as
-    // documented here:
-    // https://docs.hcaptcha.com/configuration#jsapi
-    captchaRef.current.execute();
-  };
+  // const onLoad = () => {
+  // this reaches out to the hCaptcha JS API and runs the
+  // execute function on it. you can use other functions as
+  // documented here:
+  // https://docs.hcaptcha.com/configuration#jsapi
+  //   captchaRef.current.execute();
+  // };
 
   return (
     <div
@@ -144,16 +146,16 @@ export default function Login() {
           visible={loading}
           loader={
             <>
-              {token === null ? (
+              {/* {token === null ? (
                 <HCaptcha
-                  sitekey="794b8617-4db1-4406-9ef0-dfdd04ae462b"
+                  sitekey="682fed61-9e30-4880-b49d-0ff6d2be2bc5"
                   onVerify={setToken}
                   onLoad={onLoad}
                   ref={captchaRef}
                 />
-              ) : (
-                <Loader size="xl" />
-              )}
+              ) : ( */}
+              <Loader size="xl" />
+              {/* )} */}
             </>
           }
         />
@@ -165,12 +167,12 @@ export default function Login() {
           variants={pageVariants}
           transition={pageTransition}
         >
-          <h1 className="text-2xl  font-bold">{t("login")}</h1>
+          <h1 className="text-2xl  font-bold">{t("Login")}</h1>
           <div className="my-3 text-sm">
             Tham gia hàng triệu máy chủ công cộng miễn phí lớn nhất
           </div>
           <Divider />
-          <Group position="apart" className="my-3">
+          {/* <Group position="apart" className="my-3">
             <span>{t("login_with")}</span>
             <Select
               value={type}
@@ -181,36 +183,62 @@ export default function Login() {
                 { value: "username", label: t("username") },
               ]}
             />
-          </Group>
+          </Group> */}
           <form
             className="flex flex-col"
             onSubmit={form.onSubmit(handleSubmit)}
           >
-            {type && type === "username" ? (
+            {/* {type && type === "username" ? (
               <TextInput
-                placeholder={t("username")}
-                label={t("username")}
+                placeholder={t("Username")}
+                label={t("Username")}
                 {...form.getInputProps("username")}
                 onBlur={() => form.validateField("username")}
                 required
               />
-            ) : (
-              <TextInput
-                label={t("email")}
-                placeholder={t("email")}
-                {...form.getInputProps("email")}
-                onBlur={() => form.validateField("email")}
-                required
-                icon={<At size={16} />}
-              />
-            )}
+            ) : ( */}
+            <TextInput
+              label={
+                <div
+                  className={`flex ${
+                    serverError?.email || form.errors.email
+                      ? "text-red-500"
+                      : ""
+                  }`}
+                >
+                  {t("Email")}
+                  <pre className="text-red-500 mx-1">*</pre>
+                  {serverError?.email ||
+                    (form.errors.email && "- Email is invalid")}
+                </div>
+              }
+              placeholder={t("Email")}
+              {...form.getInputProps("email")}
+              onBlur={() => form.validateField("email")}
+              // required
+              icon={<At size={16} />}
+            />
+            {/* )} */}
             <PasswordInput
-              placeholder={t("password")}
-              label={t("password")}
+              placeholder={t("Password")}
+              label={
+                <div
+                  className={`flex ${
+                    serverError?.password || form.errors.password
+                      ? "text-red-500"
+                      : ""
+                  }`}
+                >
+                  {t("Password")}
+                  <pre className="text-red-500 mx-1">*</pre>
+                  {serverError?.password ||
+                    (form.errors.password && "- Password is invalid")}
+                </div>
+              }
               {...form.getInputProps("password")}
               onBlur={() => form.validateField("password")}
               icon={<Lock size={16} />}
-              required
+              // required
             />
             <Group position="apart" className="my-3">
               <Checkbox size="xs" color="yellow" label="Remember me" />
@@ -220,7 +248,7 @@ export default function Login() {
                 href="https://mantine.dev"
                 size="xs"
               >
-                {t("forgot_password")}
+                {t("Forgot Password")}
               </Text>
             </Group>
             <Group position="center" grow className="my-6">
@@ -232,17 +260,17 @@ export default function Login() {
                 type="submit"
                 style={{ backgroundColor: "#fab005" }}
               >
-                {t("login")}
+                {t("Login")}
               </Button>
             </Group>
           </form>
           <Group position="center">
-            <Tooltip label={t("login_with_facebook")} radius="md">
+            <Tooltip label={t("Login With Facebook")} radius="md">
               <ActionIcon size="xl" radius="md" variant="default">
                 <img src={Facebook} alt="Facebook" />
               </ActionIcon>
             </Tooltip>
-            <Tooltip label={t("login_with_google")} radius="md">
+            <Tooltip label={t("Login With Google")} radius="md">
               <ActionIcon size="xl" radius="md" variant="default">
                 <img src={Google} alt="Google" />
               </ActionIcon>

@@ -6,4 +6,5 @@ const RESET_PASSWORD_PAGE = "/reset-password";
 const VERIFY_EMAIL_PAGE = "/verify-email";
 const LOGOUT_PAGE = "/logout";
 const LOGIN_SUCCESS_PAGE = "/login-success";
-const DM_URL = (dmId = ":dmId") => `/channels/me/${dmId}`;
+const ME_PAGE = "/channel/@me";
+const DM_URL = (dmId = ":channel") => `/channel/${dmId}`;

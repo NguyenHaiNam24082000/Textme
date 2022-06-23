@@ -14,7 +14,6 @@ import {
   Group,
   Checkbox,
   Divider,
-  Drawer,
   NumberInput,
   Progress,
   Popover,
@@ -118,7 +117,7 @@ const InputWrapper = ({
       withArrow
       styles={{ popover: { width: "100%" } }}
       className="w-full"
-      noFocusTrap
+      trapFocus={false}
       transition="pop-top-left"
       onFocusCapture={onFocusCapture}
       onBlurCapture={onBlurCapture}
@@ -258,7 +257,7 @@ export default function Register() {
           variants={pageVariants}
           transition={pageTransition}
         >
-          <h1 className="text-2xl  font-bold">{t("register")}</h1>
+          <h1 className="text-2xl  font-bold">{t("Register")}</h1>
           <div className="my-3 text-sm">
             Tham gia hàng triệu máy chủ công cộng miễn phí lớn nhất
           </div>
@@ -281,7 +280,7 @@ export default function Register() {
               maxLength={32}
             >
               <TextInput
-                placeholder={t("username")}
+                placeholder={t("Username")}
                 value={form.values.username}
                 onBlur={() => form.validateField("username")}
                 label={
@@ -292,7 +291,7 @@ export default function Register() {
                         : ""
                     }`}
                   >
-                    {t("username")}
+                    {t("Username")}
                     <pre className="text-red-500 mx-1">*</pre>
                     {serverError?.username ||
                       (form.errors.username && "- Username is invalid")}
@@ -326,13 +325,13 @@ export default function Register() {
                         : ""
                     }`}
                   >
-                    {t("email")}
+                    {t("Email")}
                     <pre className="text-red-500 mx-1">*</pre>
                     {serverError?.email ||
                       (form.errors.email && "- Email is invalid")}
                   </div>
                 }
-                placeholder={t("email")}
+                placeholder={t("Email")}
                 {...form.getInputProps("email")}
                 onBlur={() => form.validateField("email")}
                 // required
@@ -354,14 +353,14 @@ export default function Register() {
               maxLength={32}
             >
               <PasswordInput
-                placeholder={t("password")}
+                placeholder={t("Password")}
                 label={
                   <div
                     className={`flex ${
                       form.errors.password ? "text-red-500" : ""
                     }`}
                   >
-                    {t("password")}
+                    {t("Password")}
                     <pre className="text-red-500 mx-1">*</pre>
                     {form.errors.password && "- Password is invalid"}
                   </div>
@@ -374,14 +373,14 @@ export default function Register() {
               />
             </InputWrapper>
             <PasswordInput
-              placeholder={t("confirm_password")}
+              placeholder={t("Confirm Password")}
               label={
                 <div
                   className={`flex ${
                     form.errors.confirmPassword ? "text-red-500" : ""
                   }`}
                 >
-                  {t("confirm_password")}
+                  {t("Confirm Password")}
                   <pre className="text-red-500 mx-1">*</pre>
                   {form.errors.confirmPassword && (
                     <>- Passwords don't match. Try again</>
@@ -410,7 +409,7 @@ export default function Register() {
                 compact
                 style={{ backgroundColor: "#fab005" }}
               >
-                {t("register")}
+                {t("Register")}
               </Button>
             </Group>
           </form>

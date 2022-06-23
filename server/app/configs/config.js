@@ -13,7 +13,10 @@ const envVarsSchema = Joi.object()
     APP_PORT: Joi.number().default(5000),
     DB_URI: Joi.string().required().description("MongoDB connection string"),
     JWT_SECRET: Joi.string().required().description("JWT secret key"),
-    JWT_ACCESS_EXPIRATION_MINUTES: Joi.number()
+    // JWT_ACCESS_EXPIRATION_MINUTES: Joi.number()
+    //   .default(30)
+    //   .description("JWT access token expiration time in minutes"),
+    JWT_ACCESS_EXPIRATION_DAYS: Joi.number()
       .default(30)
       .description("JWT access token expiration time in minutes"),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number()
@@ -56,7 +59,7 @@ module.exports = {
   },
   jwt: {
     secret: envVars.JWT_SECRET,
-    accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
+    accessExpirationDays: envVars.JWT_ACCESS_EXPIRATION_DAYS,
     refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
     resetPasswordExpirationMinutes:
       envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
