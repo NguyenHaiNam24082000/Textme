@@ -7,9 +7,35 @@ import {
   Group,
   Text,
 } from "@mantine/core";
-import React from "react";
+import React, { useState } from "react";
+import { useQueryClient } from "react-query";
+import { addFriendRequestApi } from "../../../../apis/friend";
+import {
+  OUT_GOING_REQUESTS_KEY,
+  PENDING_REQUESTS_KEY,
+} from "../../../../configs/queryKeys";
 
 export default function AddFriendItem({ user }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+  const cache = useQueryClient();
+  const addFriendHandler = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await addFriendRequestApi({
+        username: user.username,
+        discriminator: user.discriminator,
+      });
+      if (data) {
+        cache.invalidateQueries(PENDING_REQUESTS_KEY);
+        cache.invalidateQueries(OUT_GOING_REQUESTS_KEY);
+        setIsAdded(true);
+      }
+    } catch (err) {
+      // const result = apiErrorHandler(err);
+      setIsLoading(false);
+    }
+  };
   return (
     <Group
       position="apart"
@@ -80,26 +106,33 @@ export default function AddFriendItem({ user }) {
         </div>
       </Group>
       <Group spacing="xs">
-        {/* {isIncoming(user, friend) && (
+        {user.status === "FRIEND" && (
           <ActionIcon
-            loading={isLoading}
-            onClick={acceptPending}
+            // loading={isLoading}
+            // onClick={acceptPending}
             size="xl"
             radius="xl"
             variant="light"
           >
-            <FontAwesomeIcon icon="fa-solid fa-check" />
+            <FontAwesomeIcon icon="fa-solid fa-inbox" />
           </ActionIcon>
-        )} */}
-        <ActionIcon
-          //   loading={isLoading}
-          //   onClick={cancelPending}
-          size="xl"
-          radius="xl"
-          variant="light"
-        >
-          <FontAwesomeIcon icon="fa-solid fa-user-plus" />
-        </ActionIcon>
+        )}
+        {(user.status === "PENDING" || isAdded) && (
+          <ActionIcon size="xl" radius="xl" variant="light">
+            <FontAwesomeIcon icon="fa-solid fa-user-clock" />
+          </ActionIcon>
+        )}
+        {!user.status && !isAdded && (
+          <ActionIcon
+            loading={isLoading}
+            onClick={addFriendHandler}
+            size="xl"
+            radius="xl"
+            variant="light"
+          >
+            <FontAwesomeIcon icon="fa-solid fa-user-plus" />
+          </ActionIcon>
+        )}
       </Group>
     </Group>
   );

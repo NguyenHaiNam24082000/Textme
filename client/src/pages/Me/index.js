@@ -251,17 +251,13 @@ export default function Me() {
         opened={call}
         onClose={() => {}}
         withCloseButton={false}
+        size={300}
       >
         {channelCall && (
-          <Stack>
+          <Stack align="center">
             <div className="h-full w-14 relative">
               {channelCall.type === "GROUP" ? (
                 <Indicator
-                  sx={{
-                    indicator: {
-                      zIndex: "5",
-                    },
-                  }}
                   inline
                   size={16}
                   offset={7}
@@ -277,6 +273,9 @@ export default function Me() {
                   }
                   withBorder
                   sx={{
+                    indicator: {
+                      zIndex: "5",
+                    },
                     width: "100%",
                     height: "100%",
                     position: "relative",

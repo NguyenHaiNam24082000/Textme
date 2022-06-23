@@ -15,7 +15,7 @@ import {
   Popover,
   Indicator,
 } from "@mantine/core";
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { changePassword } from "../../../../../apis/auth";
 // import { GetMe } from "../../../../../store/userSlice";
@@ -103,6 +103,30 @@ function UserEditForm({ initialValues, onSubmit, onCancel, type }) {
   );
 }
 
+const handleFileChosen = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const data = reader.result;
+      // if (IMAGE_MIME_TYPE.includes(file.type)) {
+      //   const image = new Image();
+      //   image.src = data;
+      //   image.onload = function () {
+      //     console.log(this.width);
+      //   };
+      // }
+      resolve(reader.result);
+    };
+    reader.onerror = reject;
+    // if (IMAGE_MIME_TYPE.includes(file.type)) {
+    reader.readAsDataURL(file);
+    // } else {
+    //   // reader.readAsArrayBuffer(file);
+    //   reader.readAsText(file);
+    // }
+  });
+};
+
 export default function Account({ me }) {
   const dispatch = useDispatch();
   const cache = useQueryClient();
@@ -118,6 +142,13 @@ export default function Account({ me }) {
     useState(false);
   const { t } = useTranslation();
   const [serverError, setServerError] = useState(null);
+  const inputRef = useRef();
+  const [avatar, setAvatar] = useState({
+    url: me.avatar_url,
+    name: null,
+    size: null,
+    type: null,
+  });
   const form = useForm({
     initialValues: {
       oldPassword: "",
@@ -161,6 +192,37 @@ export default function Account({ me }) {
       <div className="flex flex-col w-full">
         <h3 className="text-xl font-semibold mb-3">{t("My Account")}</h3>
         <div className="flex flex-col w-full h-auto bg-gray-200 rounded-lg overflow-hidden">
+          <input
+            ref={inputRef}
+            accept={["image/png", "image/jpeg", "image/sgv+xml", "image/gif"]}
+            type="file"
+            multiple={false}
+            autoComplete="off"
+            style={{ display: "none", pointerEvents: "none" }}
+            onChange={async (e) => {
+              const files = e.target.files;
+              if (files && files.length > 0) {
+                const results = await Promise.all(
+                  Array.from(files, async (file) => {
+                    const fileContents = await handleFileChosen(file);
+                    let result = null;
+                    if (file.size < 5000000) {
+                      result = {
+                        url: fileContents,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        createdAt: new Date(),
+                      };
+                    }
+                    return result;
+                  })
+                );
+                setAvatar(...results);
+              }
+              console.log(files, "avatar");
+            }}
+          />
           <BackgroundImage
             sx={{
               background: `#${Math.floor(me.accent_color).toString(16)}`,
@@ -183,39 +245,44 @@ export default function Account({ me }) {
                 placement="center"
                 trigger="hover"
                 delay={500}
+                // opened={true}
                 control={
-                  <div className="flex items-center relative">
-                    <Indicator
-                      sx={{
-                        indicator: {
-                          zIndex: "5",
-                        },
-                      }}
-                      inline
-                      size={28}
-                      offset={20}
-                      position="bottom-end"
-                      color={me?.status?.online ? "green" : "gray"}
-                      withBorder
-                    >
-                      <Avatar
-                        src={me.avatar_url}
-                        radius={"50%"}
-                        size={128}
-                        styles={{
-                          border: "8px solid #fff",
-                          placeholder: {
-                            color: "#fff",
-                            backgroundColor: `#${Math.floor(
-                              me.accent_color
-                            ).toString(16)}`,
-                          },
-                        }}
-                      >
-                        {me.username[0]}
-                      </Avatar>
-                    </Indicator>
-                  </div>
+                  // <div className="flex items-center relative">
+                  // <Indicator
+                  //   sx={{
+                  //     indicator: {
+                  //       zIndex: "5",
+                  //     },
+                  //   }}
+                  //   inline
+                  //   size={28}
+                  //   offset={20}
+                  //   position="bottom-end"
+                  //   color={me?.status?.online ? "green" : "gray"}
+                  //   withBorder
+                  // >
+                  <Avatar
+                    src={avatar.url || me.avatar_url}
+                    radius={"50%"}
+                    size={128}
+                    className="cursor-pointer"
+                    style={{ border: "8px solid #fff" }}
+                    styles={{
+                      placeholder: {
+                        color: "#fff",
+                        backgroundColor: `#${Math.floor(
+                          me.accent_color
+                        ).toString(16)}`,
+                      },
+                    }}
+                    onClick={() => {
+                      inputRef.current.click();
+                    }}
+                  >
+                    {me.username[0]}
+                  </Avatar>
+                  // </Indicator>
+                  // </div>
                 }
               >
                 <Menu.Item>Change Avatar</Menu.Item>
@@ -250,16 +317,32 @@ export default function Account({ me }) {
                 <div className="flex items-center gap-2">
                   <Button
                     disabled={
-                      values.phone === me.phone && values.name === me.name
+                      values.phone === me.phone &&
+                      values.name === me.name &&
+                      avatar.url === me.avatar_url
                     }
                     leftIcon={<FontAwesomeIcon icon="fa-solid fa-pen" />}
                     onClick={async () => {
-                      const { data } = await updateProfile(me.id, {
-                        ...(values.phone !== me.phone && {
-                          phone: values.phone,
-                        }),
-                        ...(values.name !== me.name && { name: values.name }),
-                      });
+                      const formData = new FormData();
+                      const base64 = avatar.url.split(";base64,");
+                      const byteCharacters = atob(base64[1]);
+                      const byteNumbers = new Array(byteCharacters.length);
+                      for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                      }
+                      const byteArray = new Uint8Array(byteNumbers);
+                      const blob = new Blob([byteArray], { type: avatar.type });
+                      formData.append("phone", values.phone);
+                      formData.append("name", values.name);
+                      formData.append("filename", avatar.name);
+                      formData.append("avatar", blob);
+                      // const { data } = await updateProfile(me.id, {
+                      //   ...(values.phone !== me.phone && {
+                      //     phone: values.phone,
+                      //   }),
+                      //   ...(values.name !== me.name && { name: values.name }),
+                      // });
+                      const { data } = await updateProfile(me.id, formData);
                       console.log(data, "update");
                       if (data) {
                         cache.invalidateQueries(ACCOUNT_KEY);

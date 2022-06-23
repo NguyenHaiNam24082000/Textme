@@ -222,7 +222,7 @@ export default function ChannelListSidebar({ server }) {
       {/* ${active === it.value && "bg-gray-200"} */}
       <div className="flex flex-col flex-auto w-full overflow-x-hidden overflow-y-scroll">
         <div className="flex flex-col w-full">
-          <div className="flex flex-col w-full flex-shrink-0 px-1 my-2">
+          {/* <div className="flex flex-col w-full flex-shrink-0 px-1 my-2">
             <div
               className={`flex items-center h-8 px-2 text-base cursor-pointer gap-2 hover:bg-gray-200 
           `}
@@ -293,7 +293,9 @@ export default function ChannelListSidebar({ server }) {
                   </Tooltip>
                 </Group>
               </Group>
-              {/* {server &&
+            </div>
+          </div> */}
+          {/* {server &&
                 server.channels.map((channel) => (
                   <div
                     key={channel.channel._id}
@@ -312,9 +314,25 @@ export default function ChannelListSidebar({ server }) {
                     </div>
                   </div>
                 ))} */}
-            </div>
+          <div style={{ padding: 8 }}>
+            <Group className={classes.collectionsHeader} position="apart">
+              <Text weight={500} color="dimmed">
+                Channels
+              </Text>
+              <Group spacing={8}>
+                <Tooltip label="List options" withArrow position="right">
+                  <ActionIcon variant="hover">
+                    <FontAwesomeIcon icon="fa-solid fa-ellipsis" />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Create collection" withArrow position="right">
+                  <ActionIcon variant="hover">
+                    <FontAwesomeIcon icon="fa-solid fa-plus" />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
+            </Group>
           </div>
-
           <Tree
             server={server}
             setOpenedModalCreateChannel={setOpenedModalCreateChannel}

@@ -16,6 +16,7 @@ import {
   Loader,
   Grid,
   Indicator,
+  Notification,
 } from "@mantine/core";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
@@ -118,7 +119,7 @@ const AttachmentFile = ({ attachment }) => {
         crossOrigin="anonymous"
         src={attachment.url}
         alt={attachment.filename}
-        className="w-[500px] h-[500px]"
+        className="w-[250px] h-[250px]"
         style={{
           filter: attachment.nsfw ? "blur(30px)" : "",
         }}
@@ -520,11 +521,11 @@ export default function Message({
           const index = d?.pages[0]?.results.findIndex(
             (m) => m.id === result?.data?.messageReference?.message
           );
-          if (index) {
-            result?.data?.systemMessageType === "CHANNEL_PINNED_MESSAGE"
-              ? (d.pages[0].results[index].pinned = true)
-              : (d.pages[0].results[index].pinned = false);
-          }
+          // if (index) {
+          //   result?.data?.systemMessageType === "CHANNEL_PINNED_MESSAGE"
+          //     ? (d.pages[0].results[index].pinned = true)
+          //     : (d.pages[0].results[index].pinned = false);
+          // }
         }
         // if (d?.pages[0]?.results[0]?.id !== result?.data?.id) {
         //   d?.pages[0]?.results.unshift(result?.data);
@@ -815,181 +816,163 @@ export default function Message({
               ) : (
                 <>
                   {message.replies.length > 0 ? (
-                    <Timeline
-                      active={-1}
-                      bulletSize={24}
-                      lineWidth={2}
-                      classNames={{
-                        itemBulletWithChild: "z-10",
-                      }}
-                      // sx={(theme, { color }) => ({
-                      //   "itemLineActive::before": {
-                      //     borderLeftColor: theme.fn.themeColor(
-                      //       color,
-                      //       theme.colorScheme === "dark" ? 6 : 7
-                      //     ),
-                      //   },
-                      // })}
-                      style={{ paddingLeft: 20, width: "100%" }}
-                    >
-                      {message.replies.map((reply, index) => (
-                        <Timeline.Item
-                          key={index}
-                          lineActive={
-                            index + 1 < message.replies.length - 1
-                              ? me.user.id ===
-                                  message.replies[index + 1].sender.id &&
-                                reply.sender.id === me.user.id
-                              : message.sender.id === me.user.id
-                          }
-                          active={reply.sender.id === me.user.id}
-                          // sx={(theme) => ({
-                          //   "&:not(:last-of-type)::after": {
-                          //     display: "inline-block",
-                          //   },
+                    // <Timeline
+                    //   active={-1}
+                    //   bulletSize={24}
+                    //   lineWidth={2}
+                    //   classNames={{
+                    //     itemBulletWithChild: "z-10",
+                    //   }}
+                    //   // sx={(theme, { color }) => ({
+                    //   //   "itemLineActive::before": {
+                    //   //     borderLeftColor: theme.fn.themeColor(
+                    //   //       color,
+                    //   //       theme.colorScheme === "dark" ? 6 : 7
+                    //   //     ),
+                    //   //   },
+                    //   // })}
+                    //   style={{ paddingLeft: 20, width: "100%" }}
+                    // >
+                    <div className="flex flex-col w-full">
+                      <div className="ml-12">
+                        {message.replies.map((reply, index) => (
+                          <Notification
+                            key={index}
+                            disallowClose
+                            title={reply.sender.username}
+                            onClick={() => {
+                              setCurrentMessageSelected(reply.id);
+                            }}
+                            className="mb-1 cursor-pointer shadow-none"
+                          >
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: `${format(reply.content)}`,
+                              }}
+                            ></div>
+                          </Notification>
+                          // <Timeline.Item
+                          //   key={index}
+                          //     // lineActive={
+                          //     //   index + 1 < message.replies.length - 1
+                          //     //     ? me.user.id ===
+                          //     //         message.replies[index + 1].sender.id &&
+                          //     //       reply.sender.id === me.user.id
+                          //     //     : message.sender.id === me.user.id
+                          //     // }
+                          //     // active={reply.sender.id === me.user.id}
+                          //     // sx={(theme) => ({
+                          //     //   "&:not(:last-of-type)::after": {
+                          //     //     display: "inline-block",
+                          //     //   },
 
-                          //   "&::after": {
-                          //     boxSizing: "border-box",
-                          //     position: "absolute",
-                          //     top: 0,
-                          //     left: "left" ? -2 : "auto",
-                          //     right: "right" ? -2 : "auto",
-                          //     bottom: -6,
-                          //     borderLeft: `2px solid ${
-                          //       theme.colorScheme === "dark"
-                          //         ? theme.colors.dark[4]
-                          //         : theme.colors.gray[3]
-                          //     }`,
-                          //     content: '""',
-                          //     display: "none",
-                          //     width: 2,
-                          //     transform: "rotate(90deg) translate(-2px, -12px)",
-                          //   },
-
-                          //   "&.mantine-Timeline-itemLineActive::after": {
-                          //     borderLeftColor: theme.fn.themeColor(
-                          //       theme.primaryColor,
-                          //       // color,
-                          //       theme.colorScheme === "dark" ? 6 : 7
-                          //     ),
-                          //   },
-                          // })}
-                          // lineVariant="dotted"
-                          bullet={
-                            <Avatar
-                              size={22}
-                              radius="xl"
-                              src="https://avatars0.githubusercontent.com/u/10353856?s=460&u=88394dfd67727327c1f7670a1764dc38a8a24831&v=4"
-                            />
-                          }
-                          style={{
-                            marginTop: index === 0 ? 0 : 12,
-                            paddingLeft: 16,
-                          }}
-                          title={
-                            <div className="flex gap-1 items-center truncate overflow-ellipsis min-w-0 ml-4">
-                              <div
-                                className="py-[2px] flex items-center gap-2 max-h-8 truncate"
-                                style={{ flex: "1 1 0%" }}
-                              >
-                                {reply.sender.username}
-                                {/* <Badge
-                        sx={{ paddingLeft: 0 }}
-                        className="normal-case"
-                        radius="xl"
-                        color="teal"
-                        leftSection={
-                          <Avatar
-                            alt="Avatar for badge"
-                            size="xs"
-                            radius="xl"
-                            src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
-                          />
-                        }
-                      >
-                        {reply.sender.username}
-                      </Badge> */}
-                                {/* <Link to={`chat-messages-${reply.id}`} spy={true} smooth={true}> */}
-                                <div
-                                  className="truncate overflow-ellipsis max-h-7 font-normal text-sm cursor-pointer hover:underline hover:text-slate-200"
-                                  style={{ maxWidth: 320 }}
-                                  onClick={() => {
-                                    setCurrentMessageSelected(reply.id);
-                                  }}
-                                >
-                                  {reply.content}
-                                </div>
-                                {/* </Link> */}
-                                <Tooltip
-                                  label={getMoreDetailsTime(reply.createdAt)}
-                                  withArrow
-                                >
-                                  <span className="cursor-default text-xs">
-                                    ({chatMainTime(reply.createdAt)})
-                                  </span>
-                                </Tooltip>
-                              </div>
-                            </div>
-                          }
-                        />
-                      ))}
-                      <Timeline.Item
+                          //     // })}
+                          //     // lineVariant="dotted"
+                          //     bullet={
+                          //       <Avatar
+                          //         size={22}
+                          //         radius="xl"
+                          //         src="https://avatars0.githubusercontent.com/u/10353856?s=460&u=88394dfd67727327c1f7670a1764dc38a8a24831&v=4"
+                          //       />
+                          //     }
+                          //     style={{
+                          //       marginTop: index === 0 ? 0 : 12,
+                          //       paddingLeft: 16,
+                          //     }}
+                          //     title={
+                          //       <div className="flex gap-1 items-center truncate overflow-ellipsis min-w-0 ml-4">
+                          //         <div
+                          //           className="py-[2px] flex items-center gap-2 max-h-8 truncate"
+                          //           style={{ flex: "1 1 0%" }}
+                          //         >
+                          //           {reply.sender.username}
+                          //           {/* <Badge
+                          //   sx={{ paddingLeft: 0 }}
+                          //   className="normal-case"
+                          //   radius="xl"
+                          //   color="teal"
+                          // leftSection={
+                          //     <Avatar
+                          //       alt="Avatar for badge"
+                          //       size="xs"
+                          //       radius="xl"
+                          //       src="https://yt3.ggpht.com/yti/APfAmoGyHvZbfLTnkvMzb7VBVVkkqJpD6HgoYUMO770U=s88-c-k-c0x00ffffff-no-rj-mo"
+                          //     />
+                          //   }
+                          // >
+                          //   {reply.sender.username}
+                          // </Badge> */}
+                          //           {/* <Link to={`chat-messages-${reply.id}`} spy={true} smooth={true}> */}
+                          //           <div
+                          //             className="truncate overflow-ellipsis max-h-7 font-normal text-sm cursor-pointer hover:underline hover:text-slate-200"
+                          //             style={{ maxWidth: 320 }}
+                          //             onClick={() => {
+                          //               setCurrentMessageSelected(reply.id);
+                          //             }}
+                          //           >
+                          //             {reply.content}
+                          //           </div>
+                          //           {/* </Link> */}
+                          //           <Tooltip
+                          //             label={getMoreDetailsTime(reply.createdAt)}
+                          //             withArrow
+                          //           >
+                          //             <span className="cursor-default text-xs">
+                          //               ({chatMainTime(reply.createdAt)})
+                          //             </span>
+                          //           </Tooltip>
+                          //         </div>
+                          //       </div>
+                          //   }
+                          // />
+                        ))}
+                      </div>
+                      {/* <Timeline.Item
                         style={{ marginTop: 14, paddingLeft: 16 }}
                         bulletSize={40}
-                        bullet={
-                          <div className="flex justify-center">
-                            <a
-                              // href="#"
-                              className={`flex items-center mx-auto w-10 h-10 text-white rounded-full`}
+                        bullet={ */}
+                      <div className="flex">
+                        <div className="flex justify-center">
+                          <a
+                            // href="#"
+                            className={`flex items-center mx-auto w-10 h-10 text-white rounded-full`}
+                          >
+                            <Indicator
+                              sx={{
+                                indicator: {
+                                  zIndex: "5",
+                                },
+                              }}
+                              inline
+                              size={16}
+                              offset={7}
+                              position="bottom-end"
+                              color={
+                                message.sender?.status?.online
+                                  ? "green"
+                                  : "gray"
+                              }
+                              withBorder
                             >
-                              {/* <svg
-                                className="w-6 h-6 text-center mx-auto"
-                                aria-hidden="false"
-                                width="28"
-                                height="20"
-                                viewBox="0 0 28 20"
-                              >
-                                <path
-                                  fill="currentColor"
-                                  d="M20.6644 20C20.6644 20 19.8014 18.9762 19.0822 18.0714C22.2226 17.1905 23.4212 15.2381 23.4212 15.2381C22.4384 15.881 21.5034 16.3334 20.6644 16.6429C19.4658 17.1429 18.3151 17.4762 17.1884 17.6667C14.887 18.0953 12.7774 17.9762 10.9795 17.6429C9.61301 17.381 8.43836 17 7.45548 16.6191C6.90411 16.4048 6.30479 16.1429 5.70548 15.8096C5.63356 15.7619 5.56164 15.7381 5.48973 15.6905C5.44178 15.6667 5.41781 15.6429 5.39384 15.6191C4.96233 15.381 4.7226 15.2143 4.7226 15.2143C4.7226 15.2143 5.87329 17.1191 8.91781 18.0238C8.19863 18.9286 7.31164 20 7.31164 20C2.0137 19.8333 0 16.381 0 16.381C0 8.7144 3.45205 2.50017 3.45205 2.50017C6.90411 -0.07123 10.1884 0.000197861 10.1884 0.000197861L10.4281 0.285909C6.11301 1.52399 4.12329 3.40493 4.12329 3.40493C4.12329 3.40493 4.65068 3.11921 5.53767 2.71446C8.10274 1.59542 10.1404 1.2859 10.9795 1.21447C11.1233 1.19066 11.2432 1.16685 11.387 1.16685C12.8493 0.976379 14.5034 0.92876 16.2295 1.11923C18.5068 1.38114 20.9521 2.0478 23.4452 3.40493C23.4452 3.40493 21.5514 1.61923 17.476 0.381146L17.8116 0.000197861C17.8116 0.000197861 21.0959 -0.07123 24.5479 2.50017C24.5479 2.50017 28 8.7144 28 16.381C28 16.381 25.9623 19.8333 20.6644 20ZM9.51712 8.88106C8.15068 8.88106 7.07192 10.0715 7.07192 11.5239C7.07192 12.9763 8.17466 14.1667 9.51712 14.1667C10.8836 14.1667 11.9623 12.9763 11.9623 11.5239C11.9863 10.0715 10.8836 8.88106 9.51712 8.88106ZM18.2671 8.88106C16.9007 8.88106 15.8219 10.0715 15.8219 11.5239C15.8219 12.9763 16.9247 14.1667 18.2671 14.1667C19.6336 14.1667 20.7123 12.9763 20.7123 11.5239C20.7123 10.0715 19.6336 8.88106 18.2671 8.88106Z"
-                                ></path>
-                              </svg> */}
-                              <Indicator
-                                sx={{
-                                  indicator: {
-                                    zIndex: "5",
+                              <Avatar
+                                src={message.sender?.avatar_url}
+                                radius="xl"
+                                styles={{
+                                  placeholder: {
+                                    color: "#fff",
+                                    backgroundColor: `#${Math.floor(
+                                      message.sender?.accent_color
+                                    ).toString(16)}`,
                                   },
                                 }}
-                                inline
-                                size={16}
-                                offset={7}
-                                position="bottom-end"
-                                color={
-                                  message.sender?.status?.online
-                                    ? "green"
-                                    : "gray"
-                                }
-                                withBorder
                               >
-                                <Avatar
-                                  src={message.sender?.avatar_url}
-                                  radius="xl"
-                                  styles={{
-                                    placeholder: {
-                                      color: "#fff",
-                                      backgroundColor: `#${Math.floor(
-                                        message.sender?.accent_color
-                                      ).toString(16)}`,
-                                    },
-                                  }}
-                                >
-                                  {message.sender?.username[0].toUpperCase()}
-                                </Avatar>
-                              </Indicator>
-                            </a>
-                          </div>
-                        }
-                      >
+                                {message.sender?.username[0].toUpperCase()}
+                              </Avatar>
+                            </Indicator>
+                          </a>
+                        </div>
+                        {/* }
+                      > */}
                         <div className="w-full flex flex-col ml-4">
                           <div className="flex items-center">
                             {/* <Link  to="about" spy={true} smooth={true}> */}
@@ -1109,8 +1092,10 @@ export default function Message({
                         ))}
                       </div> */}
                         </div>
-                      </Timeline.Item>
-                    </Timeline>
+                      </div>
+                      {/* </Timeline.Item> */}
+                      {/* </Timeline> */}
+                    </div>
                   ) : (
                     <>
                       <div className="flex justify-center">
@@ -1447,14 +1432,14 @@ export default function Message({
                       }
                       onClick={() => {
                         if (!speaking) {
-                          const text = `${message.sender.username} say ${message.content}`;
+                          const text = `${message.sender.username} nói ${message.content}`;
                           speak({ text, voice, rate, pitch });
                         } else {
                           cancel();
                         }
                       }}
                     >
-                      {speaking ? "Pause Message" : "Speak Message"}
+                      {speaking ? "Dừng đọc tin nhắn" : "Đọc tin nhắn"}
                     </Menu.Item>
                   )}
                   <Menu.Item
@@ -1467,6 +1452,7 @@ export default function Message({
                     <Menu.Item
                       color="red"
                       icon={<FontAwesomeIcon icon="fa-solid fa-trash-can" />}
+                      onClick={delMessage}
                     >
                       Xoá tin nhắn
                     </Menu.Item>
@@ -1537,7 +1523,7 @@ const Embed = ({ embed }) => {
           className="grid max-w-[520px] rounded relative "
           style={{
             borderLeft: "4px solid #000",
-            backgroundColor: "rgba(128,128,128,0.8)",
+            backgroundColor: "#CBD5E1",
           }}
         >
           <div
@@ -1789,7 +1775,7 @@ const Embed = ({ embed }) => {
           className="grid max-w-[520px] rounded relative "
           style={{
             borderLeft: "4px solid #000",
-            backgroundColor: "rgba(128,128,128,0.8)",
+            backgroundColor: "#CBD5E1",
           }}
         >
           <div
@@ -1860,7 +1846,7 @@ const Embed = ({ embed }) => {
           className="grid max-w-[520px] rounded relative "
           style={{
             borderLeft: "4px solid #000",
-            backgroundColor: "rgba(128,128,128,0.8)",
+            backgroundColor: "#CBD5E1",
           }}
         >
           <div

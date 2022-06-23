@@ -883,28 +883,30 @@ export default function EditorDraft({ channel, user, scrollToBottom }) {
               Array.from(files, async (file) => {
                 const fileContents = await handleFileChosen(file);
                 let result = null;
-                if (isMultiSelect) {
-                  result = {
-                    id: uuid(),
-                    url: fileContents,
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    nsfw: false,
-                    watermark: "Neutral",
-                    createdAt: new Date(),
-                  };
-                } else {
-                  result = {
-                    id: images[indexFileReplace].id,
-                    url: fileContents,
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    watermark: file.watermark,
-                    nsfw: images[indexFileReplace].nsfw,
-                    createdAt: images[indexFileReplace].createdAt,
-                  };
+                if (file.size < 5000000) {
+                  if (isMultiSelect) {
+                    result = {
+                      id: uuid(),
+                      url: fileContents,
+                      name: file.name,
+                      size: file.size,
+                      type: file.type,
+                      nsfw: false,
+                      watermark: "Neutral",
+                      createdAt: new Date(),
+                    };
+                  } else {
+                    result = {
+                      id: images[indexFileReplace].id,
+                      url: fileContents,
+                      name: file.name,
+                      size: file.size,
+                      type: file.type,
+                      watermark: file.watermark,
+                      nsfw: images[indexFileReplace].nsfw,
+                      createdAt: images[indexFileReplace].createdAt,
+                    };
+                  }
                 }
                 return result;
               })

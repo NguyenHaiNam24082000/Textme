@@ -214,6 +214,18 @@ module.exports = [
     },
   },
   {
+    name: "leave-room",
+    controller: async (socket, io, { channel, leaver }) => {
+      console.log(channel, "channel");
+      console.log(leaver, "leaver");
+      socket.to(channel.id).emit("user-leave-call", {
+        socketId: socket.id,
+        userId: leaver,
+      });
+      socket.leave(channel.id);
+    },
+  },
+  {
     name: CHANNEL_SOCKET.LEAVE_CHANNEL,
     controller: async (socket, io, channelId) => {
       redis.del(`${SOCKET_ID_IN_ROOM}${socket.id}`);

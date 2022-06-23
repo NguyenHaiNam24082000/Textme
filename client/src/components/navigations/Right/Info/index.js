@@ -333,16 +333,8 @@ export default function Info({ messages, channel }) {
                       }
                     >
                       <Group>
-                        <Image
-                          lineClamp={1}
-                          width={40}
-                          height={40}
-                          sx={{
-                            maxWidth: "250px",
-                          }}
-                          src={embed?.image?.url}
-                        />
-                        <div>
+                        <Image width={40} height={40} src={embed?.image?.url} />
+                        <div style={{ maxWidth: "250px" }}>
                           <Text lineClamp={1}>
                             {embed?.title ?? "Untitled"}
                           </Text>

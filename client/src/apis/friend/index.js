@@ -26,12 +26,19 @@ export const allFriendsRequestApi = () => {
 
 export const blockFriendRequestApi = (id) => {
   return patchRequest("/api/v1/friend/block-friend", { id });
-}
+};
 
 export const unblockFriendRequestApi = (id) => {
   return patchRequest("/api/v1/friend/unblock-friend", { id });
-}
+};
 
 export const allBlockedFriendsRequestApi = () => {
   return getRequest("/api/v1/friend/all-blocked-friends");
-}
+};
+
+export const addFriendRequestApi = (payload) => {
+  return postRequest("/api/v1/friend/add-friend-request", {
+    username: payload.username,
+    discriminator: payload.discriminator,
+  });
+};

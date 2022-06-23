@@ -310,16 +310,16 @@ export default function VideoCall({ channel: channelInfo }) {
           const peerIdx = findPeer(userId);
           peerIdx.peer.destroy();
           setPeers((users) => {
-            users = users.filter((user) => user.peerID !== peerIdx.peer.peerID);
+            users = users.filter((user) => user.peerId !== peerIdx.peer.peerId);
             return [...users];
           });
           peersRef.current = peersRef.current.filter(
-            ({ peerID }) => peerID !== userId
+            ({ peerId }) => peerId !== userId
           );
         });
       });
 
-    socket.on("FE-toggle-camera", ({ userId, switchTarget }) => {
+    socket.on("toggle-camera", ({ userId, switchTarget }) => {
       const peerIdx = findPeer(userId);
 
       setUserVideoAudio((preList) => {
@@ -374,24 +374,22 @@ export default function VideoCall({ channel: channelInfo }) {
 
   console.log(peers, "listPeers");
 
-  const toggleCameraAudio = (e) => {
-    const target = e.target.getAttribute("data-switch");
-
+  const toggleCameraAudio = (target) => {
     setUserVideoAudio((preList) => {
       let videoSwitch = preList["localUser"].video;
       let audioSwitch = preList["localUser"].audio;
 
       if (target === "video") {
-        console.log(target);
+        console.log(target, "target");
         const userVideoTrack =
           userVideoRef.current.srcObject.getVideoTracks()[0];
         videoSwitch = !videoSwitch;
         if (videoSwitch) {
           userVideoTrack.enabled = true;
-          userVideoTrack.start();
+          // userVideoTrack.play();
         } else {
           userVideoTrack.enabled = false;
-          userVideoTrack.stop();
+          // userVideoTrack.stop();
         }
       } else {
         const userAudioTrack =
@@ -411,7 +409,10 @@ export default function VideoCall({ channel: channelInfo }) {
       };
     });
 
-    // socket.emit('BE-toggle-camera-audio', { roomId, switchTarget: target });
+    socket.emit("toggle-camera-audio", {
+      channelId: channel.id,
+      switchTarget: target,
+    });
   };
 
   function createPeer(userId, caller, stream) {
@@ -812,7 +813,7 @@ export default function VideoCall({ channel: channelInfo }) {
               size={56}
               radius="xl"
               variant="light"
-              onClick={toggleCameraAudio}
+              onClick={() => toggleCameraAudio("video")}
               data-switch="video"
             >
               <BsCameraVideoFill className="w-6 h-auto" />
@@ -855,7 +856,7 @@ export default function VideoCall({ channel: channelInfo }) {
               size={56}
               radius="xl"
               variant="light"
-              onClick={toggleCameraAudio}
+              onClick={() => toggleCameraAudio("audio")}
               data-switch="audio"
             >
               <BsMicFill className="w-6 h-auto" />
@@ -924,7 +925,9 @@ export default function VideoCall({ channel: channelInfo }) {
             size={56}
             radius="xl"
             variant="light"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
+              socket.emit("leave-room", { channel, leaver: me.user.id });
               window.close();
             }}
           >

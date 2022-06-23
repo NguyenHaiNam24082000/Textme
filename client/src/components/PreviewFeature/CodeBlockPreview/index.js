@@ -1639,7 +1639,11 @@ export default function CodeBlockPreview({ attachment }) {
               </ScrollArea>
             </Paper>
           </Popper>
-          <ActionIcon>
+          <ActionIcon
+            component={"a"}
+            download={attachment.filename}
+            href={attachment.url}
+          >
             <FontAwesomeIcon icon="fa-solid fa-file-arrow-down" />
           </ActionIcon>
         </div>

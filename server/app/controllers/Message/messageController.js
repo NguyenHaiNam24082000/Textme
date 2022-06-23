@@ -83,7 +83,7 @@ const translateMessage = catchAsync(async (req, res, next) => {
   const result = await messageService.translateMessage(
     req.user,
     messageId,
-    "vi"
+    req.user.locale.split("-")[0]
   );
   res.status(httpStatus.OK).send(result);
 });

@@ -59,7 +59,7 @@ const VideoCard = (props) => {
     //   canvasRef.current.height
     // );
     const image = new Image();
-    image.src = backgrounds[0];
+    image.src = backgrounds[9];
     if (bg1 === "blur(5px)") {
       contextRef.current.filter = "blur(5px)";
     } else if (bg1 === "blur(10px)") {

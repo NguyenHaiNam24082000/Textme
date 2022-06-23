@@ -91,7 +91,7 @@ export default function Discover() {
             height: "100%",
             width: "100%",
           }}
-          src="https://images.hdqwalls.com/wallpapers/genshin-impact-game-2021-ig.jpg"
+          src="https://discord.com/assets/1a23068e966efce6fb32ca9fecc65eed.svg"
           radius={"md"}
           mb={24}
         >
@@ -109,13 +109,25 @@ export default function Discover() {
               <Text size={14} color="white">
                 From one community to another, there's a place for everyone.
               </Text>
-              <TextInput placeholder="Search workspaces" variant="filled" />
-              <Group spacing="xs" grow>
+              <TextInput
+                placeholder="Search workspaces"
+                variant="filled"
+                sx={{
+                  width: "500px",
+                }}
+              />
+              {/* <Group
+                spacing="xs"
+                grow
+                sx={{
+                  width: "300px",
+                }}
+              >
                 <Text color="white">Related tags:</Text>
                 <Badge radius="sm" variant="outline">
                   #Badge
                 </Badge>
-              </Group>
+              </Group> */}
             </Stack>
           </Center>
         </BackgroundImage>
