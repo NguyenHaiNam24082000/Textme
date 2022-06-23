@@ -188,9 +188,9 @@ export default function Search({ channel }) {
                 setOptions({ ...options, ...{ content: e.target.value } })
               }
             />
-            <Button leftIcon={<FontAwesomeIcon icon="fa-solid fa-filter" />}>
+            {/* <Button leftIcon={<FontAwesomeIcon icon="fa-solid fa-filter" />}>
               Filter
-            </Button>
+            </Button> */}
           </div>
           <SegmentedControl
             data={[
